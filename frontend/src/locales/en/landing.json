@@ -1,0 +1,31 @@
+{
+  "hero": {
+    "title": "Advanced cognition for knowledge professionals.",
+    "subtitle": "Streamline your research, project management, and study notes with a tool designed for high-density information environments.",
+    "ctaPrimary": "Start for Free",
+    "ctaSecondary": "Watch Demo"
+  },
+  "features": {
+    "synthesis": {
+      "title": "Automated Synthesis",
+      "body": "Transform fragmented notes into structured outlines instantly. Our AI models are fine-tuned for scholarly citation and logical coherence in professional knowledge environments."
+    },
+    "library": {
+      "title": "Contextual Library",
+      "body": "A document-first approach to information storage. Every PDF, note, and recording is indexed by concept rather than file name, allowing semantic retrieval across your entire workspace."
+    },
+    "research": {
+      "title": "Research Intelligence",
+      "body": "Query your entire knowledge base using natural language. kioku understands complex hierarchies of information, identifying relationships between disparate projects and disciplines."
+    },
+    "collaborate": {
+      "title": "Collaborative Logic",
+      "body": "Multi-player environments built for research groups. Version control for ideas, shared semantic spaces, and real-time synthesis of group insights without the overhead of traditional tools."
+    }
+  },
+  "cta": {
+    "title": "Scale your knowledge potential.",
+    "body": "Join thousands of professionals using kioku to capture, connect, and recall everything that matters.",
+    "button": "Get Started for Free"
+  }
+}

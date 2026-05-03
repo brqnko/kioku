@@ -1,4 +1,9 @@
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "../components/LanguageSwitcher.jsx";
+
 export default function LandingPage() {
+  const { t } = useTranslation(["landing", "common"]);
+
   return (
     <div class="bg-[#191918] text-white/95 overflow-x-hidden">
       {/* Header */}
@@ -10,28 +15,29 @@ export default function LandingPage() {
               class="text-white hover:bg-white/10 rounded-md px-3 py-1 transition-transform active:scale-95"
               href="#"
             >
-              Product
+              {t("common:nav.product")}
             </a>
             <a
               class="text-white/60 hover:bg-white/10 rounded-md px-3 py-1 transition-transform active:scale-95"
               href="#"
             >
-              Docs
+              {t("common:nav.docs")}
             </a>
             <a
               class="text-white/60 hover:bg-white/10 rounded-md px-3 py-1 transition-transform active:scale-95"
               href="#"
             >
-              Blog
+              {t("common:nav.blog")}
             </a>
           </nav>
         </div>
         <div class="flex items-center gap-4">
+          <LanguageSwitcher />
           <button class="px-3 py-1 text-white/80 hover:bg-white/10 rounded-md transition-transform active:scale-95">
-            Sign in
+            {t("common:nav.signIn")}
           </button>
           <button class="px-4 py-1.5 bg-white text-[#191918] font-semibold rounded-lg hover:opacity-90 transition-all active:scale-95">
-            Get Started
+            {t("common:nav.getStarted")}
           </button>
         </div>
       </header>
@@ -42,18 +48,17 @@ export default function LandingPage() {
           {/* Left: Content */}
           <div class="w-full md:w-1/2 flex flex-col justify-center px-6 md:px-8 py-16 md:py-0">
             <h1 class="text-[54px] leading-[1.04] font-bold text-white mb-4 max-w-lg">
-              Advanced cognition for knowledge professionals.
+              {t("hero.title")}
             </h1>
             <p class="text-base text-white/60 leading-relaxed mb-8 max-w-md">
-              Streamline your research, project management, and study notes
-              with a tool designed for high-density information environments.
+              {t("hero.subtitle")}
             </p>
             <div class="flex flex-col sm:flex-row gap-4">
               <button class="bg-white text-[#191918] font-bold py-3 px-8 rounded-lg hover:opacity-90 transition-all active:scale-95">
-                Start for Free
+                {t("hero.ctaPrimary")}
               </button>
               <button class="bg-transparent border border-white/20 text-white font-bold py-3 px-8 rounded-lg hover:bg-white/5 transition-all active:scale-95">
-                Watch Demo
+                {t("hero.ctaSecondary")}
               </button>
             </div>
           </div>
@@ -89,46 +94,37 @@ export default function LandingPage() {
         <section class="max-w-[1200px] mx-auto px-6 py-16 space-y-16">
           <div class="max-w-2xl">
             <h2 class="text-[54px] leading-[1.04] font-bold text-white mb-4">
-              Automated Synthesis
+              {t("features.synthesis.title")}
             </h2>
             <p class="text-base text-white/60 leading-relaxed">
-              Transform fragmented notes into structured outlines instantly.
-              Our AI models are fine-tuned for scholarly citation and logical
-              coherence in professional knowledge environments.
+              {t("features.synthesis.body")}
             </p>
           </div>
 
           <div class="max-w-2xl ml-auto text-right">
             <h2 class="text-[54px] leading-[1.04] font-bold text-white mb-4">
-              Contextual Library
+              {t("features.library.title")}
             </h2>
             <p class="text-base text-white/60 leading-relaxed">
-              A document-first approach to information storage. Every PDF,
-              note, and recording is indexed by concept rather than file name,
-              allowing semantic retrieval across your entire workspace.
+              {t("features.library.body")}
             </p>
           </div>
 
           <div class="max-w-2xl">
             <h2 class="text-[54px] leading-[1.04] font-bold text-white mb-4">
-              Research Intelligence
+              {t("features.research.title")}
             </h2>
             <p class="text-base text-white/60 leading-relaxed">
-              Query your entire knowledge base using natural language. kioku
-              understands complex hierarchies of information, identifying
-              relationships between disparate projects and disciplines.
+              {t("features.research.body")}
             </p>
           </div>
 
           <div class="max-w-2xl ml-auto text-right">
             <h2 class="text-[54px] leading-[1.04] font-bold text-white mb-4">
-              Collaborative Logic
+              {t("features.collaborate.title")}
             </h2>
             <p class="text-base text-white/60 leading-relaxed">
-              Multi-player environments built for research groups. Version
-              control for ideas, shared semantic spaces, and real-time
-              synthesis of group insights without the overhead of traditional
-              tools.
+              {t("features.collaborate.body")}
             </p>
           </div>
         </section>
@@ -137,14 +133,13 @@ export default function LandingPage() {
         <section class="py-16 px-6 border-t border-white/10 text-center">
           <div class="max-w-xl mx-auto">
             <h2 class="text-[54px] leading-[1.04] font-bold text-white mb-4">
-              Scale your knowledge potential.
+              {t("cta.title")}
             </h2>
             <p class="text-base text-white/60 leading-relaxed mb-8">
-              Join thousands of professionals using kioku to capture, connect,
-              and recall everything that matters.
+              {t("cta.body")}
             </p>
             <button class="bg-white text-[#191918] font-bold py-3 px-16 rounded-lg hover:opacity-90 transition-all active:scale-95">
-              Get Started for Free
+              {t("cta.button")}
             </button>
           </div>
         </section>
@@ -156,19 +151,19 @@ export default function LandingPage() {
           <span class="text-xl font-black text-white">kioku</span>
           <div class="flex gap-6 text-sm text-white/50">
             <a class="hover:text-white transition-colors" href="#">
-              Privacy
+              {t("common:footer.privacy")}
             </a>
             <a class="hover:text-white transition-colors" href="#">
-              Terms
+              {t("common:footer.terms")}
             </a>
             <a class="hover:text-white transition-colors" href="#">
-              Status
+              {t("common:footer.status")}
             </a>
             <a class="hover:text-white transition-colors" href="#">
-              Twitter
+              {t("common:footer.twitter")}
             </a>
           </div>
-          <p class="text-sm text-white/30">© 2025 kioku.</p>
+          <p class="text-sm text-white/30">{t("common:footer.copyright")}</p>
         </div>
       </footer>
     </div>

@@ -1,0 +1,33 @@
+{
+  "language": {
+    "label": "Language",
+    "names": {
+      "en": "English",
+      "ja": "日本語"
+    }
+  },
+  "nav": {
+    "product": "Product",
+    "docs": "Docs",
+    "blog": "Blog",
+    "signIn": "Sign in",
+    "getStarted": "Get Started"
+  },
+  "footer": {
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "status": "Status",
+    "twitter": "Twitter",
+    "copyright": "© 2025 kioku."
+  },
+  "legal": {
+    "breadcrumb": "Legal & Policy",
+    "close": "Close",
+    "backToSettings": "Back to settings",
+    "documentsLabel": "kioku Legal Documents"
+  },
+  "notFound": {
+    "title": "404",
+    "message": "Page not found"
+  }
+}

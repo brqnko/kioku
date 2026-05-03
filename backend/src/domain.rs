@@ -1,5 +1,7 @@
 pub enum DomainErrorKind {
     BadInput,
+    NotFound,
+    Forbidden,
 }
 
 pub struct DomainError {

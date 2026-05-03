@@ -10,9 +10,11 @@ axum = "0.8.9"
 chrono = "0.4.44"
 jsonwebtoken = "10.3.0"
 openidconnect = "4.0.1"
+rand = "0.10.1"
 reqwest = "0.12.28"
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.149"
+sha256 = "1.6.0"
 sqlx = { version = "0.8.6", features = ["macros", "mysql", "runtime-tokio-rustls"] }
 thiserror = "2.0.18"
 tokio = { version = "1.52.1", features = ["full"] }

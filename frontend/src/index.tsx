@@ -1,5 +1,6 @@
 import { LocationProvider, Router, Route, lazy, hydrate, prerender as ssr } from "preact-iso";
 import { SWRConfig } from "swr";
+import "./i18n";
 import "./style.css";
 
 const LandingPage = lazy(() => import("./pages/LandingPage.jsx"));
