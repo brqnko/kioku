@@ -1,0 +1,93 @@
+import { defineConfig } from "vite";
+import preact from "@preact/preset-vite";
+import tailwindcss from "@tailwindcss/vite";
+import Icons from "unplugin-icons/vite";
+import { VitePWA } from "vite-plugin-pwa";
+import { ViteImageOptimizer } from "vite-plugin-image-optimizer";
+
+export default defineConfig({
+  server: {
+    port: 5173,
+    strictPort: true,
+    host: "0.0.0.0",
+  },
+  plugins: [
+    Icons({ compiler: "raw" }),
+    tailwindcss(),
+    ViteImageOptimizer(),
+    preact({
+      prerender: {
+        enabled: true,
+        renderTarget: "#app",
+        additionalPrerenderRoutes: ["/404"],
+        previewMiddlewareEnabled: false,
+        previewMiddlewareFallback: "/404",
+      },
+    }),
+    VitePWA({
+      registerType: "autoUpdate",
+      manifest: {
+        name: "kioku",
+        short_name: "kioku",
+        description: "Knowledge and learning management system",
+        theme_color: "#1a1a1a",
+        background_color: "#1a1a1a",
+        display: "standalone",
+        start_url: "/",
+        icons: [
+          {
+            src: "/icon-192x192.svg",
+            sizes: "192x192",
+            type: "image/svg+xml",
+            purpose: "any",
+          },
+          {
+            src: "/icon-512x512.svg",
+            sizes: "512x512",
+            type: "image/svg+xml",
+            purpose: "any",
+          },
+          {
+            src: "/icon-512x512.svg",
+            sizes: "512x512",
+            type: "image/svg+xml",
+            purpose: "maskable",
+          },
+        ],
+      },
+      workbox: {
+        globPatterns: ["**/*.{js,css,html,svg,png,woff2}"],
+        navigateFallbackDenylist: [/^\/api\//],
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "google-fonts-cache",
+              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "gstatic-fonts-cache",
+              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            urlPattern: /\/api\/.*/i,
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "api-cache",
+              expiration: { maxEntries: 50, maxAgeSeconds: 60 * 5 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+        ],
+      },
+    }),
+  ],
+});

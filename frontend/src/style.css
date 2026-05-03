@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme {
+  --breakpoint-tablet: 657px;
+  --breakpoint-wide: 1313px;
+  --font-display: "Inter", -apple-system, "system-ui", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif;
+
+  /* Brand */
+  --color-primary: #ffffff;
+  --color-accent-blue: #2383e2;
+
+  /* Backgrounds */
+  --color-background-dark: #191918;
+  --color-background-light: #ffffff;
+
+  /* Surfaces */
+  --color-surface-dark: #2f2f2f;
+  --color-surface-container: #201f1f;
+  --color-surface-container-low: #191918;
+  --color-surface-container-high: #2a2a2a;
+
+  /* Text */
+  --color-text-primary: rgba(255, 255, 255, 0.95);
+  --color-text-secondary: rgba(255, 255, 255, 0.6);
+  --color-text-disabled: rgba(255, 255, 255, 0.3);
+
+  /* Borders */
+  --color-border-subtle: rgba(255, 255, 255, 0.13);
+
+  /* Semantic */
+  --color-danger: #eb5757;
+  --color-warning: #f2c94c;
+  --color-success: #6fcf97;
+}
+
+:root {
+  --color-text: rgba(0, 0, 0, 0.95);
+  --color-bg: #ffffff;
+}
+
+[data-theme="dark"] {
+  --color-text: rgba(255, 255, 255, 0.95);
+  --color-bg: #191918;
+}
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  font-family: "Inter", -apple-system, "system-ui", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif;
+  font-feature-settings: "lnum", "locl" 0;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.material-symbols-outlined {
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.8s ease-out both;
+}

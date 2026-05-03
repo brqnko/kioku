@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#1a1a1a" />
+
+    <title>kioku</title>
+    <meta name="description" content="Knowledge and learning management system" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <script>
+      (function () {
+        var m = localStorage.getItem("color-mode") || "system";
+        var t =
+          m === "system"
+            ? window.matchMedia("(prefers-color-scheme:dark)").matches
+              ? "dark"
+              : "light"
+            : m;
+        document.documentElement.setAttribute("data-theme", t);
+      })();
+    </script>
+    <div id="app"></div>
+    <script prerender type="module" src="/src/index.tsx"></script>
+  </body>
+</html>

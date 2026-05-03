@@ -1,0 +1,22 @@
+# Rust
+target/
+
+# Node
+node_modules/
+
+# Git
+.git/
+.gitignore
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/

@@ -1,0 +1,50 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    volumes:
+      - ..:/workspace:cached
+      - backend-target:/workspace/backend/target
+      - frontend-node-modules:/workspace/frontend/node_modules
+      - cargo-registry:/root/.cargo/registry
+      - cargo-git:/root/.cargo/git
+      - ./nginx:/etc/nginx/conf.d
+    working_dir: /workspace
+    command: sleep infinity
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mariadb:lts
+    restart: unless-stopped
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --skip-log-bin
+      - --innodb-flush-log-at-trx-commit=2
+      - --sync-binlog=0
+      - --innodb-doublewrite=0
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: kioku
+      MARIADB_USER: kioku
+      MARIADB_PASSWORD: kioku
+    volumes:
+      - mariadb-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+volumes:
+  mariadb-data:
+  backend-target:
+  frontend-node-modules:
+  cargo-registry:
+  cargo-git:
