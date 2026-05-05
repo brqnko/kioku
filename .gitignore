@@ -16,3 +16,10 @@ node_modules/
 .DS_Store
 .idea/
 .vscode/
+
+.devcontainer/nginx/server.crt
+.devcontainer/nginx/server.key
+
+# Secrets
+.devcontainer/jwt_private.pem
+.devcontainer/jwt_public.pem

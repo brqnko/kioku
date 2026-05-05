@@ -8,7 +8,7 @@
 ```sql
 CREATE TABLE `folder` (
   `folder_id` varbinary(16) NOT NULL,
-  `parent_folder_id` varbinary(16) NOT NULL,
+  `parent_id` varbinary(16) NOT NULL,
   `name` varchar(256) NOT NULL,
   `description` varchar(1024) NOT NULL,
   `user_id` varbinary(16) NOT NULL,
@@ -16,7 +16,10 @@ CREATE TABLE `folder` (
   `changed_at` datetime NOT NULL,
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`folder_id`)
+  `parent_kind` tinyint(3) unsigned NOT NULL,
+  `depth` tinyint(3) unsigned NOT NULL,
+  PRIMARY KEY (`folder_id`),
+  KEY `idx_parent_name` (`parent_kind`,`parent_id`,`name`,`folder_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci
 ```
 
@@ -27,7 +30,7 @@ CREATE TABLE `folder` (
 | Name | Type | Default | Nullable | Extra Definition | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | ---------------- | -------- | ------- | ------- |
 | folder_id | varbinary(16) |  | false |  |  |  |  |
-| parent_folder_id | varbinary(16) |  | false |  |  |  |  |
+| parent_id | varbinary(16) |  | false |  |  |  |  |
 | name | varchar(256) |  | false |  |  |  |  |
 | description | varchar(1024) |  | false |  |  |  |  |
 | user_id | varbinary(16) |  | false |  |  |  |  |
@@ -35,6 +38,8 @@ CREATE TABLE `folder` (
 | changed_at | datetime |  | false |  |  |  |  |
 | created_at | datetime | current_timestamp() | false |  |  |  |  |
 | updated_at | datetime | current_timestamp() | false | on update current_timestamp() |  |  |  |
+| parent_kind | tinyint(3) unsigned |  | false |  |  |  |  |
+| depth | tinyint(3) unsigned |  | false |  |  |  |  |
 
 ## Constraints
 
@@ -46,6 +51,7 @@ CREATE TABLE `folder` (
 
 | Name | Definition |
 | ---- | ---------- |
+| idx_parent_name | KEY idx_parent_name (parent_kind, parent_id, name, folder_id) USING BTREE |
 | PRIMARY | PRIMARY KEY (folder_id) USING BTREE |
 
 ## Relations

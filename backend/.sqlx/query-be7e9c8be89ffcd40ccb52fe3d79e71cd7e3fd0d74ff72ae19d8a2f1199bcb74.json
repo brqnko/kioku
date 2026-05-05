@@ -1,0 +1,114 @@
+{
+  "db_name": "MySQL",
+  "query": "\n                    SELECT file_id, name, description, user_id,\n                           storage_id, file_size,\n                           parent_id, parent_kind,\n                           uploaded_at, changed_at\n                    FROM file\n                    WHERE parent_kind = ? AND parent_id = ?\n                      AND (name, file_id) > (?, ?)\n                    ORDER BY name ASC, file_id ASC\n                    LIMIT ?\n                    ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "file_id",
+        "type_info": {
+          "type": "VarString",
+          "flags": "NOT_NULL | PRIMARY_KEY | BINARY | NO_DEFAULT_VALUE",
+          "max_size": 16
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": {
+          "type": "VarString",
+          "flags": "NOT_NULL | NO_DEFAULT_VALUE",
+          "max_size": 1024
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "description",
+        "type_info": {
+          "type": "VarString",
+          "flags": "NOT_NULL | NO_DEFAULT_VALUE",
+          "max_size": 4096
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "user_id",
+        "type_info": {
+          "type": "VarString",
+          "flags": "NOT_NULL | BINARY | NO_DEFAULT_VALUE",
+          "max_size": 16
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "storage_id",
+        "type_info": {
+          "type": "VarString",
+          "flags": "NOT_NULL | BINARY | NO_DEFAULT_VALUE",
+          "max_size": 16
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "file_size",
+        "type_info": {
+          "type": "LongLong",
+          "flags": "NOT_NULL | UNSIGNED | NO_DEFAULT_VALUE",
+          "max_size": 20
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "parent_id",
+        "type_info": {
+          "type": "VarString",
+          "flags": "NOT_NULL | BINARY | NO_DEFAULT_VALUE",
+          "max_size": 16
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "parent_kind",
+        "type_info": {
+          "type": "Tiny",
+          "flags": "NOT_NULL | MULTIPLE_KEY | UNSIGNED | NO_DEFAULT_VALUE",
+          "max_size": 3
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "uploaded_at",
+        "type_info": {
+          "type": "Datetime",
+          "flags": "NOT_NULL | BINARY | NO_DEFAULT_VALUE",
+          "max_size": 19
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "changed_at",
+        "type_info": {
+          "type": "Datetime",
+          "flags": "NOT_NULL | BINARY | NO_DEFAULT_VALUE",
+          "max_size": 19
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 5
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "be7e9c8be89ffcd40ccb52fe3d79e71cd7e3fd0d74ff72ae19d8a2f1199bcb74"
+}

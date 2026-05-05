@@ -14,7 +14,8 @@ CREATE TABLE `file_embedding` (
   `indexed_at` datetime NOT NULL,
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`file_embedding_id`)
+  PRIMARY KEY (`file_embedding_id`),
+  KEY `idx_file_id` (`file_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci
 ```
 
@@ -42,6 +43,7 @@ CREATE TABLE `file_embedding` (
 
 | Name | Definition |
 | ---- | ---------- |
+| idx_file_id | KEY idx_file_id (file_id) USING BTREE |
 | PRIMARY | PRIMARY KEY (file_embedding_id) USING BTREE |
 
 ## Relations

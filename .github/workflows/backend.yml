@@ -1,0 +1,77 @@
+name: backend
+
+on:
+  pull_request:
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend.yml'
+  push:
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend.yml'
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    services:
+      mariadb:
+        image: mariadb:lts
+        env:
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: kioku_test
+          MARIADB_USER: kioku
+          MARIADB_PASSWORD: kioku
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "healthcheck.sh --connect --innodb_initialized"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+          --health-start-period 30s
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: backend
+
+      - name: Install sqlx-cli
+        run: cargo install sqlx-cli --no-default-features --features mysql,rustls
+
+      - name: Run migrations
+        env:
+          DATABASE_URL: mysql://kioku:kioku@127.0.0.1:3306/kioku_test
+        run: sqlx migrate run
+
+      - name: Prepare sqlx
+        env:
+          DATABASE_URL: mysql://kioku:kioku@127.0.0.1:3306/kioku_test
+        run: cargo sqlx prepare
+
+      - name: Check sqlx files are up to date
+        run: |
+          if [ -n "$(git status --porcelain .sqlx)" ]; then
+            echo "::error::.sqlx is out of date. Run 'cargo sqlx prepare' and commit the .sqlx directory."
+            git diff .sqlx
+            exit 1
+          fi
+
+      - name: Clippy
+        env:
+          SQLX_OFFLINE: "true"
+        run: cargo clippy -- -D warnings
+
+      - name: Test
+        env:
+          DATABASE_URL: mysql://kioku:kioku@127.0.0.1:3306/kioku_test
+        run: cargo test

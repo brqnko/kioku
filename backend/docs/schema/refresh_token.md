@@ -19,7 +19,9 @@ CREATE TABLE `refresh_token` (
   `expires_at` datetime NOT NULL,
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`refresh_token_id`)
+  PRIMARY KEY (`refresh_token_id`),
+  UNIQUE KEY `uk_token_hash` (`token_hash`),
+  KEY `idx_user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci
 ```
 
@@ -47,12 +49,15 @@ CREATE TABLE `refresh_token` (
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
 | PRIMARY | PRIMARY KEY | PRIMARY KEY (refresh_token_id) |
+| uk_token_hash | UNIQUE | UNIQUE KEY uk_token_hash (token_hash) |
 
 ## Indexes
 
 | Name | Definition |
 | ---- | ---------- |
+| idx_user_id | KEY idx_user_id (user_id) USING BTREE |
 | PRIMARY | PRIMARY KEY (refresh_token_id) USING BTREE |
+| uk_token_hash | UNIQUE KEY uk_token_hash (token_hash) USING BTREE |
 
 ## Relations
 

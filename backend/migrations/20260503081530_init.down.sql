@@ -1,4 +1,4 @@
-drop table `m_user`;
+drop table `user`;
 
 drop table `refresh_token`;
 
