@@ -6,18 +6,12 @@ pub trait EmbeddingClient: Send + Sync {
     ) -> Result<std::collections::HashMap<uuid::Uuid, Vec<f32>>, anyhow::Error>;
 }
 
-pub struct EmbeddingClientImpl {
-    http_client: reqwest::Client,
-    endpoint: String,
-}
+#[derive(Default)]
+pub struct EmbeddingClientImpl;
 
 impl EmbeddingClientImpl {
-    pub fn new(endpoint: String) -> Result<Self, anyhow::Error> {
-        let http_client = reqwest::Client::builder().build()?;
-        Ok(Self {
-            http_client,
-            endpoint,
-        })
+    pub fn new() -> Self {
+        Self
     }
 }
 
@@ -25,7 +19,7 @@ impl EmbeddingClientImpl {
 impl EmbeddingClient for EmbeddingClientImpl {
     async fn embed(
         &self,
-        inputs: std::collections::HashMap<uuid::Uuid, String>,
+        _inputs: std::collections::HashMap<uuid::Uuid, String>,
     ) -> Result<std::collections::HashMap<uuid::Uuid, Vec<f32>>, anyhow::Error> {
         todo!()
     }

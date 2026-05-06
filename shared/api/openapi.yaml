@@ -478,6 +478,93 @@ paths:
                 $ref: '#/components/schemas/ErrorBody'
       security:
       - Bearer: []
+  /files/{file_id}/ancestors:
+    get:
+      tags: []
+      operationId: get_file_ancestors
+      parameters:
+      - name: file_id
+        in: path
+        description: File ID
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ancestors]
+                properties:
+                  ancestors:
+                    type: array
+                    items:
+                      oneOf:
+                      - allOf:
+                        - type: object
+                          required: [id, name]
+                          properties:
+                            id:
+                              type: string
+                            name:
+                              type: string
+                        - type: object
+                          required: [kind]
+                          properties:
+                            kind:
+                              type: string
+                              enum:
+                              - project
+                      - allOf:
+                        - type: object
+                          required: [id, name]
+                          properties:
+                            id:
+                              type: string
+                            name:
+                              type: string
+                        - type: object
+                          required: [kind]
+                          properties:
+                            kind:
+                              type: string
+                              enum:
+                              - folder
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '401':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '403':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+      security:
+      - Bearer: []
   /files/{file_id}/content:
     get:
       tags: []
@@ -964,6 +1051,93 @@ paths:
                     format: date-time
                   user_id:
                     type: string
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '401':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '403':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+      security:
+      - Bearer: []
+  /folders/{folder_id}/ancestors:
+    get:
+      tags: []
+      operationId: get_folder_ancestors
+      parameters:
+      - name: folder_id
+        in: path
+        description: Folder ID
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ancestors]
+                properties:
+                  ancestors:
+                    type: array
+                    items:
+                      oneOf:
+                      - allOf:
+                        - type: object
+                          required: [id, name]
+                          properties:
+                            id:
+                              type: string
+                            name:
+                              type: string
+                        - type: object
+                          required: [kind]
+                          properties:
+                            kind:
+                              type: string
+                              enum:
+                              - project
+                      - allOf:
+                        - type: object
+                          required: [id, name]
+                          properties:
+                            id:
+                              type: string
+                            name:
+                              type: string
+                        - type: object
+                          required: [kind]
+                          properties:
+                            kind:
+                              type: string
+                              enum:
+                              - folder
         '400':
           description: ''
           content:
@@ -1562,6 +1736,423 @@ paths:
                 $ref: '#/components/schemas/ErrorBody'
       security:
       - Bearer: []
+  /projects/{project_id}/chats:
+    get:
+      tags: []
+      operationId: list_chats
+      parameters:
+      - name: project_id
+        in: path
+        description: Project ID
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: cursor_last_activity_at
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: cursor_chat_id
+        in: query
+        required: false
+        schema:
+          type: string
+          format: uuid
+      - name: limit
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int32
+          maximum: 32
+          minimum: 1
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      required: [id, name, user_id, project_id, started_at, last_activity_at]
+                      properties:
+                        id:
+                          type: string
+                        last_activity_at:
+                          type: string
+                          format: date-time
+                        name:
+                          type: string
+                        project_id:
+                          type: string
+                        started_at:
+                          type: string
+                          format: date-time
+                        user_id:
+                          type: string
+                  next_cursor:
+                    oneOf:
+                    - type: 'null'
+                    - type: object
+                      required: [last_activity_at, chat_id]
+                      properties:
+                        chat_id:
+                          type: string
+                        last_activity_at:
+                          type: string
+                          format: date-time
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '401':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '403':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+      security:
+      - Bearer: []
+    post:
+      tags: []
+      operationId: create_chat
+      parameters:
+      - name: project_id
+        in: path
+        description: Project ID
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                  maxLength: 256
+        required: true
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [id, name, user_id, project_id, started_at, last_activity_at]
+                properties:
+                  id:
+                    type: string
+                  last_activity_at:
+                    type: string
+                    format: date-time
+                  name:
+                    type: string
+                  project_id:
+                    type: string
+                  started_at:
+                    type: string
+                    format: date-time
+                  user_id:
+                    type: string
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '401':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '403':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+      security:
+      - Bearer: []
+  /projects/{project_id}/chats/{chat_id}:
+    get:
+      tags: []
+      operationId: get_chat
+      parameters:
+      - name: project_id
+        in: path
+        description: Project ID
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: chat_id
+        in: path
+        description: Chat ID
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [id, name, user_id, project_id, messages, started_at, last_activity_at]
+                properties:
+                  id:
+                    type: string
+                  last_activity_at:
+                    type: string
+                    format: date-time
+                  messages:
+                    type: array
+                    items:
+                      type: object
+                      required: [role, content]
+                      properties:
+                        content:
+                          type: string
+                        role:
+                          type: string
+                          enum:
+                          - user
+                          - assistant
+                  name:
+                    type: string
+                  project_id:
+                    type: string
+                  started_at:
+                    type: string
+                    format: date-time
+                  user_id:
+                    type: string
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '401':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '403':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+      security:
+      - Bearer: []
+    delete:
+      tags: []
+      operationId: remove_chat
+      parameters:
+      - name: project_id
+        in: path
+        description: Project ID
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: chat_id
+        in: path
+        description: Chat ID
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '204':
+          description: Deleted
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '401':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '403':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+      security:
+      - Bearer: []
+  /projects/{project_id}/chats/{chat_id}/messages:
+    post:
+      tags: []
+      operationId: send_message
+      parameters:
+      - name: project_id
+        in: path
+        description: Project ID
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: chat_id
+        in: path
+        description: Chat ID
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [content]
+              properties:
+                content:
+                  type: string
+                  maxLength: 8192
+        required: true
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [user_message, assistant_message, last_activity_at]
+                properties:
+                  assistant_message:
+                    type: object
+                    required: [role, content]
+                    properties:
+                      content:
+                        type: string
+                      role:
+                        type: string
+                        enum:
+                        - user
+                        - assistant
+                  last_activity_at:
+                    type: string
+                    format: date-time
+                  user_message:
+                    type: object
+                    required: [role, content]
+                    properties:
+                      content:
+                        type: string
+                      role:
+                        type: string
+                        enum:
+                        - user
+                        - assistant
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '401':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '403':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+      security:
+      - Bearer: []
   /projects/{project_id}/children:
     get:
       tags: []
@@ -1699,6 +2290,434 @@ paths:
                           enum:
                           - folders
                           - files
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '401':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '403':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+      security:
+      - Bearer: []
+  /projects/{project_id}/podcasts:
+    get:
+      tags: []
+      operationId: list_podcasts
+      parameters:
+      - name: project_id
+        in: path
+        description: Project ID
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: cursor_created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: cursor_podcast_id
+        in: query
+        required: false
+        schema:
+          type: string
+          format: uuid
+      - name: limit
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int32
+          maximum: 32
+          minimum: 1
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      required: [id, name, description, user_id, project_id, created_at, status]
+                      properties:
+                        created_at:
+                          type: string
+                          format: date-time
+                        description:
+                          type: string
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        project_id:
+                          type: string
+                        status:
+                          type: string
+                          enum:
+                          - generating
+                          - generated
+                        user_id:
+                          type: string
+                  next_cursor:
+                    oneOf:
+                    - type: 'null'
+                    - type: object
+                      required: [created_at, podcast_id]
+                      properties:
+                        created_at:
+                          type: string
+                          format: date-time
+                        podcast_id:
+                          type: string
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '401':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '403':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+      security:
+      - Bearer: []
+    post:
+      tags: []
+      operationId: create_podcast
+      parameters:
+      - name: project_id
+        in: path
+        description: Project ID
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, description, used_file_ids]
+              properties:
+                description:
+                  type: string
+                  maxLength: 1024
+                name:
+                  type: string
+                  maxLength: 256
+                used_file_ids:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+        required: true
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [podcast_id]
+                properties:
+                  podcast_id:
+                    type: string
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '401':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '403':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+      security:
+      - Bearer: []
+  /projects/{project_id}/podcasts/{podcast_id}:
+    get:
+      tags: []
+      operationId: get_podcast
+      parameters:
+      - name: project_id
+        in: path
+        description: Project ID
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: podcast_id
+        in: path
+        description: Podcast ID
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [id, name, description, user_id, project_id, used_file_ids, podcast_script, audio_url, podcast_created_at]
+                properties:
+                  audio_url:
+                    type: string
+                  description:
+                    type: string
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  podcast_created_at:
+                    type: string
+                    format: date-time
+                  podcast_script:
+                    type: array
+                    items:
+                      type: object
+                      required: [speaker, text]
+                      properties:
+                        speaker:
+                          type: string
+                        text:
+                          type: string
+                  project_id:
+                    type: string
+                  used_file_ids:
+                    type: array
+                    items:
+                      type: string
+                  user_id:
+                    type: string
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '401':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '403':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+      security:
+      - Bearer: []
+    delete:
+      tags: []
+      operationId: remove_podcast
+      parameters:
+      - name: project_id
+        in: path
+        description: Project ID
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: podcast_id
+        in: path
+        description: Podcast ID
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '204':
+          description: Deleted
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '401':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '403':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+      security:
+      - Bearer: []
+    patch:
+      tags: []
+      operationId: update_podcast
+      parameters:
+      - name: project_id
+        in: path
+        description: Project ID
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: podcast_id
+        in: path
+        description: Podcast ID
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                description:
+                  type:
+                  - string
+                  - 'null'
+                  maxLength: 1024
+                name:
+                  type:
+                  - string
+                  - 'null'
+                  maxLength: 256
+        required: true
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [id, name, description, user_id, project_id, used_file_ids, podcast_script, audio_url, podcast_created_at]
+                properties:
+                  audio_url:
+                    type: string
+                  description:
+                    type: string
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  podcast_created_at:
+                    type: string
+                    format: date-time
+                  podcast_script:
+                    type: array
+                    items:
+                      type: object
+                      required: [speaker, text]
+                      properties:
+                        speaker:
+                          type: string
+                        text:
+                          type: string
+                  project_id:
+                    type: string
+                  used_file_ids:
+                    type: array
+                    items:
+                      type: string
+                  user_id:
+                    type: string
         '400':
           description: ''
           content:

@@ -22,9 +22,9 @@ impl DomainError {
     }
 }
 
-impl Into<(u16, crate::server::schema::ErrorBody)> for DomainError {
-    fn into(self) -> (u16, crate::server::schema::ErrorBody) {
-        let status = match self.kind {
+impl From<DomainError> for (u16, crate::server::schema::ErrorBody) {
+    fn from(val: DomainError) -> Self {
+        let status = match val.kind {
             DomainErrorKind::BadInput => 400,
             DomainErrorKind::NotFound => 404,
             DomainErrorKind::Forbidden => 403,
@@ -32,8 +32,8 @@ impl Into<(u16, crate::server::schema::ErrorBody)> for DomainError {
         (
             status,
             crate::server::schema::ErrorBody {
-                code: self.code.to_string(),
-                description: self.description,
+                code: val.code.to_string(),
+                description: val.description,
             },
         )
     }

@@ -351,10 +351,6 @@ pub async fn update_file_text(
 
     tx.commit().await?;
 
-    app.queue_service
-        .enqueue(crate::util::queue::Job::IndexFile { file_id: file.id })
-        .await?;
-
     Ok(Ok(UpdateFileTextOutput { file }))
 }
 
@@ -508,8 +504,7 @@ pub async fn index_file(
                 return Ok(Ok(IndexFileOutput {}));
             }
 
-            let mut chunks_by_id: std::collections::HashMap<uuid::Uuid, String> =
-                std::collections::HashMap::new();
+            let mut chunks_by_id = std::collections::HashMap::<uuid::Uuid, String>::new();
             for chunk in chunks {
                 chunks_by_id.insert(uuid::Uuid::new_v4(), chunk);
             }
@@ -868,10 +863,94 @@ pub struct RemoveFolderInput {
 pub struct RemoveFolderOutput {}
 
 pub async fn remove_folder(
-    app: &crate::app::App,
-    input: RemoveFolderInput,
+    _app: &crate::app::App,
+    _input: RemoveFolderInput,
 ) -> Result<Result<RemoveFolderOutput, crate::domain::DomainError>, anyhow::Error> {
     todo!()
+}
+
+// get folder ancestors
+
+pub struct GetFolderAncestorsInput {
+    pub user_id: uuid::Uuid,
+    pub folder_id: uuid::Uuid,
+}
+
+pub struct GetFolderAncestorsOutput {
+    pub ancestors: Vec<super::query_service::AncestorView>,
+}
+
+pub async fn get_folder_ancestors(
+    app: &crate::app::App,
+    input: GetFolderAncestorsInput,
+) -> Result<Result<GetFolderAncestorsOutput, crate::domain::DomainError>, anyhow::Error> {
+    let folder = match app.file_query_service.get_folder(input.folder_id).await? {
+        Some(ok) => ok,
+        None => {
+            return Ok(Err(crate::domain::DomainError::new(
+                "folder_not_found",
+                "folder not found".to_string(),
+                crate::domain::DomainErrorKind::NotFound,
+            )));
+        }
+    };
+
+    if folder.user_id != input.user_id {
+        return Ok(Err(crate::domain::DomainError::new(
+            "forbidden",
+            "folder does not belong to the user".to_string(),
+            crate::domain::DomainErrorKind::Forbidden,
+        )));
+    }
+
+    let ancestors = app
+        .file_query_service
+        .list_ancestors(input.user_id, folder.parent_id, folder.parent_kind)
+        .await?;
+
+    Ok(Ok(GetFolderAncestorsOutput { ancestors }))
+}
+
+// get file ancestors
+
+pub struct GetFileAncestorsInput {
+    pub user_id: uuid::Uuid,
+    pub file_id: uuid::Uuid,
+}
+
+pub struct GetFileAncestorsOutput {
+    pub ancestors: Vec<super::query_service::AncestorView>,
+}
+
+pub async fn get_file_ancestors(
+    app: &crate::app::App,
+    input: GetFileAncestorsInput,
+) -> Result<Result<GetFileAncestorsOutput, crate::domain::DomainError>, anyhow::Error> {
+    let file = match app.file_query_service.get_file(input.file_id).await? {
+        Some(ok) => ok,
+        None => {
+            return Ok(Err(crate::domain::DomainError::new(
+                "file_not_found",
+                "file not found".to_string(),
+                crate::domain::DomainErrorKind::NotFound,
+            )));
+        }
+    };
+
+    if file.user_id != input.user_id {
+        return Ok(Err(crate::domain::DomainError::new(
+            "forbidden",
+            "file does not belong to the user".to_string(),
+            crate::domain::DomainErrorKind::Forbidden,
+        )));
+    }
+
+    let ancestors = app
+        .file_query_service
+        .list_ancestors(input.user_id, file.parent_id, file.parent_kind)
+        .await?;
+
+    Ok(Ok(GetFileAncestorsOutput { ancestors }))
 }
 
 // list children
@@ -906,7 +985,7 @@ pub async fn list_children(
         Err(err) => return Ok(Err(err)),
     };
 
-    let mut rows: Vec<_> = app
+    let mut rows = app
         .file_query_service
         .list_children_by_parent(&parent, input.cursor, input.limit + 1)
         .await?
@@ -918,7 +997,7 @@ pub async fn list_children(
             };
             owner == input.user_id
         })
-        .collect();
+        .collect::<Vec<super::query_service::ListChildrenByParentView>>();
 
     let next_cursor = if rows.len() as u32 > input.limit {
         rows.pop().map(|item| match item {

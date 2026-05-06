@@ -5,19 +5,31 @@
  * OpenAPI spec version: 0.1.0
  */
 import type {
+  CreateChat200,
+  CreateChatBody,
   CreateFile200,
   CreateFileBody,
   CreateFolder200,
   CreateFolderBody,
+  CreatePodcast200,
+  CreatePodcastBody,
   CreateProject200,
   CreateProjectBody,
+  GetChat200,
   GetDashboard200,
+  GetFileAncestors200,
   GetFileContent200,
   GetFolder200,
+  GetFolderAncestors200,
+  GetPodcast200,
   GetProject200,
   GetUserProfile200,
+  ListChats200,
+  ListChatsParams,
   ListFolderChildren200,
   ListFolderChildrenParams,
+  ListPodcasts200,
+  ListPodcastsParams,
   ListProjectChildren200,
   ListProjectChildrenParams,
   ListProjects200,
@@ -28,12 +40,16 @@ import type {
   OidcStart200,
   RequestUploadUrl200,
   RequestUploadUrlBody,
+  SendMessage200,
+  SendMessageBody,
   UpdateFile200,
   UpdateFileBody,
   UpdateFileText200,
   UpdateFileTextBody,
   UpdateFolder200,
   UpdateFolderBody,
+  UpdatePodcast200,
+  UpdatePodcastBody,
   UpdateProject200,
   UpdateProjectBody,
   UpdateUserProfile200,
@@ -118,6 +134,14 @@ const logout = (
     },
       );
     }
+  const getFileAncestors = (
+    fileId: string,
+ ) => {
+      return customInstance<GetFileAncestors200>(
+      {url: `/files/${fileId}/ancestors`, method: 'GET'
+    },
+      );
+    }
   const getFileContent = (
     fileId: string,
  ) => {
@@ -171,6 +195,14 @@ const logout = (
       {url: `/folders/${folderId}`, method: 'PATCH',
       headers: {'Content-Type': 'application/json', },
       data: updateFolderBody
+    },
+      );
+    }
+  const getFolderAncestors = (
+    folderId: string,
+ ) => {
+      return customInstance<GetFolderAncestors200>(
+      {url: `/folders/${folderId}/ancestors`, method: 'GET'
     },
       );
     }
@@ -230,6 +262,57 @@ const logout = (
     },
       );
     }
+  const listChats = (
+    projectId: string,
+    params: ListChatsParams,
+ ) => {
+      return customInstance<ListChats200>(
+      {url: `/projects/${projectId}/chats`, method: 'GET',
+        params
+    },
+      );
+    }
+  const createChat = (
+    projectId: string,
+    createChatBody: CreateChatBody,
+ ) => {
+      return customInstance<CreateChat200>(
+      {url: `/projects/${projectId}/chats`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: createChatBody
+    },
+      );
+    }
+  const getChat = (
+    projectId: string,
+    chatId: string,
+ ) => {
+      return customInstance<GetChat200>(
+      {url: `/projects/${projectId}/chats/${chatId}`, method: 'GET'
+    },
+      );
+    }
+  const removeChat = (
+    projectId: string,
+    chatId: string,
+ ) => {
+      return customInstance<void>(
+      {url: `/projects/${projectId}/chats/${chatId}`, method: 'DELETE'
+    },
+      );
+    }
+  const sendMessage = (
+    projectId: string,
+    chatId: string,
+    sendMessageBody: SendMessageBody,
+ ) => {
+      return customInstance<SendMessage200>(
+      {url: `/projects/${projectId}/chats/${chatId}/messages`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: sendMessageBody
+    },
+      );
+    }
   const listProjectChildren = (
     projectId: string,
     params: ListProjectChildrenParams,
@@ -237,6 +320,57 @@ const logout = (
       return customInstance<ListProjectChildren200>(
       {url: `/projects/${projectId}/children`, method: 'GET',
         params
+    },
+      );
+    }
+  const listPodcasts = (
+    projectId: string,
+    params: ListPodcastsParams,
+ ) => {
+      return customInstance<ListPodcasts200>(
+      {url: `/projects/${projectId}/podcasts`, method: 'GET',
+        params
+    },
+      );
+    }
+  const createPodcast = (
+    projectId: string,
+    createPodcastBody: CreatePodcastBody,
+ ) => {
+      return customInstance<CreatePodcast200>(
+      {url: `/projects/${projectId}/podcasts`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: createPodcastBody
+    },
+      );
+    }
+  const getPodcast = (
+    projectId: string,
+    podcastId: string,
+ ) => {
+      return customInstance<GetPodcast200>(
+      {url: `/projects/${projectId}/podcasts/${podcastId}`, method: 'GET'
+    },
+      );
+    }
+  const removePodcast = (
+    projectId: string,
+    podcastId: string,
+ ) => {
+      return customInstance<void>(
+      {url: `/projects/${projectId}/podcasts/${podcastId}`, method: 'DELETE'
+    },
+      );
+    }
+  const updatePodcast = (
+    projectId: string,
+    podcastId: string,
+    updatePodcastBody: UpdatePodcastBody,
+ ) => {
+      return customInstance<UpdatePodcast200>(
+      {url: `/projects/${projectId}/podcasts/${podcastId}`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: updatePodcastBody
     },
       );
     }

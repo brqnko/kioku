@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import { useTranslation } from "react-i18next";
+import { useSWRConfig } from "swr";
 import { kyInstance } from "../api/mutator";
+import { invalidateAfterMutation } from "../utils/swrCache";
 import { Dialog } from "./Dialog";
 import {
   CreateFolderBodyParentKind,
@@ -24,6 +26,7 @@ export function CreateFolderDialog({
   onSuccess,
 }: CreateFolderDialogProps) {
   const { t } = useTranslation();
+  const { mutate } = useSWRConfig();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -60,7 +63,10 @@ export function CreateFolderDialog({
             : CreateFolderBodyParentKind.folder,
       };
       await kyInstance.post("folders", { json: body }).json<CreateFolder200>();
-      await onSuccess();
+      await Promise.all([
+        onSuccess(),
+        invalidateAfterMutation(mutate, { library: true, dashboard: true }),
+      ]);
       onClose();
     } catch {
       setError(t("createFolder.errors.failed"));

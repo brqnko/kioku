@@ -162,7 +162,7 @@ pub async fn list_projects(
                         last_seen_at: item.last_seen_at,
                         last_seen_file_id: item.last_seen_file_id.to_string(),
                     })
-                    .collect(),
+                    .collect::<Vec<ProjectItem>>(),
                 next_cursor: o.next_cursor.map(|c| ListProjectsCursor {
                     last_seen_at: c.last_seen_at,
                     project_id: c.project_id.to_string(),

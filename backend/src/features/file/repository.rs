@@ -24,12 +24,19 @@ pub trait FileRepository<C>: Send + Sync {
 
 pub struct FileRepositoryImpl {}
 
+impl Default for FileRepositoryImpl {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl FileRepositoryImpl {
     pub fn new() -> Self {
         Self {}
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn row_to_file(
     file_id: Vec<u8>,
     name: String,
@@ -141,7 +148,7 @@ impl FileRepository<sqlx::MySqlConnection> for FileRepositoryImpl {
                     r.changed_at,
                 )
             })
-            .collect()
+            .collect::<Result<Vec<super::domain::File>, anyhow::Error>>()
     }
 
     async fn save(
@@ -229,6 +236,12 @@ pub trait FolderRepository<C>: Send + Sync {
 }
 
 pub struct FolderRepositoryImpl {}
+
+impl Default for FolderRepositoryImpl {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl FolderRepositoryImpl {
     pub fn new() -> Self {
@@ -355,6 +368,12 @@ pub trait TextStorageRepository<C>: Send + Sync {
 }
 
 pub struct TextStorageRepositoryImpl {}
+
+impl Default for TextStorageRepositoryImpl {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl TextStorageRepositoryImpl {
     pub fn new() -> Self {

@@ -121,6 +121,22 @@ export type UpdateFile200 = {
   user_id: string;
 };
 
+export type GetFileAncestors200AncestorsItem = {
+  id: string;
+  name: string;
+} & {
+  kind: 'project';
+} | {
+  id: string;
+  name: string;
+} & {
+  kind: 'folder';
+};
+
+export type GetFileAncestors200 = {
+  ancestors: GetFileAncestors200AncestorsItem[];
+};
+
 export type GetFileContent200Content = {
   expires_at: string;
   kind: 'url';
@@ -282,6 +298,22 @@ export type UpdateFolder200 = {
   user_id: string;
 };
 
+export type GetFolderAncestors200AncestorsItem = {
+  id: string;
+  name: string;
+} & {
+  kind: 'project';
+} | {
+  id: string;
+  name: string;
+} & {
+  kind: 'folder';
+};
+
+export type GetFolderAncestors200 = {
+  ancestors: GetFolderAncestors200AncestorsItem[];
+};
+
 export type ListFolderChildrenParams = {
 cursor_phase?: ListFolderChildrenCursorPhase;
 cursor_name?: string;
@@ -432,6 +464,109 @@ export type UpdateProject200 = {
   name: string;
 };
 
+export type ListChatsParams = {
+cursor_last_activity_at?: string;
+cursor_chat_id?: string;
+/**
+ * @minimum 1
+ * @maximum 32
+ */
+limit: number;
+};
+
+export type ListChats200ItemsItem = {
+  id: string;
+  last_activity_at: string;
+  name: string;
+  project_id: string;
+  started_at: string;
+  user_id: string;
+};
+
+export type ListChats200NextCursor = null | {
+  chat_id: string;
+  last_activity_at: string;
+};
+
+export type ListChats200 = {
+  items: ListChats200ItemsItem[];
+  next_cursor?: ListChats200NextCursor;
+};
+
+export type CreateChatBody = {
+  /** @maxLength 256 */
+  name: string;
+};
+
+export type CreateChat200 = {
+  id: string;
+  last_activity_at: string;
+  name: string;
+  project_id: string;
+  started_at: string;
+  user_id: string;
+};
+
+export type GetChat200MessagesItemRole = typeof GetChat200MessagesItemRole[keyof typeof GetChat200MessagesItemRole];
+
+
+export const GetChat200MessagesItemRole = {
+  user: 'user',
+  assistant: 'assistant',
+} as const;
+
+export type GetChat200MessagesItem = {
+  content: string;
+  role: GetChat200MessagesItemRole;
+};
+
+export type GetChat200 = {
+  id: string;
+  last_activity_at: string;
+  messages: GetChat200MessagesItem[];
+  name: string;
+  project_id: string;
+  started_at: string;
+  user_id: string;
+};
+
+export type SendMessageBody = {
+  /** @maxLength 8192 */
+  content: string;
+};
+
+export type SendMessage200AssistantMessageRole = typeof SendMessage200AssistantMessageRole[keyof typeof SendMessage200AssistantMessageRole];
+
+
+export const SendMessage200AssistantMessageRole = {
+  user: 'user',
+  assistant: 'assistant',
+} as const;
+
+export type SendMessage200AssistantMessage = {
+  content: string;
+  role: SendMessage200AssistantMessageRole;
+};
+
+export type SendMessage200UserMessageRole = typeof SendMessage200UserMessageRole[keyof typeof SendMessage200UserMessageRole];
+
+
+export const SendMessage200UserMessageRole = {
+  user: 'user',
+  assistant: 'assistant',
+} as const;
+
+export type SendMessage200UserMessage = {
+  content: string;
+  role: SendMessage200UserMessageRole;
+};
+
+export type SendMessage200 = {
+  assistant_message: SendMessage200AssistantMessage;
+  last_activity_at: string;
+  user_message: SendMessage200UserMessage;
+};
+
 export type ListProjectChildrenParams = {
 cursor_phase?: ListProjectChildrenCursorPhase;
 cursor_name?: string;
@@ -487,6 +622,103 @@ export type ListProjectChildren200NextCursor = null | {
 export type ListProjectChildren200 = {
   items: ListProjectChildren200ItemsItem[];
   next_cursor?: ListProjectChildren200NextCursor;
+};
+
+export type ListPodcastsParams = {
+cursor_created_at?: string;
+cursor_podcast_id?: string;
+/**
+ * @minimum 1
+ * @maximum 32
+ */
+limit: number;
+};
+
+export type ListPodcasts200ItemsItemStatus = typeof ListPodcasts200ItemsItemStatus[keyof typeof ListPodcasts200ItemsItemStatus];
+
+
+export const ListPodcasts200ItemsItemStatus = {
+  generating: 'generating',
+  generated: 'generated',
+} as const;
+
+export type ListPodcasts200ItemsItem = {
+  created_at: string;
+  description: string;
+  id: string;
+  name: string;
+  project_id: string;
+  status: ListPodcasts200ItemsItemStatus;
+  user_id: string;
+};
+
+export type ListPodcasts200NextCursor = null | {
+  created_at: string;
+  podcast_id: string;
+};
+
+export type ListPodcasts200 = {
+  items: ListPodcasts200ItemsItem[];
+  next_cursor?: ListPodcasts200NextCursor;
+};
+
+export type CreatePodcastBody = {
+  /** @maxLength 1024 */
+  description: string;
+  /** @maxLength 256 */
+  name: string;
+  used_file_ids: string[];
+};
+
+export type CreatePodcast200 = {
+  podcast_id: string;
+};
+
+export type GetPodcast200PodcastScriptItem = {
+  speaker: string;
+  text: string;
+};
+
+export type GetPodcast200 = {
+  audio_url: string;
+  description: string;
+  id: string;
+  name: string;
+  podcast_created_at: string;
+  podcast_script: GetPodcast200PodcastScriptItem[];
+  project_id: string;
+  used_file_ids: string[];
+  user_id: string;
+};
+
+export type UpdatePodcastBody = {
+  /**
+     * @maxLength 1024
+     * @nullable
+     */
+  description?: string | null;
+  /**
+     * @maxLength 256
+     * @nullable
+     */
+  name?: string | null;
+};
+
+export type UpdatePodcast200PodcastScriptItem = {
+  speaker: string;
+  text: string;
+};
+
+export type UpdatePodcast200 = {
+  audio_url: string;
+  description: string;
+  id: string;
+  name: string;
+  podcast_created_at: string;
+  podcast_script: UpdatePodcast200PodcastScriptItem[];
+  project_id: string;
+  used_file_ids: string[];
+  user_id: string;
 };
 
 export type GetUserProfile200 = {

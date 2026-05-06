@@ -17,7 +17,7 @@
     "@milkdown/theme-nord": "^7.20.0",
     "@tailwindcss/vite": "^4.2.4",
     "i18next": "^26.0.4",
-    "ky": "^2.0.2",
+    "ky": "^1.7.2",
     "marked": "^18.0.3",
     "preact": "^10.29.1",
     "preact-iso": "^2.11.1",

@@ -19,6 +19,12 @@ pub trait ProjectRepository<C>: Send + Sync {
 
 pub struct ProjectRepositoryImpl {}
 
+impl Default for ProjectRepositoryImpl {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ProjectRepositoryImpl {
     pub fn new() -> Self {
         Self {}

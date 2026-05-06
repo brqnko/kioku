@@ -27,6 +27,11 @@ pub trait QueryService: Send + Sync {
         cursor: Option<ListProjectsByUserIdCursor>,
         limit: u32,
     ) -> Result<Vec<ListProjectsByUserIdView>, anyhow::Error>;
+    async fn exists_owned_by_user(
+        &self,
+        project_id: uuid::Uuid,
+        user_id: uuid::Uuid,
+    ) -> Result<bool, anyhow::Error>;
 }
 
 pub struct QueryServiceImpl {
@@ -168,5 +173,25 @@ impl QueryService for QueryServiceImpl {
         };
 
         Ok(rows)
+    }
+
+    async fn exists_owned_by_user(
+        &self,
+        project_id: uuid::Uuid,
+        user_id: uuid::Uuid,
+    ) -> Result<bool, anyhow::Error> {
+        let row = sqlx::query!(
+            r#"
+            SELECT 1 AS hit
+            FROM project
+            WHERE project_id = ? AND created_by = ?
+            "#,
+            project_id.as_bytes().as_slice(),
+            user_id.as_bytes().as_slice(),
+        )
+        .fetch_optional(&self.pool)
+        .await?;
+
+        Ok(row.is_some())
     }
 }

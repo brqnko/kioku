@@ -3,6 +3,7 @@ target/
 
 # Node
 node_modules/
+dist/
 
 # Env
 .env
@@ -23,3 +24,6 @@ node_modules/
 # Secrets
 .devcontainer/jwt_private.pem
 .devcontainer/jwt_public.pem
+
+# Test fixtures
+*.pdf

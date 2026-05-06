@@ -13,8 +13,9 @@ struct Config {
     s3_provider_name: String,
     s3_bucket: String,
     s3_temporary_bucket: String,
-    embedding_endpoint: String,
     redis_url: String,
+    gemini_api_key: String,
+    github_token: String,
 }
 
 impl Config {
@@ -28,7 +29,7 @@ impl Config {
             database_url: require("DATABASE_URL")?,
             frontend_url: require("FRONTEND_URL")?,
             backend_url: require("BACKEND_URL")?,
-            port: require("PORT")?.parse()?,
+            port: require("PORT")?.parse::<u16>()?,
             mysql_kind: match require("MYSQL_KIND")?.as_str() {
                 "mariadb" => backend::util::dialect::MySQLKind::MariaDB,
                 "tidb" => backend::util::dialect::MySQLKind::TiDB,
@@ -43,8 +44,9 @@ impl Config {
             s3_provider_name: require("S3_PROVIDER_NAME")?,
             s3_bucket: require("S3_BUCKET")?,
             s3_temporary_bucket: require("S3_TEMPORARY_BUCKET")?,
-            embedding_endpoint: require("EMBEDDING_ENDPOINT")?,
             redis_url: require("REDIS_URL")?,
+            gemini_api_key: require("GEMINI_API_KEY")?,
+            github_token: require("GITHUB_TOKEN")?,
         })
     }
 }
@@ -108,6 +110,9 @@ async fn main() -> anyhow::Result<()> {
         config.s3_temporary_bucket,
     )?;
     temporary_storage_impl.set_expiration_days(1).await?;
+    temporary_storage_impl
+        .set_cors(&config.frontend_url)
+        .await?;
     let temporary_storage_service: Arc<dyn backend::util::storage::StorageService> =
         Arc::new(temporary_storage_impl);
 
@@ -119,14 +124,25 @@ async fn main() -> anyhow::Result<()> {
             redis_pool.clone(),
         ));
 
-    let embedding_client: Arc<dyn backend::util::embedding::EmbeddingClient> = Arc::new(
-        backend::util::embedding::EmbeddingClientImpl::new(config.embedding_endpoint)?,
+    let embedding_client: Arc<dyn backend::util::embedding::EmbeddingClient> =
+        Arc::new(backend::util::embedding::EmbeddingClientImpl::new());
+
+    let llm_client: Arc<dyn backend::util::llm::LLMClient> =
+        Arc::new(backend::util::llm::CopilotImpl::new(config.github_token)?);
+
+    let tts_client: Arc<dyn backend::util::tts::TTSClient> = Arc::new(
+        backend::util::tts::GeminiTtsImpl::new(config.gemini_api_key)?,
     );
 
-    let queue_service: Arc<dyn backend::util::queue::QueueService> =
-        Arc::new(backend::util::queue::QueueServiceImpl::new(redis_pool.clone()).await?);
+    let pdf2md_service: Arc<dyn backend::util::pdf2md::Pdf2MdService> =
+        Arc::new(backend::util::pdf2md::Pdf2MdServiceImpl::new());
 
-    let app = Arc::new(backend::app::App::new(
+    let podcast_request_service: Arc<dyn backend::util::podcast_request::PodcastRequestService> =
+        Arc::new(
+            backend::util::podcast_request::PodcastRequestServiceImpl::new(redis_pool.clone()),
+        );
+
+    let app = Arc::new(backend::app::App::new(backend::app::AppArgs {
         pool,
         oidc_client,
         jwt_service,
@@ -134,14 +150,15 @@ async fn main() -> anyhow::Result<()> {
         temporary_storage_service,
         jti_blacklist_service,
         embedding_client,
-        queue_service,
-        config.mysql_kind,
-        chrono::Duration::hours(1),
-        chrono::Duration::days(7),
-        config.frontend_url,
-    ));
-
-    let consumer_handle = tokio::spawn(backend::util::queue::run(app.clone()));
+        llm_client,
+        tts_client,
+        pdf2md_service,
+        podcast_request_service,
+        mysql_kind: config.mysql_kind,
+        access_token_duration: chrono::Duration::hours(1),
+        refresh_token_duration: chrono::Duration::days(7),
+        frontend_url: config.frontend_url,
+    }));
 
     let bind_addr = format!("0.0.0.0:{}", config.port);
     let listener = tokio::net::TcpListener::bind(&bind_addr).await?;
@@ -149,10 +166,6 @@ async fn main() -> anyhow::Result<()> {
     axum::serve(listener, backend::server::router(app))
         .with_graceful_shutdown(shutdown_signal())
         .await?;
-
-    tracing::info!("shutting down consumer");
-    consumer_handle.abort();
-    let _ = consumer_handle.await;
 
     Ok(())
 }

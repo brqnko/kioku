@@ -192,8 +192,8 @@ impl QueryService for QueryServiceImpl {
             let rows = builder.build().fetch_all(&self.pool).await?;
 
             use sqlx::Row as _;
-            let mut by_id: std::collections::HashMap<uuid::Uuid, GetDashboardRecentFileView> =
-                std::collections::HashMap::new();
+            let mut by_id =
+                std::collections::HashMap::<uuid::Uuid, GetDashboardRecentFileView>::new();
             for r in rows {
                 let file_id: Vec<u8> = r.try_get("file_id")?;
                 let owner_id: Vec<u8> = r.try_get("user_id")?;
@@ -216,7 +216,7 @@ impl QueryService for QueryServiceImpl {
             recent_ids
                 .into_iter()
                 .filter_map(|id| by_id.remove(&id))
-                .collect()
+                .collect::<Vec<GetDashboardRecentFileView>>()
         };
 
         Ok(Some(GetDashboardView {

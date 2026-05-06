@@ -17,7 +17,7 @@ fn required_to_flow(yaml: &str) -> String {
             let mut items = Vec::new();
             while lines
                 .peek()
-                .map_or(false, |next| next.starts_with(&item_prefix))
+                .is_some_and(|next| next.starts_with(&item_prefix))
             {
                 let item_line = lines.next().unwrap();
                 items.push(item_line.trim().trim_start_matches("- ").to_string());

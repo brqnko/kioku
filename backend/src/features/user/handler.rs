@@ -60,7 +60,9 @@ pub async fn oidc_start(
             for cookie in cookies {
                 resp.headers_mut().append(
                     axum::http::header::SET_COOKIE,
-                    cookie.parse().expect("invalid cookie value"),
+                    cookie
+                        .parse::<axum::http::HeaderValue>()
+                        .expect("invalid cookie value"),
                 );
             }
             resp
@@ -149,7 +151,7 @@ pub async fn oidc_callback(
         ];
         let mut resp = axum::response::Redirect::to(&o.redirect_to).into_response();
         for cookie in cookies {
-            resp.headers_mut().append(axum::http::header::SET_COOKIE, cookie.parse().expect("invalid cookie value"));
+            resp.headers_mut().append(axum::http::header::SET_COOKIE, cookie.parse::<axum::http::HeaderValue>().expect("invalid cookie value"));
         }
         resp
     })))
@@ -199,7 +201,9 @@ pub async fn logout(
             for cookie in clear {
                 resp.headers_mut().append(
                     axum::http::header::SET_COOKIE,
-                    cookie.parse().expect("invalid cookie value"),
+                    cookie
+                        .parse::<axum::http::HeaderValue>()
+                        .expect("invalid cookie value"),
                 );
             }
             resp
@@ -267,7 +271,9 @@ pub async fn refresh(
             for cookie in cookies {
                 resp.headers_mut().append(
                     axum::http::header::SET_COOKIE,
-                    cookie.parse().expect("invalid cookie value"),
+                    cookie
+                        .parse::<axum::http::HeaderValue>()
+                        .expect("invalid cookie value"),
                 );
             }
             resp
@@ -459,7 +465,7 @@ pub async fn list_sessions(
                         last_used_at: item.last_used_at,
                         expires_at: item.expires_at,
                     })
-                    .collect(),
+                    .collect::<Vec<SessionItem>>(),
                 next_cursor: o.next_cursor.map(|c| c.to_string()),
             })
         })
@@ -584,7 +590,7 @@ pub async fn get_dashboard(
                         storage_id: f.storage_id.to_string(),
                         changed_at: f.changed_at,
                     })
-                    .collect(),
+                    .collect::<Vec<DashboardRecentFileItem>>(),
             })
         })
     }))

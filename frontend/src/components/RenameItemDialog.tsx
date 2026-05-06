@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import { useTranslation } from "react-i18next";
+import { useSWRConfig } from "swr";
 import { kyInstance } from "../api/mutator";
+import { invalidateAfterMutation } from "../utils/swrCache";
 import { Dialog } from "./Dialog";
 
 interface RenameItemDialogProps {
@@ -23,6 +25,7 @@ export function RenameItemDialog({
   onSuccess,
 }: RenameItemDialogProps) {
   const { t } = useTranslation();
+  const { mutate } = useSWRConfig();
   const [name, setName] = useState(initialName);
   const [description, setDescription] = useState(initialDescription ?? "");
   const [submitting, setSubmitting] = useState(false);
@@ -75,7 +78,14 @@ export function RenameItemDialog({
             ? `projects/${id}`
             : `folders/${id}`;
       await kyInstance.patch(path, { json: body });
-      await onSuccess();
+      await Promise.all([
+        onSuccess(),
+        invalidateAfterMutation(mutate, {
+          childListings: true,
+          library: true,
+          dashboard: true,
+        }),
+      ]);
       onClose();
     } catch {
       setError(t("renameItem.errors.failed"));

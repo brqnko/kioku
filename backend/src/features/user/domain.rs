@@ -163,7 +163,7 @@ impl User {
             joined_at: option.joined_at.unwrap_or(chrono::Utc::now()),
             iss,
             sub,
-            recent_seen_file_ids: option.recent_seen_file_ids.unwrap_or(Vec::new()),
+            recent_seen_file_ids: option.recent_seen_file_ids.unwrap_or_default(),
             ai_learning_summary: option.ai_learning_summary.unwrap_or("".to_owned()),
             ai_learning_summary_updated_at: option
                 .ai_learning_summary_updated_at
@@ -245,11 +245,11 @@ impl RefreshToken {
     ) -> Result<Result<Self, crate::domain::DomainError>, anyhow::Error> {
         Ok(Ok(Self {
             id: option.id.unwrap_or(uuid::Uuid::new_v4()),
-            user_id: user_id,
+            user_id,
             token_hash: option.token_hash.unwrap_or("".to_owned()),
             generation: option.generation.unwrap_or(1),
-            ip_address: ip_address,
-            user_agent: user_agent,
+            ip_address,
+            user_agent,
             access_token_jti: option.access_token_jti.unwrap_or(uuid::Uuid::nil()),
             activated_at: option.activated_at.unwrap_or(chrono::Utc::now()),
             last_used_at: option.last_used_at.unwrap_or(chrono::Utc::now()),
@@ -420,9 +420,9 @@ mod tests {
     #[test]
     fn push_recent_seen_file_id_truncates_to_max() {
         let mut user = make_user();
-        let ids: Vec<_> = (0..User::MAX_RECENT_SEEN_FILE_IDS + 2)
+        let ids = (0..User::MAX_RECENT_SEEN_FILE_IDS + 2)
             .map(|_| uuid::Uuid::new_v4())
-            .collect();
+            .collect::<Vec<_>>();
         for id in &ids {
             user.push_recent_seen_file_id(*id).unwrap();
         }
@@ -430,12 +430,12 @@ mod tests {
             user.recent_seen_file_ids.len(),
             User::MAX_RECENT_SEEN_FILE_IDS
         );
-        let expected: Vec<_> = ids
+        let expected = ids
             .iter()
             .rev()
             .take(User::MAX_RECENT_SEEN_FILE_IDS)
             .copied()
-            .collect();
+            .collect::<Vec<_>>();
         assert_eq!(user.recent_seen_file_ids, expected);
     }
 

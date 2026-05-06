@@ -4,8 +4,10 @@ pub mod schema;
 pub type HandlerResult<T> = schema::HandlerResult<T>;
 
 mod docs {
+    use crate::features::chatbot::handler::*;
     use crate::features::file::handler::*;
     use crate::features::misc::handler;
+    use crate::features::podcast::handler::*;
     use crate::features::project::handler::*;
     use crate::features::user::handler::*;
     use crate::server::schema::*;
@@ -40,8 +42,20 @@ mod docs {
             get_folder,
             update_folder,
             remove_folder,
+            get_folder_ancestors,
+            get_file_ancestors,
             list_project_children,
             list_folder_children,
+            create_podcast,
+            list_podcasts,
+            get_podcast,
+            update_podcast,
+            remove_podcast,
+            create_chat,
+            list_chats,
+            get_chat,
+            send_message,
+            remove_chat,
         ),
         components(schemas(ErrorBody,))
     )]
@@ -60,6 +74,8 @@ pub fn router(app: std::sync::Arc<crate::app::App>) -> axum::Router {
     let protected = crate::features::user::handler::protected_router()
         .merge(crate::features::project::handler::protected_router())
         .merge(crate::features::file::handler::protected_router())
+        .merge(crate::features::podcast::handler::protected_router())
+        .merge(crate::features::chatbot::handler::protected_router())
         .layer(axum::middleware::from_fn(middleware::csrf::csrf))
         .layer(axum::middleware::from_fn_with_state(
             app.clone(),
@@ -75,7 +91,7 @@ pub fn router(app: std::sync::Arc<crate::app::App>) -> axum::Router {
         .merge(protected)
         .split_for_parts();
 
-    router
+    let router = router
         .merge(<utoipa_redoc::Redoc<_> as utoipa_redoc::Servable<_>>::with_url("/redoc", api))
         .with_state(app)
         .layer(
@@ -91,5 +107,10 @@ pub fn router(app: std::sync::Arc<crate::app::App>) -> axum::Router {
         .layer(tower_http::request_id::PropagateRequestIdLayer::x_request_id())
         .layer(tower_http::request_id::SetRequestIdLayer::x_request_id(
             tower_http::request_id::MakeRequestUuid,
-        ))
+        ));
+
+    #[cfg(debug_assertions)]
+    let router = router.layer(axum::middleware::from_fn(middleware::dev_delay::dev_delay));
+
+    router
 }

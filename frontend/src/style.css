@@ -57,6 +57,7 @@
 :root {
   --color-text: var(--color-charcoal);
   --color-bg: var(--color-background-light);
+  --sidebar-width: 16rem;
 }
 
 [data-theme="light"] {

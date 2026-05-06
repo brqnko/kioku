@@ -21,39 +21,41 @@ pub trait OIDCClient: Send + Sync {
     ) -> Result<ExchangeResult, anyhow::Error>;
 }
 
+type GoogleOIDCClient = openidconnect::Client<
+    openidconnect::EmptyAdditionalClaims,
+    openidconnect::core::CoreAuthDisplay,
+    openidconnect::core::CoreGenderClaim,
+    openidconnect::core::CoreJweContentEncryptionAlgorithm,
+    openidconnect::core::CoreJsonWebKey,
+    openidconnect::core::CoreAuthPrompt,
+    openidconnect::StandardErrorResponse<openidconnect::core::CoreErrorResponseType>,
+    openidconnect::StandardTokenResponse<
+        openidconnect::IdTokenFields<
+            openidconnect::EmptyAdditionalClaims,
+            openidconnect::EmptyExtraTokenFields,
+            openidconnect::core::CoreGenderClaim,
+            openidconnect::core::CoreJweContentEncryptionAlgorithm,
+            openidconnect::core::CoreJwsSigningAlgorithm,
+        >,
+        openidconnect::core::CoreTokenType,
+    >,
+    openidconnect::StandardTokenIntrospectionResponse<
+        openidconnect::EmptyExtraTokenFields,
+        openidconnect::core::CoreTokenType,
+    >,
+    openidconnect::core::CoreRevocableToken,
+    openidconnect::StandardErrorResponse<openidconnect::RevocationErrorResponseType>,
+    openidconnect::EndpointSet,
+    openidconnect::EndpointNotSet,
+    openidconnect::EndpointNotSet,
+    openidconnect::EndpointSet,
+    openidconnect::EndpointMaybeSet,
+    openidconnect::EndpointMaybeSet,
+>;
+
 pub struct GoogleOIDCClientImpl {
     http_client: reqwest::Client,
-    client: openidconnect::Client<
-        openidconnect::EmptyAdditionalClaims,
-        openidconnect::core::CoreAuthDisplay,
-        openidconnect::core::CoreGenderClaim,
-        openidconnect::core::CoreJweContentEncryptionAlgorithm,
-        openidconnect::core::CoreJsonWebKey,
-        openidconnect::core::CoreAuthPrompt,
-        openidconnect::StandardErrorResponse<openidconnect::core::CoreErrorResponseType>,
-        openidconnect::StandardTokenResponse<
-            openidconnect::IdTokenFields<
-                openidconnect::EmptyAdditionalClaims,
-                openidconnect::EmptyExtraTokenFields,
-                openidconnect::core::CoreGenderClaim,
-                openidconnect::core::CoreJweContentEncryptionAlgorithm,
-                openidconnect::core::CoreJwsSigningAlgorithm,
-            >,
-            openidconnect::core::CoreTokenType,
-        >,
-        openidconnect::StandardTokenIntrospectionResponse<
-            openidconnect::EmptyExtraTokenFields,
-            openidconnect::core::CoreTokenType,
-        >,
-        openidconnect::core::CoreRevocableToken,
-        openidconnect::StandardErrorResponse<openidconnect::RevocationErrorResponseType>,
-        openidconnect::EndpointSet,
-        openidconnect::EndpointNotSet,
-        openidconnect::EndpointNotSet,
-        openidconnect::EndpointSet,
-        openidconnect::EndpointMaybeSet,
-        openidconnect::EndpointMaybeSet,
-    >,
+    client: GoogleOIDCClient,
 }
 
 impl GoogleOIDCClientImpl {

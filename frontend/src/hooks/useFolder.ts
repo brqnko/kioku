@@ -2,8 +2,9 @@ import useSWR from "swr";
 import useSWRInfinite from "swr/infinite";
 import { kyInstance } from "../api/mutator";
 import type {
+  GetFileAncestors200,
   GetFolder200,
-  GetProject200,
+  GetFolderAncestors200,
   ListFolderChildren200,
 } from "../api/generated/backend.schemas";
 
@@ -76,32 +77,20 @@ export interface BreadcrumbAncestor {
   name: string;
 }
 
-export async function fetchAncestors(node: {
-  parent_id: string;
-  parent_kind: "project" | "folder";
-}): Promise<BreadcrumbAncestor[]> {
-  const chain: BreadcrumbAncestor[] = [];
-  let parentId = node.parent_id;
-  let parentKind: "project" | "folder" = node.parent_kind;
-  let safety = 32;
-  while (safety-- > 0) {
-    if (parentKind === "project") {
-      const project = await kyInstance
-        .get(`projects/${parentId}`)
-        .json<GetProject200>();
-      chain.unshift({ kind: "project", id: project.id, name: project.name });
-      return chain;
-    }
-    const parentFolder = await kyInstance
-      .get(`folders/${parentId}`)
-      .json<GetFolder200>();
-    chain.unshift({
-      kind: "folder",
-      id: parentFolder.id,
-      name: parentFolder.name,
-    });
-    parentId = parentFolder.parent_id;
-    parentKind = parentFolder.parent_kind;
-  }
-  return chain;
+export async function fetchFolderAncestors(
+  folderId: string,
+): Promise<BreadcrumbAncestor[]> {
+  const res = await kyInstance
+    .get(`folders/${folderId}/ancestors`)
+    .json<GetFolderAncestors200>();
+  return res.ancestors;
+}
+
+export async function fetchFileAncestors(
+  fileId: string,
+): Promise<BreadcrumbAncestor[]> {
+  const res = await kyInstance
+    .get(`files/${fileId}/ancestors`)
+    .json<GetFileAncestors200>();
+  return res.ancestors;
 }

@@ -303,9 +303,29 @@
           "nullable": false,
           "default": "current_timestamp()",
           "extra_def": "on update current_timestamp()"
+        },
+        {
+          "name": "audio_storage_id",
+          "type": "varbinary(16)",
+          "nullable": false
+        },
+        {
+          "name": "project_id",
+          "type": "varbinary(16)",
+          "nullable": false
         }
       ],
       "indexes": [
+        {
+          "name": "idx_project_created_at",
+          "def": "KEY idx_project_created_at (project_id, podcast_created_at, podcast_id) USING BTREE",
+          "table": "podcast",
+          "columns": [
+            "project_id",
+            "podcast_created_at",
+            "podcast_id"
+          ]
+        },
         {
           "name": "PRIMARY",
           "def": "PRIMARY KEY (podcast_id) USING BTREE",
@@ -338,7 +358,7 @@
           "table": "podcast"
         }
       ],
-      "def": "CREATE TABLE `podcast` (\n  `podcast_id` varbinary(16) NOT NULL,\n  `name` varchar(256) NOT NULL,\n  `description` varchar(1024) NOT NULL,\n  `user_id` varbinary(16) NOT NULL,\n  `used_file_ids` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`used_file_ids`)),\n  `podcast_script` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`podcast_script`)),\n  `podcast_created_at` datetime NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT current_timestamp(),\n  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),\n  PRIMARY KEY (`podcast_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci"
+      "def": "CREATE TABLE `podcast` (\n  `podcast_id` varbinary(16) NOT NULL,\n  `name` varchar(256) NOT NULL,\n  `description` varchar(1024) NOT NULL,\n  `user_id` varbinary(16) NOT NULL,\n  `used_file_ids` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`used_file_ids`)),\n  `podcast_script` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`podcast_script`)),\n  `podcast_created_at` datetime NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT current_timestamp(),\n  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),\n  `audio_storage_id` varbinary(16) NOT NULL,\n  `project_id` varbinary(16) NOT NULL,\n  PRIMARY KEY (`podcast_id`),\n  KEY `idx_project_created_at` (`project_id`,`podcast_created_at`,`podcast_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci"
     },
     {
       "name": "folder",

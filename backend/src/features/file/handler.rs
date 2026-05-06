@@ -238,9 +238,7 @@ pub async fn get_file_content(
                     method,
                     expires_at,
                 },
-                super::usecase::FileContent::Text { content } => {
-                    FileContentBody::Text { content }
-                }
+                super::usecase::FileContent::Text { content } => FileContentBody::Text { content },
             };
             axum::Json(GetFileContentResponse { file, content })
         })
@@ -330,6 +328,19 @@ pub async fn update_file_text(
         text: body.text,
     };
     let output = super::usecase::update_file_text(&app, input).await;
+
+    if let Ok(Ok(o)) = &output {
+        let app = app.clone();
+        let file_id = o.file.id;
+        tokio::spawn(async move {
+            let input = super::usecase::IndexFileInput { file_id };
+            match super::usecase::index_file(&app, input).await {
+                Ok(Ok(_)) => tracing::info!(%file_id, "index_file finished"),
+                Ok(Err(err)) => tracing::error!(%file_id, ?err, "index_file domain error"),
+                Err(err) => tracing::error!(%file_id, ?err, "index_file failed"),
+            }
+        });
+    }
 
     crate::server::schema::HandlerResult(
         output.map(|r| r.map(|o| axum::Json(file_response(o.file)))),
@@ -564,6 +575,104 @@ pub async fn remove_folder(
     )
 }
 
+// list ancestors
+
+#[derive(serde::Serialize, utoipa::ToSchema)]
+#[serde(tag = "kind", rename_all = "snake_case")]
+pub enum AncestorItem {
+    Project(#[schema(inline)] AncestorEntry),
+    Folder(#[schema(inline)] AncestorEntry),
+}
+
+#[derive(serde::Serialize, utoipa::ToSchema)]
+pub struct AncestorEntry {
+    id: String,
+    name: String,
+}
+
+#[derive(serde::Serialize, utoipa::ToSchema)]
+pub struct ListAncestorsResponse {
+    #[schema(inline)]
+    ancestors: Vec<AncestorItem>,
+}
+
+fn build_list_ancestors_response(
+    ancestors: Vec<super::query_service::AncestorView>,
+) -> ListAncestorsResponse {
+    let items = ancestors
+        .into_iter()
+        .map(|a| {
+            let entry = AncestorEntry {
+                id: a.id.to_string(),
+                name: a.name,
+            };
+            match a.kind {
+                0 => AncestorItem::Project(entry),
+                _ => AncestorItem::Folder(entry),
+            }
+        })
+        .collect::<Vec<AncestorItem>>();
+    ListAncestorsResponse { ancestors: items }
+}
+
+#[utoipa::path(
+    get,
+    path = "/folders/{folder_id}/ancestors",
+    security(("Bearer" = [])),
+    params(
+        ("folder_id" = uuid::Uuid, Path, description = "Folder ID"),
+    ),
+    responses(
+        (status = 200, body = inline(ListAncestorsResponse)),
+        (status = 400, body = crate::server::schema::ErrorBody),
+        (status = 401, body = crate::server::schema::ErrorBody),
+        (status = 403, body = crate::server::schema::ErrorBody),
+        (status = 404, body = crate::server::schema::ErrorBody),
+        (status = 500, body = crate::server::schema::ErrorBody),
+    )
+)]
+pub async fn get_folder_ancestors(
+    axum::extract::Extension(user_id): axum::extract::Extension<uuid::Uuid>,
+    axum::extract::State(app): axum::extract::State<std::sync::Arc<crate::app::App>>,
+    axum::extract::Path(folder_id): axum::extract::Path<uuid::Uuid>,
+) -> crate::server::HandlerResult<axum::Json<ListAncestorsResponse>> {
+    let input = super::usecase::GetFolderAncestorsInput { user_id, folder_id };
+    let output = super::usecase::get_folder_ancestors(&app, input).await;
+
+    crate::server::schema::HandlerResult(
+        output.map(|r| r.map(|o| axum::Json(build_list_ancestors_response(o.ancestors)))),
+    )
+}
+
+#[utoipa::path(
+    get,
+    path = "/files/{file_id}/ancestors",
+    security(("Bearer" = [])),
+    params(
+        ("file_id" = uuid::Uuid, Path, description = "File ID"),
+    ),
+    responses(
+        (status = 200, body = inline(ListAncestorsResponse)),
+        (status = 400, body = crate::server::schema::ErrorBody),
+        (status = 401, body = crate::server::schema::ErrorBody),
+        (status = 403, body = crate::server::schema::ErrorBody),
+        (status = 404, body = crate::server::schema::ErrorBody),
+        (status = 500, body = crate::server::schema::ErrorBody),
+    )
+)]
+pub async fn get_file_ancestors(
+    axum::extract::Extension(user_id): axum::extract::Extension<uuid::Uuid>,
+    axum::extract::State(app): axum::extract::State<std::sync::Arc<crate::app::App>>,
+    axum::extract::Path(file_id): axum::extract::Path<uuid::Uuid>,
+) -> crate::server::HandlerResult<axum::Json<ListAncestorsResponse>> {
+    let input = super::usecase::GetFileAncestorsInput { user_id, file_id };
+    let output = super::usecase::get_file_ancestors(&app, input).await;
+
+    crate::server::schema::HandlerResult(
+        output.map(|r| r.map(|o| axum::Json(build_list_ancestors_response(o.ancestors)))),
+    )
+}
+
 // list children
 
 #[derive(serde::Deserialize, serde::Serialize, utoipa::ToSchema, Clone, Copy)]
@@ -709,7 +818,7 @@ fn build_list_children_response(
                 })
             }
         })
-        .collect();
+        .collect::<Vec<ListChildrenItem>>();
     let next_cursor = output.next_cursor.map(|c| ListChildrenCursor {
         phase: c.phase.into(),
         name: c.name,
@@ -817,6 +926,8 @@ pub fn protected_router() -> utoipa_axum::router::OpenApiRouter<std::sync::Arc<c
         .routes(routes!(update_file, remove_file))
         .routes(routes!(create_folder))
         .routes(routes!(get_folder, update_folder, remove_folder))
+        .routes(routes!(get_folder_ancestors))
+        .routes(routes!(get_file_ancestors))
         .routes(routes!(list_project_children))
         .routes(routes!(list_folder_children))
 }

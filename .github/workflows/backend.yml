@@ -18,6 +18,8 @@ jobs:
     defaults:
       run:
         working-directory: backend
+    permissions:
+      contents: read
 
     services:
       mariadb:
@@ -45,31 +47,44 @@ jobs:
         with:
           workspaces: backend
 
-      - name: Install sqlx-cli
-        run: cargo install sqlx-cli --no-default-features --features mysql,rustls
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: sqlx-cli
+
+      - uses: k1LoW/setup-tbls@v1
+        with:
+          version: v1.93.0
 
       - name: Run migrations
         env:
           DATABASE_URL: mysql://kioku:kioku@127.0.0.1:3306/kioku_test
         run: sqlx migrate run
 
-      - name: Prepare sqlx
-        env:
-          DATABASE_URL: mysql://kioku:kioku@127.0.0.1:3306/kioku_test
-        run: cargo sqlx prepare
+      - name: Generate tbls docs
+        run: tbls doc "mysql://kioku:kioku@127.0.0.1:3306/kioku_test" docs/schema --er-format svg --rm-dist --force
 
-      - name: Check sqlx files are up to date
+      - name: Generate OpenAPI spec
+        env:
+          SQLX_OFFLINE: "true"
+        run: cargo run --bin gen_spec > ../shared/api/openapi.yaml
+
+      - name: Check OpenAPI spec is up to date
         run: |
-          if [ -n "$(git status --porcelain .sqlx)" ]; then
-            echo "::error::.sqlx is out of date. Run 'cargo sqlx prepare' and commit the .sqlx directory."
-            git diff .sqlx
+          if [ -n "$(git status --porcelain ../shared/api/openapi.yaml)" ]; then
+            echo "::error::openapi.yaml is out of date. Run './scripts/generate-spec.sh' and commit the changes."
+            git diff ../shared/api/openapi.yaml
             exit 1
           fi
+
+      - name: Check sqlx prepare is up to date
+        env:
+          DATABASE_URL: mysql://kioku:kioku@127.0.0.1:3306/kioku_test
+        run: cargo sqlx prepare --check
 
       - name: Clippy
         env:
           SQLX_OFFLINE: "true"
-        run: cargo clippy -- -D warnings
+        run: cargo clippy --all-targets -- -D warnings
 
       - name: Test
         env:

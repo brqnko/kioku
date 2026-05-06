@@ -6,12 +6,14 @@ interface RowActionMenuProps {
   ariaLabel: string;
   onEdit: () => void;
   onDelete: () => void;
+  icon?: string;
 }
 
 export function RowActionMenu({
   ariaLabel,
   onEdit,
   onDelete,
+  icon = "more_horiz",
 }: RowActionMenuProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -70,7 +72,7 @@ export function RowActionMenu({
         class="material-symbols-outlined text-text-disabled group-hover:text-text-primary hover:text-text-primary transition-colors cursor-pointer rounded-md p-1 hover:bg-overlay-faint bg-transparent border-none"
         onClick={toggle}
       >
-        more_horiz
+        {icon}
       </button>
       {open &&
         typeof document !== "undefined" &&

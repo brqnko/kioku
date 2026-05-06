@@ -7,7 +7,7 @@
 | [_sqlx_migrations](_sqlx_migrations.md) | 6 |  | BASE TABLE |
 | [user](user.md) | 11 |  | BASE TABLE |
 | [chat_file](chat_file.md) | 10 |  | BASE TABLE |
-| [podcast](podcast.md) | 9 |  | BASE TABLE |
+| [podcast](podcast.md) | 11 |  | BASE TABLE |
 | [folder](folder.md) | 11 |  | BASE TABLE |
 | [file_embedding](file_embedding.md) | 7 |  | BASE TABLE |
 | [refresh_token](refresh_token.md) | 12 |  | BASE TABLE |

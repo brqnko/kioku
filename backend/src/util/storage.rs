@@ -87,6 +87,33 @@ impl StorageServiceImpl {
         Ok(Self { client, bucket })
     }
 
+    pub async fn set_cors(&self, allowed_origin: &str) -> Result<(), anyhow::Error> {
+        let rule = aws_sdk_s3::types::CorsRule::builder()
+            .allowed_origins(allowed_origin.to_string())
+            .allowed_methods("GET")
+            .allowed_methods("PUT")
+            .allowed_methods("HEAD")
+            .allowed_headers("*")
+            .expose_headers("ETag")
+            .max_age_seconds(3000)
+            .build()?;
+
+        let configuration = aws_sdk_s3::types::CorsConfiguration::builder()
+            .cors_rules(rule)
+            .build()?;
+
+        self.client
+            .put_bucket_cors()
+            .bucket(&self.bucket)
+            .cors_configuration(configuration)
+            .send()
+            .await?;
+
+        tracing::info!(bucket = %self.bucket, allowed_origin, "configured s3 bucket cors");
+
+        Ok(())
+    }
+
     pub async fn set_expiration_days(&self, days: i32) -> Result<(), anyhow::Error> {
         let rule = aws_sdk_s3::types::LifecycleRule::builder()
             .id(format!("expire-after-{days}-days"))

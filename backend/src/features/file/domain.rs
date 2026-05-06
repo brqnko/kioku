@@ -246,6 +246,7 @@ pub struct FileOption {
 }
 
 impl File {
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         user_id: uuid::Uuid,
         name: String,

@@ -17,11 +17,13 @@ export function Dialog({
   maxWidth = "max-w-[500px]",
 }: DialogProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
   useEffect(() => {
     if (!open) return;
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") onCloseRef.current();
     };
     document.addEventListener("keydown", handleKey);
     const prevOverflow = document.body.style.overflow;
@@ -30,7 +32,7 @@ export function Dialog({
       document.removeEventListener("keydown", handleKey);
       document.body.style.overflow = prevOverflow;
     };
-  }, [open, onClose]);
+  }, [open]);
 
   if (!open) return null;
 

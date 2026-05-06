@@ -26,7 +26,12 @@
     "podcast": "Podcast",
     "chat": "AI Chat",
     "newProject": "New Project",
-    "about": "What is kioku?"
+    "about": "What is kioku?",
+    "expand": "Expand sidebar",
+    "collapse": "Collapse sidebar",
+    "sidebar": "Sidebar",
+    "report": "Report a problem",
+    "recentFiles": "Recent Files"
   },
   "profile": {
     "tabs": {
@@ -264,12 +269,138 @@
     "recent": {
       "title": "Recently used files",
       "toLibrary": "Go to library",
-      "more": "More actions",
       "empty": "No recently used files."
+    }
+  },
+  "chat": {
+    "loading": "Loading...",
+    "loadMore": "Load more",
+    "errors": {
+      "load": "Failed to load projects."
+    },
+    "selectProject": {
+      "title": "Select a project",
+      "subtitle": "Choose the project you want to start an AI chat with.",
+      "empty": "You don't have any projects yet. Create one in your library first.",
+      "toLibrary": "Go to library",
+      "noDescription": "No description.",
+      "lastUpdated": "Updated {{time}}"
+    }
+  },
+  "projectChat": {
+    "newChat": "New Chat",
+    "creating": "Creating...",
+    "newChatName": "Chat {{date}}",
+    "sessionList": {
+      "empty": "No chats yet."
+    },
+    "welcome": {
+      "title": "AI Chat",
+      "subtitle": "Create a new chat to start a conversation with the AI.",
+      "cta": "Start a chat",
+      "emptyChat": "No messages yet. Ask a question below."
+    },
+    "input": {
+      "placeholder": "Ask the AI... (Shift + Enter for new line)",
+      "send": "Send",
+      "sending": "Sending...",
+      "disclaimer": "AI may generate incorrect information. Always verify important details with original sources."
+    },
+    "errors": {
+      "send": "Failed to send the message.",
+      "create": "Failed to create the chat."
+    }
+  },
+  "podcast": {
+    "loading": "Loading...",
+    "loadMore": "Load more",
+    "errors": {
+      "load": "Failed to load projects."
+    },
+    "selectProject": {
+      "title": "Select a project",
+      "subtitle": "Choose the project for which you want to generate or browse podcasts.",
+      "empty": "You don't have any projects yet. Create one in your library first.",
+      "toLibrary": "Go to library",
+      "noDescription": "No description.",
+      "lastUpdated": "Updated {{time}}"
+    },
+    "list": {
+      "crumb": "Podcast",
+      "title": "Podcast",
+      "subtitle": "Generated podcasts for this project. AI narrates your lectures and materials with the most fitting commentary.",
+      "featured": "Latest",
+      "loadMore": "Load earlier podcasts",
+      "noDescription": "No description.",
+      "createdOn": "Created on {{date}}",
+      "empty": "No podcasts have been generated for this project yet.",
+      "status": {
+        "generating": "Generating"
+      },
+      "menuLabel": "Options for {{name}}",
+      "actions": {
+        "info": "Details",
+        "play": "Play now"
+      },
+      "create": {
+        "cta": "Generate podcast",
+        "notImplemented": "Podcast generation flow is not implemented yet."
+      }
+    },
+    "create": {
+      "crumb": "New generation",
+      "title": "Create AI Podcast",
+      "loading": "Loading...",
+      "loadMore": "Load more",
+      "submit": "Generate Podcast",
+      "submitting": "Submitting...",
+      "notice": "Generation typically takes 2-3 minutes.\nIt will appear in the list once it's ready.",
+      "source": {
+        "title": "Select source material",
+        "count": "{{count}} file(s) selected",
+        "empty": "This project doesn't contain any files yet.",
+        "emptyFolder": "Empty folder"
+      },
+      "settings": {
+        "title": "Podcast details"
+      },
+      "fields": {
+        "name": "Podcast name",
+        "nameHint": "If left empty, the selected filenames will be joined with \", \".",
+        "description": "Description",
+        "optional": "(optional)"
+      },
+      "placeholders": {
+        "name": "e.g. Macroeconomics Lecture 4 — Recap",
+        "description": "Outline the angle or talking points for this podcast..."
+      },
+      "errors": {
+        "load": "Failed to load folder contents.",
+        "nameRequired": "Please enter a podcast name.",
+        "filesRequired": "Please select at least one source file.",
+        "failed": "Failed to create the podcast."
+      }
+    },
+    "detail": {
+      "crumb": "Player",
+      "aiGenerated": "AI Generated",
+      "generating": "This podcast is still being generated. It will become playable once it's ready.",
+      "backToList": "Back to list",
+      "play": "Play",
+      "pause": "Pause",
+      "replay10": "Rewind 10 seconds",
+      "forward10": "Forward 10 seconds",
+      "mute": "Mute",
+      "unmute": "Unmute",
+      "speed": "Playback speed",
+      "progress": "Playback position",
+      "audioError": "Failed to load the audio. Please try again later.",
+      "transcript": "Transcript"
     }
   },
   "auth": {
     "signInWithGoogle": "Continue with Google",
+    "toDashboard": "Go to Dashboard",
     "idOnlyNotice": "We only obtain an identifier for your account. We do not store your email address or name.",
     "consentBefore": "By continuing, you agree to our ",
     "termsLink": "Terms of Service",
@@ -278,26 +409,26 @@
     "consentAfter": "."
   },
   "hero": {
-    "title": "Advanced cognition for knowledge professionals.",
+    "title": "Folder structure for NotebookLM.",
     "subtitle": "Streamline your research, project management, and study notes with a tool designed for high-density information environments.",
     "ctaPrimary": "Start for Free"
   },
   "features": {
     "synthesis": {
-      "title": "Automated Synthesis",
-      "body": "Transform fragmented notes into structured outlines instantly. Our AI models are fine-tuned for scholarly citation and logical coherence in professional knowledge environments."
+      "title": "Organize with folders",
+      "body": "Keep PDFs, notes, and text files neatly organized in projects and nested folders. One place for everything — lectures, research, or personal study."
     },
     "library": {
-      "title": "Contextual Library",
-      "body": "A document-first approach to information storage. Every PDF, note, and recording is indexed by concept rather than file name, allowing semantic retrieval across your entire workspace."
+      "title": "Chat with your materials",
+      "body": "Ask the AI questions grounded in your project files. Summarize a paper, rephrase a chapter, or dig into the details — all based on what you've actually uploaded."
     },
     "research": {
-      "title": "Research Intelligence",
-      "body": "Query your entire knowledge base using natural language. kioku understands complex hierarchies of information, identifying relationships between disparate projects and disciplines."
+      "title": "AI-generated podcasts",
+      "body": "Select any files and let AI turn them into an audio explanation. Get a podcast-style summary in minutes — perfect for reviewing on the go."
     },
     "collaborate": {
-      "title": "Collaborative Logic",
-      "body": "Multi-player environments built for research groups. Version control for ideas, shared semantic spaces, and real-time synthesis of group insights without the overhead of traditional tools."
+      "title": "Track your progress",
+      "body": "The dashboard shows recently opened files and an AI-generated learning summary at a glance. Pick up exactly where you left off, every time."
     }
   },
   "cta": {

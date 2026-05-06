@@ -585,11 +585,7 @@ pub async fn get_dashboard(
     app: &crate::app::App,
     input: GetDashboardInput,
 ) -> Result<Result<GetDashboardOutput, crate::domain::DomainError>, anyhow::Error> {
-    let dashboard = match app
-        .user_query_service
-        .get_dashboard(input.user_id)
-        .await?
-    {
+    let dashboard = match app.user_query_service.get_dashboard(input.user_id).await? {
         Some(ok) => ok,
         None => {
             return Ok(Err(crate::domain::DomainError::new(

@@ -1,9 +1,12 @@
 import { useTranslation } from "react-i18next";
+import DashboardButton from "../components/DashboardButton";
 import GoogleSignInButton from "../components/GoogleSignInButton";
 import HeaderControls from "../components/HeaderControls";
+import { useAuth } from "../hooks/useAuth";
 
 export default function LandingPage() {
   const { t } = useTranslation();
+  const { isAuthenticated } = useAuth();
 
   return (
     <div class="bg-background-light dark:bg-background-dark text-charcoal dark:text-white/95 overflow-x-hidden">
@@ -22,18 +25,22 @@ export default function LandingPage() {
         <section class="border-b border-border-light dark:border-border-dark">
           <div class="max-w-[1200px] mx-auto px-6 min-h-screen flex flex-col md:flex-row">
             {/* Left: Content */}
-            <div class="w-full md:w-1/2 flex flex-col justify-center py-16 md:py-0 md:pr-8">
-              <h1 class="text-[54px] leading-[1.04] font-bold text-charcoal dark:text-white mb-4 max-w-lg">
+            <div class="w-full md:w-1/2 min-w-0 flex flex-col justify-center py-16 md:py-0 md:pr-8">
+              <h1 class="text-[54px] leading-[1.04] font-bold text-charcoal dark:text-white mb-4 break-keep">
                 {t("hero.title")}
               </h1>
-              <p class="text-base text-taupe dark:text-text-muted-dark leading-relaxed mb-8 max-w-md">
+              <p class="text-base text-taupe dark:text-text-muted-dark leading-relaxed mb-8">
                 {t("hero.subtitle")}
               </p>
-              <GoogleSignInButton align="start" />
+              {isAuthenticated ? (
+                <DashboardButton align="start" />
+              ) : (
+                <GoogleSignInButton align="start" />
+              )}
             </div>
 
             {/* Right: UI Mockup */}
-            <div class="w-full md:w-1/2 flex items-center justify-center py-6 md:py-8 relative overflow-hidden">
+            <div class="w-full md:w-1/2 min-w-0 flex items-center justify-center py-6 md:py-8 relative overflow-hidden">
               <div class="w-full max-w-md aspect-[4/3] bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark rounded-lg shadow-2xl p-4 flex flex-col gap-2">
                 <div class="flex items-center justify-between border-b border-border-light dark:border-white/5 pb-2">
                   <div class="flex gap-1">
@@ -107,7 +114,11 @@ export default function LandingPage() {
               {t("cta.body")}
             </p>
             <div class="flex justify-center">
-              <GoogleSignInButton align="center" />
+              {isAuthenticated ? (
+                <DashboardButton align="center" />
+              ) : (
+                <GoogleSignInButton align="center" />
+              )}
             </div>
           </div>
         </section>

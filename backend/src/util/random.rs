@@ -5,5 +5,5 @@ pub fn random_string(len: usize) -> String {
         .sample_iter(rand::distr::Alphabetic)
         .take(len)
         .map(char::from)
-        .collect()
+        .collect::<String>()
 }

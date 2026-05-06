@@ -29,3 +29,6 @@ alter table `folder`
 
 alter table `file_embedding`
     add key `idx_file_id` (`file_id`);
+
+alter table `podcast`
+    add key `idx_project_created_at` (`project_id`, `podcast_created_at`, `podcast_id`);

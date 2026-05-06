@@ -51,7 +51,7 @@ export default function DashboardPage() {
     <div class="min-h-screen bg-background-dark text-text-primary">
       <SideNavBar />
       <TopAppBar />
-      <main class="ml-64 p-8 min-h-[calc(100vh-3.5rem)] flex flex-col gap-8">
+      <main class="ml-[var(--sidebar-width)] p-8 min-h-[calc(100vh-3.5rem)] flex flex-col gap-8 transition-[margin-left] duration-200 ease-in-out">
         <header class="flex flex-col gap-1">
           <h1 class="text-[22px] leading-[1.27] font-bold tracking-tight">
             {t("dashboard.title")}
@@ -136,18 +136,10 @@ export default function DashboardPage() {
                     href={`/files/${file.id}`}
                     class="bg-surface-dark border border-border-dark rounded-xl p-4 flex flex-col gap-4 hover:bg-overlay-faint hover:border-overlay-medium transition-all duration-200 group no-underline text-inherit"
                   >
-                    <div class="flex items-start justify-between">
+                    <div class="flex items-start">
                       <div class={`w-10 h-10 rounded-lg flex items-center justify-center ${toneClass[tone]}`}>
                         <span class="material-symbols-outlined text-[20px]">{icon}</span>
                       </div>
-                      <button
-                        type="button"
-                        aria-label={t("dashboard.recent.more")}
-                        class="text-text-disabled hover:text-text-primary opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                        onClick={(e) => e.preventDefault()}
-                      >
-                        <span class="material-symbols-outlined text-[18px]">more_vert</span>
-                      </button>
                     </div>
                     <div>
                       <h3 class="text-sm font-bold truncate mb-1 group-hover:text-accent-blue transition-colors">

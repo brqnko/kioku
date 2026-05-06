@@ -37,6 +37,12 @@ pub trait RefreshTokenRepository<C>: Send + Sync {
 
 pub struct RefreshTokenRepositoryImpl {}
 
+impl Default for RefreshTokenRepositoryImpl {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl RefreshTokenRepositoryImpl {
     pub fn new() -> Self {
         Self {}
@@ -188,7 +194,7 @@ impl RefreshTokenRepository<sqlx::MySqlConnection> for RefreshTokenRepositoryImp
                     expires_at: r.expires_at.and_utc(),
                 })
             })
-            .collect()
+            .collect::<Result<Vec<super::domain::RefreshToken>, anyhow::Error>>()
     }
 
     async fn remove(
@@ -248,6 +254,12 @@ pub trait UserRepository<C>: Send + Sync {
 }
 
 pub struct UserRepositoryImpl {}
+
+impl Default for UserRepositoryImpl {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl UserRepositoryImpl {
     pub fn new() -> Self {

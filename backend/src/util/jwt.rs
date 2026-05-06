@@ -88,8 +88,8 @@ impl JWTService for JWTServiceImpl {
         let data = jsonwebtoken::decode::<Claims>(&token, &self.decoding_key, &validation)?;
 
         Ok(VerifiedUserAccessToken {
-            user_id: data.claims.sub.parse()?,
-            jti: data.claims.jti.parse()?,
+            user_id: data.claims.sub.parse::<uuid::Uuid>()?,
+            jti: data.claims.jti.parse::<uuid::Uuid>()?,
         })
     }
 }

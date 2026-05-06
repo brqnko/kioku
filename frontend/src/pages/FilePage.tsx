@@ -6,7 +6,8 @@ import SideNavBar from "../components/SideNavBar";
 import TopAppBar from "../components/TopAppBar";
 import { MarkdownEditor } from "../components/MarkdownEditor";
 import { useFileContent, fileContentKeyFor } from "../hooks/useFile";
-import { fetchAncestors, type BreadcrumbAncestor } from "../hooks/useFolder";
+import { invalidateAfterMutation } from "../utils/swrCache";
+import { fetchFileAncestors, type BreadcrumbAncestor } from "../hooks/useFolder";
 import { kyInstance } from "../api/mutator";
 import { formatSize } from "../utils/file";
 import type {
@@ -43,6 +44,14 @@ export default function FilePage() {
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const initRef = useRef<string | null>(null);
 
+  const [copiedField, setCopiedField] = useState<"created" | "updated" | null>(null);
+
+  const copyDate = (field: "created" | "updated", iso: string) => {
+    navigator.clipboard.writeText(formatDate(iso, i18n.language)).catch(() => {});
+    setCopiedField(field);
+    setTimeout(() => setCopiedField(null), 1500);
+  };
+
   const [editingName, setEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState("");
   const [editingDesc, setEditingDesc] = useState(false);
@@ -55,7 +64,14 @@ export default function FilePage() {
   ): Promise<void> => {
     if (!fileId) return;
     await kyInstance.patch(`files/${fileId}`, { json: patch });
-    await mutate(fileContentKeyFor(fileId));
+    await Promise.all([
+      mutate(fileContentKeyFor(fileId)),
+      invalidateAfterMutation(mutate, {
+        childListings: true,
+        library: true,
+        dashboard: true,
+      }),
+    ]);
   };
 
   const startEditName = () => {
@@ -102,12 +118,9 @@ export default function FilePage() {
   };
 
   useEffect(() => {
-    if (!file) return;
+    if (!fileId) return;
     let cancelled = false;
-    fetchAncestors({
-      parent_id: file.parent_id,
-      parent_kind: file.parent_kind,
-    })
+    fetchFileAncestors(fileId)
       .then((chain) => {
         if (!cancelled) setAncestors(chain);
       })
@@ -117,7 +130,7 @@ export default function FilePage() {
     return () => {
       cancelled = true;
     };
-  }, [file]);
+  }, [fileId]);
 
   const isText = content?.kind === "text";
 
@@ -176,7 +189,7 @@ export default function FilePage() {
     <div class="min-h-screen bg-background-dark text-text-primary">
       <SideNavBar />
       <TopAppBar />
-      <main class="ml-64 min-h-[calc(100vh-3.5rem)] overflow-y-auto">
+      <main class="ml-[var(--sidebar-width)] min-h-[calc(100vh-3.5rem)] overflow-y-auto transition-[margin-left] duration-200 ease-in-out">
         <div class="w-full max-w-4xl mx-auto px-12 py-16">
           {error && (
             <p class="text-sm text-danger mb-4">{t("file.errors.load")}</p>
@@ -300,6 +313,15 @@ export default function FilePage() {
                   <span class="text-text-primary">
                     {formatDate(file.uploaded_at, i18n.language)}
                   </span>
+                  <button
+                    type="button"
+                    onClick={() => copyDate("created", file.uploaded_at)}
+                    class="flex items-center justify-center w-6 h-6 rounded text-text-disabled hover:text-text-secondary hover:bg-overlay-faint transition-colors cursor-pointer bg-transparent border-none"
+                  >
+                    <span class="material-symbols-outlined text-[14px]">
+                      {copiedField === "created" ? "check" : "content_copy"}
+                    </span>
+                  </button>
                 </div>
                 <div class="flex items-center gap-4">
                   <span class="flex items-center gap-2 w-32">
@@ -311,6 +333,15 @@ export default function FilePage() {
                   <span class="text-text-primary">
                     {formatDate(file.changed_at, i18n.language)}
                   </span>
+                  <button
+                    type="button"
+                    onClick={() => copyDate("updated", file.changed_at)}
+                    class="flex items-center justify-center w-6 h-6 rounded text-text-disabled hover:text-text-secondary hover:bg-overlay-faint transition-colors cursor-pointer bg-transparent border-none"
+                  >
+                    <span class="material-symbols-outlined text-[14px]">
+                      {copiedField === "updated" ? "check" : "content_copy"}
+                    </span>
+                  </button>
                 </div>
                 <div class="flex items-center gap-4">
                   <span class="flex items-center gap-2 w-32">

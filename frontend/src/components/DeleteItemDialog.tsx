@@ -1,15 +1,18 @@
 import { useEffect, useState } from "preact/hooks";
 import { useTranslation } from "react-i18next";
+import { useSWRConfig } from "swr";
 import { kyInstance } from "../api/mutator";
+import { invalidateAfterMutation } from "../utils/swrCache";
 import { Dialog } from "./Dialog";
 
 interface DeleteItemDialogProps {
   open: boolean;
   onClose: () => void;
-  kind: "file" | "folder";
+  kind?: "file" | "folder";
   id: string;
   name: string;
   onSuccess: () => unknown | Promise<unknown>;
+  customPath?: string;
 }
 
 export function DeleteItemDialog({
@@ -19,8 +22,10 @@ export function DeleteItemDialog({
   id,
   name,
   onSuccess,
+  customPath,
 }: DeleteItemDialogProps) {
   const { t } = useTranslation();
+  const { mutate } = useSWRConfig();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,9 +40,16 @@ export function DeleteItemDialog({
     setSubmitting(true);
     setError(null);
     try {
-      const path = kind === "file" ? `files/${id}` : `folders/${id}`;
+      const path = customPath ?? (kind === "file" ? `files/${id}` : `folders/${id}`);
       await kyInstance.delete(path);
-      await onSuccess();
+      await Promise.all([
+        onSuccess(),
+        invalidateAfterMutation(mutate, {
+          childListings: true,
+          library: true,
+          dashboard: true,
+        }),
+      ]);
       onClose();
     } catch {
       setError(t("deleteItem.errors.failed"));

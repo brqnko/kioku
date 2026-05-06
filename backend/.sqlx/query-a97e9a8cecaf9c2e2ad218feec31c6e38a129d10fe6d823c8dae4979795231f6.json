@@ -1,0 +1,12 @@
+{
+  "db_name": "MySQL",
+  "query": "\n            INSERT INTO podcast\n                (podcast_id, name, description, user_id, project_id,\n                 used_file_ids, podcast_script, audio_storage_id, podcast_created_at)\n            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)\n            ON DUPLICATE KEY UPDATE\n                name               = VALUES(name),\n                description        = VALUES(description),\n                used_file_ids      = VALUES(used_file_ids),\n                podcast_script     = VALUES(podcast_script),\n                audio_storage_id   = VALUES(audio_storage_id)\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 9
+    },
+    "nullable": []
+  },
+  "hash": "a97e9a8cecaf9c2e2ad218feec31c6e38a129d10fe6d823c8dae4979795231f6"
+}

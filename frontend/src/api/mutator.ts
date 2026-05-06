@@ -68,8 +68,11 @@ export const kyInstance = ky.create({
 
         const ok = await refreshTokens();
         if (!ok) {
-          if (typeof window !== "undefined") {
-            window.dispatchEvent(new CustomEvent("auth:unauthenticated"));
+          if (
+            typeof window !== "undefined" &&
+            window.location.pathname !== "/"
+          ) {
+            window.location.href = "/";
           }
           return;
         }

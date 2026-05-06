@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import { useTranslation } from "react-i18next";
+import { useSWRConfig } from "swr";
 import { Dialog } from "./Dialog";
 import { createTextFile, uploadFile } from "../api/upload";
+import { invalidateAfterMutation } from "../utils/swrCache";
 
 interface UploadDialogProps {
   open: boolean;
@@ -21,6 +23,7 @@ export function UploadDialog({
   onSuccess,
 }: UploadDialogProps) {
   const { t } = useTranslation();
+  const { mutate } = useSWRConfig();
   const [mode, setMode] = useState<Mode>("file");
   const [file, setFile] = useState<File | null>(null);
   const [name, setName] = useState("");
@@ -64,7 +67,10 @@ export function UploadDialog({
       setSubmitting(true);
       try {
         await uploadFile({ file, parentId, parentKind });
-        await onSuccess();
+        await Promise.all([
+          onSuccess(),
+          invalidateAfterMutation(mutate, { library: true, dashboard: true }),
+        ]);
         onClose();
       } catch (err) {
         setError(translateError(err));
@@ -87,7 +93,10 @@ export function UploadDialog({
         parentId,
         parentKind,
       });
-      await onSuccess();
+      await Promise.all([
+        onSuccess(),
+        invalidateAfterMutation(mutate, { library: true, dashboard: true }),
+      ]);
       onClose();
     } catch (err) {
       setError(translateError(err));

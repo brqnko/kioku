@@ -68,6 +68,12 @@ pub struct GetTextContentView {
     pub content: String,
 }
 
+pub struct AncestorView {
+    pub kind: u8,
+    pub id: uuid::Uuid,
+    pub name: String,
+}
+
 #[async_trait::async_trait]
 pub trait QueryService: Send + Sync {
     async fn list_children_by_parent(
@@ -88,6 +94,13 @@ pub trait QueryService: Send + Sync {
         &self,
         storage_id: uuid::Uuid,
     ) -> Result<Option<GetTextContentView>, anyhow::Error>;
+
+    async fn list_ancestors(
+        &self,
+        user_id: uuid::Uuid,
+        parent_id: uuid::Uuid,
+        parent_kind: u8,
+    ) -> Result<Vec<AncestorView>, anyhow::Error>;
 }
 
 pub struct QueryServiceImpl {
@@ -126,7 +139,7 @@ impl QueryService for QueryServiceImpl {
             }) => (false, None, Some((name, id.as_bytes().to_vec()))),
         };
 
-        let mut items: Vec<ListChildrenByParentView> = Vec::new();
+        let mut items = Vec::<ListChildrenByParentView>::new();
 
         if start_with_folders {
             let folders: Vec<ListChildrenByParentFolderView> = match folder_cursor {
@@ -360,5 +373,99 @@ impl QueryService for QueryServiceImpl {
         .await?;
 
         Ok(row.map(|r| GetTextContentView { content: r.content }))
+    }
+
+    async fn list_ancestors(
+        &self,
+        user_id: uuid::Uuid,
+        parent_id: uuid::Uuid,
+        parent_kind: u8,
+    ) -> Result<Vec<AncestorView>, anyhow::Error> {
+        if parent_kind == 0 {
+            let row = sqlx::query!(
+                r#"
+                SELECT project_id, name
+                FROM project
+                WHERE project_id = ? AND created_by = ?
+                "#,
+                parent_id.as_bytes().as_slice(),
+                user_id.as_bytes().as_slice(),
+            )
+            .fetch_optional(&self.pool)
+            .await?;
+            return Ok(match row {
+                Some(r) => vec![AncestorView {
+                    kind: 0,
+                    id: uuid::Uuid::from_slice(&r.project_id)?,
+                    name: r.name,
+                }],
+                None => vec![],
+            });
+        }
+
+        let chain = sqlx::query!(
+            r#"
+            WITH RECURSIVE chain AS (
+                SELECT folder_id, parent_id, parent_kind, name, user_id, 0 AS hops
+                FROM folder
+                WHERE folder_id = ? AND user_id = ?
+                UNION ALL
+                SELECT f.folder_id, f.parent_id, f.parent_kind, f.name, f.user_id,
+                       c.hops + 1
+                FROM chain c
+                JOIN folder f
+                  ON c.parent_kind = 1
+                 AND f.folder_id = c.parent_id
+                 AND f.user_id = c.user_id
+                WHERE c.hops < 32
+            )
+            SELECT folder_id AS `folder_id!: Vec<u8>`,
+                   parent_id AS `parent_id!: Vec<u8>`,
+                   parent_kind AS `parent_kind!: u8`,
+                   name AS `name!: String`,
+                   hops AS `hops!: i64`
+            FROM chain
+            ORDER BY hops DESC
+            "#,
+            parent_id.as_bytes().as_slice(),
+            user_id.as_bytes().as_slice(),
+        )
+        .fetch_all(&self.pool)
+        .await?;
+
+        if chain.is_empty() {
+            return Ok(vec![]);
+        }
+
+        let mut result = Vec::with_capacity(chain.len() + 1);
+        let topmost = &chain[0];
+        if topmost.parent_kind == 0 {
+            let project_row = sqlx::query!(
+                r#"
+                SELECT project_id, name
+                FROM project
+                WHERE project_id = ? AND created_by = ?
+                "#,
+                topmost.parent_id.as_slice(),
+                user_id.as_bytes().as_slice(),
+            )
+            .fetch_optional(&self.pool)
+            .await?;
+            if let Some(p) = project_row {
+                result.push(AncestorView {
+                    kind: 0,
+                    id: uuid::Uuid::from_slice(&p.project_id)?,
+                    name: p.name,
+                });
+            }
+        }
+        for r in chain {
+            result.push(AncestorView {
+                kind: 1,
+                id: uuid::Uuid::from_slice(&r.folder_id)?,
+                name: r.name,
+            });
+        }
+        Ok(result)
     }
 }

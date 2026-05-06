@@ -9,7 +9,7 @@ import { DeleteItemDialog } from "../components/DeleteItemDialog";
 import { RenameItemDialog } from "../components/RenameItemDialog";
 import { RowActionMenu } from "../components/RowActionMenu";
 import {
-  fetchAncestors,
+  fetchFolderAncestors,
   useFolder,
   useFolderChildren,
   type BreadcrumbAncestor,
@@ -54,9 +54,9 @@ export default function FolderPage() {
   const [ancestors, setAncestors] = useState<BreadcrumbAncestor[]>([]);
 
   useEffect(() => {
-    if (!folder) return;
+    if (!folderId) return;
     let cancelled = false;
-    fetchAncestors(folder)
+    fetchFolderAncestors(folderId)
       .then((chain) => {
         if (!cancelled) setAncestors(chain);
       })
@@ -66,7 +66,7 @@ export default function FolderPage() {
     return () => {
       cancelled = true;
     };
-  }, [folder]);
+  }, [folderId]);
 
   const folders = items.filter(
     (i): i is Extract<ListFolderChildren200ItemsItem, { kind: "folder" }> =>
@@ -81,7 +81,7 @@ export default function FolderPage() {
     <div class="min-h-screen bg-background-dark text-text-primary">
       <SideNavBar />
       <TopAppBar />
-      <main class="ml-64 p-8 min-h-[calc(100vh-3.5rem)] overflow-y-auto">
+      <main class="ml-[var(--sidebar-width)] p-8 min-h-[calc(100vh-3.5rem)] overflow-y-auto transition-[margin-left] duration-200 ease-in-out">
         <section class="mb-8 flex items-end justify-between flex-wrap gap-4">
           <div class="flex flex-col gap-3">
             <nav class="flex items-center gap-2 text-text-secondary text-sm font-medium flex-wrap">

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "preact/hooks";
 import { useTranslation } from "react-i18next";
 import { useSWRConfig } from "swr";
 import { kyInstance } from "../api/mutator";
+import { invalidateAfterMutation } from "../utils/swrCache";
 import { Dialog } from "./Dialog";
 import type {
   CreateProject200,
@@ -49,12 +50,7 @@ export function CreateProjectDialog({ open, onClose }: CreateProjectDialogProps)
       await kyInstance
         .post("projects", { json: body })
         .json<CreateProject200>();
-      await Promise.all([
-        mutate("users/me/dashboard"),
-        mutate(
-          (key) => Array.isArray(key) && key[0] === "library:page",
-        ),
-      ]);
+      await invalidateAfterMutation(mutate, { library: true, dashboard: true });
       onClose();
     } catch {
       setError(t("createProject.errors.failed"));
