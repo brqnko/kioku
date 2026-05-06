@@ -5,15 +5,23 @@ services:
       dockerfile: Dockerfile
     env_file:
       - .env
+    ports:
+      - "443:443"
     volumes:
       - ..:/workspace:cached
       - backend-target:/workspace/backend/target
       - frontend-node-modules:/workspace/frontend/node_modules
+      - frontend-dist:/workspace/frontend/dist
       - cargo-registry:/root/.cargo/registry
       - cargo-git:/root/.cargo/git
-      - ./nginx:/etc/nginx/conf.d
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/server.crt:/etc/nginx/certs/server.crt:ro
+      - ./nginx/server.key:/etc/nginx/certs/server.key:ro
     working_dir: /workspace
-    command: sleep infinity
+    command: ["sh", "-c", "nginx && sleep infinity"]
+    secrets:
+      - jwt-private
+      - jwt-public
     depends_on:
       db:
         condition: service_healthy
@@ -46,5 +54,12 @@ volumes:
   mariadb-data:
   backend-target:
   frontend-node-modules:
+  frontend-dist:
   cargo-registry:
   cargo-git:
+
+secrets:
+  jwt-private:
+    file: jwt_private.pem
+  jwt-public:
+    file: jwt_public.pem

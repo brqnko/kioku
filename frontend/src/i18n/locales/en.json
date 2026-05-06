@@ -1,0 +1,555 @@
+{
+  "language": {
+    "label": "Language",
+    "names": {
+      "en": "English",
+      "ja": "日本語"
+    }
+  },
+  "colorMode": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "footer": {
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "copyright": "© 2025 kioku."
+  },
+  "notFound": {
+    "title": "404",
+    "message": "Page not found"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "library": "Library",
+    "podcast": "Podcast",
+    "chat": "AI Chat",
+    "newProject": "New Project",
+    "about": "What is kioku?",
+    "expand": "Expand sidebar",
+    "collapse": "Collapse sidebar",
+    "sidebar": "Sidebar",
+    "report": "Report a problem",
+    "recentFiles": "Recent Files"
+  },
+  "profile": {
+    "tabs": {
+      "account": "Account",
+      "security": "Security"
+    },
+    "loading": "Loading...",
+    "save": "Save changes",
+    "saving": "Saving...",
+    "saved": "Saved",
+    "cancel": "Cancel",
+    "errors": {
+      "load": "Failed to load profile.",
+      "save": "Failed to save."
+    },
+    "account": {
+      "title": "Account settings",
+      "subtitle": "Manage your profile and preferences.",
+      "displayName": "Display name",
+      "displayNameHelp": "This is how you will appear to others.",
+      "language": "Language",
+      "theme": "Theme"
+    },
+    "actions": {
+      "report": "Report a problem",
+      "logout": "Logout",
+      "delete": "Delete account"
+    },
+    "logoutConfirm": {
+      "title": "Log out?",
+      "body": "Your current session will end. You will need to sign in again to continue."
+    },
+    "deleteConfirm": {
+      "title": "Delete account",
+      "body": "This action cannot be undone. All your data will be permanently removed. Type the confirmation phrase below to proceed.",
+      "phrase": "Delete my account",
+      "inputLabel": "Type \"{{phrase}}\"",
+      "confirm": "Delete permanently",
+      "deleting": "Deleting..."
+    },
+    "security": {
+      "title": "Active sessions",
+      "subtitle": "Manage the devices that are currently signed into your account. Logging out of a device will immediately end its session.",
+      "error": "Failed to load sessions.",
+      "empty": "No active sessions.",
+      "unknownAgent": "Unknown device",
+      "columns": {
+        "device": "Device / Browser",
+        "ip": "IP address",
+        "lastAccessed": "Last accessed",
+        "action": "Action"
+      },
+      "revoke": "Log out",
+      "revoking": "Revoking...",
+      "revokeAll": "Log out of all other devices",
+      "revokingAll": "Revoking...",
+      "revokeConfirm": {
+        "title": "Log out of this device?",
+        "body": "The selected session will end immediately."
+      },
+      "revokeAllConfirm": {
+        "title": "Log out of all other devices",
+        "body": "All sessions other than the current one will be terminated. You will need to sign in again on those devices."
+      }
+    }
+  },
+  "createProject": {
+    "title": "Create a new project",
+    "fields": {
+      "name": "Project name",
+      "description": "Description",
+      "optional": "(optional)"
+    },
+    "placeholders": {
+      "name": "Enter project name...",
+      "description": "Describe the project..."
+    },
+    "cancel": "Cancel",
+    "submit": "Create project",
+    "submitting": "Creating...",
+    "errors": {
+      "nameRequired": "Please enter a project name.",
+      "failed": "Failed to create the project."
+    }
+  },
+  "topbar": {
+    "settings": "Settings"
+  },
+  "library": {
+    "title": "Library",
+    "subtitle": "Projects in progress and saved notes",
+    "newProject": "New project",
+    "loading": "Loading...",
+    "error": "Failed to load projects.",
+    "empty": "No projects yet. Create a new one to get started.",
+    "noDescription": "No description.",
+    "lastUpdated": "Updated {{time}}",
+    "loadMore": "Load more"
+  },
+  "project": {
+    "loading": "Loading...",
+    "empty": "This project has no files yet.",
+    "allFiles": "All Files",
+    "newFolder": "New Folder",
+    "editProject": "Edit project",
+    "breadcrumb": {
+      "library": "Library"
+    },
+    "table": {
+      "name": "Name",
+      "type": "Type",
+      "size": "Size",
+      "modified": "Last Modified",
+      "action": "Action",
+      "folder": "Folder",
+      "more": "More actions"
+    },
+    "errors": {
+      "load": "Failed to load project.",
+      "children": "Failed to load files."
+    },
+    "upload": {
+      "label": "New File"
+    }
+  },
+  "folder": {
+    "empty": "This folder has no files yet.",
+    "editFolder": "Edit folder",
+    "errors": {
+      "load": "Failed to load folder."
+    }
+  },
+  "file": {
+    "loading": "Loading...",
+    "createdAt": "Created",
+    "updatedAt": "Updated",
+    "size": "Size",
+    "description": {
+      "label": "Description",
+      "empty": "Add a description",
+      "edit": "Edit description"
+    },
+    "autosave": {
+      "saving": "Saving...",
+      "saved": "Saved"
+    },
+    "binary": {
+      "notice": "This file cannot be shown as text.",
+      "open": "Open file"
+    },
+    "errors": {
+      "load": "Failed to load file.",
+      "save": "Failed to save."
+    }
+  },
+  "upload": {
+    "title": "New File",
+    "tabs": {
+      "file": "File",
+      "text": "Text"
+    },
+    "file": {
+      "cta": "Click to choose a file",
+      "hint": "Up to 16MB"
+    },
+    "text": {
+      "name": "File name",
+      "namePlaceholder": "e.g. memo.note",
+      "body": "Body",
+      "bodyPlaceholder": "Type your content here..."
+    },
+    "cancel": "Cancel",
+    "submit": "Save",
+    "submitting": "Saving...",
+    "errors": {
+      "fileRequired": "Please choose a file.",
+      "nameRequired": "Please enter a file name.",
+      "tooLarge": "Too large (max 16MB).",
+      "failed": "Failed to save."
+    }
+  },
+  "createFolder": {
+    "title": "Create a new folder",
+    "fields": {
+      "name": "Folder name",
+      "description": "Description",
+      "optional": "(optional)"
+    },
+    "placeholders": {
+      "name": "Enter folder name...",
+      "description": "Describe this folder..."
+    },
+    "cancel": "Cancel",
+    "submit": "Create folder",
+    "submitting": "Creating...",
+    "errors": {
+      "nameRequired": "Please enter a folder name.",
+      "failed": "Failed to create the folder."
+    }
+  },
+  "deleteItem": {
+    "title": "Delete this item?",
+    "body": "\"{{name}}\" will be permanently deleted. This action cannot be undone.",
+    "cancel": "Cancel",
+    "submit": "Delete",
+    "submitting": "Deleting...",
+    "menu": "Delete",
+    "errors": {
+      "failed": "Failed to delete."
+    }
+  },
+  "renameItem": {
+    "title": "Edit",
+    "label": "Name",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Add a description (optional)...",
+    "cancel": "Cancel",
+    "submit": "Save",
+    "submitting": "Saving...",
+    "menu": "Edit",
+    "errors": {
+      "nameRequired": "Please enter a name.",
+      "failed": "Failed to save."
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Welcome back. Review today's study tasks and AI suggestions.",
+    "loading": "Loading...",
+    "error": "Failed to load data.",
+    "summary": {
+      "title": "Today's Study Summary",
+      "empty": "No summary has been generated yet."
+    },
+    "recent": {
+      "title": "Recently used files",
+      "toLibrary": "Go to library",
+      "empty": "No recently used files."
+    }
+  },
+  "chat": {
+    "loading": "Loading...",
+    "loadMore": "Load more",
+    "errors": {
+      "load": "Failed to load projects."
+    },
+    "selectProject": {
+      "title": "Select a project",
+      "subtitle": "Choose the project you want to start an AI chat with.",
+      "empty": "You don't have any projects yet. Create one in your library first.",
+      "toLibrary": "Go to library",
+      "noDescription": "No description.",
+      "lastUpdated": "Updated {{time}}"
+    }
+  },
+  "projectChat": {
+    "newChat": "New Chat",
+    "creating": "Creating...",
+    "newChatName": "Chat {{date}}",
+    "sessionList": {
+      "empty": "No chats yet."
+    },
+    "welcome": {
+      "title": "AI Chat",
+      "subtitle": "Create a new chat to start a conversation with the AI.",
+      "cta": "Start a chat",
+      "emptyChat": "No messages yet. Ask a question below."
+    },
+    "input": {
+      "placeholder": "Ask the AI... (Shift + Enter for new line)",
+      "send": "Send",
+      "sending": "Sending...",
+      "disclaimer": "AI may generate incorrect information. Always verify important details with original sources."
+    },
+    "errors": {
+      "send": "Failed to send the message.",
+      "create": "Failed to create the chat."
+    }
+  },
+  "podcast": {
+    "loading": "Loading...",
+    "loadMore": "Load more",
+    "errors": {
+      "load": "Failed to load projects."
+    },
+    "selectProject": {
+      "title": "Select a project",
+      "subtitle": "Choose the project for which you want to generate or browse podcasts.",
+      "empty": "You don't have any projects yet. Create one in your library first.",
+      "toLibrary": "Go to library",
+      "noDescription": "No description.",
+      "lastUpdated": "Updated {{time}}"
+    },
+    "list": {
+      "crumb": "Podcast",
+      "title": "Podcast",
+      "subtitle": "Generated podcasts for this project. AI narrates your lectures and materials with the most fitting commentary.",
+      "featured": "Latest",
+      "loadMore": "Load earlier podcasts",
+      "noDescription": "No description.",
+      "createdOn": "Created on {{date}}",
+      "empty": "No podcasts have been generated for this project yet.",
+      "status": {
+        "generating": "Generating"
+      },
+      "menuLabel": "Options for {{name}}",
+      "actions": {
+        "info": "Details",
+        "play": "Play now"
+      },
+      "create": {
+        "cta": "Generate podcast",
+        "notImplemented": "Podcast generation flow is not implemented yet."
+      }
+    },
+    "create": {
+      "crumb": "New generation",
+      "title": "Create AI Podcast",
+      "loading": "Loading...",
+      "loadMore": "Load more",
+      "submit": "Generate Podcast",
+      "submitting": "Submitting...",
+      "notice": "Generation typically takes 2-3 minutes.\nIt will appear in the list once it's ready.",
+      "source": {
+        "title": "Select source material",
+        "count": "{{count}} file(s) selected",
+        "empty": "This project doesn't contain any files yet.",
+        "emptyFolder": "Empty folder"
+      },
+      "settings": {
+        "title": "Podcast details"
+      },
+      "fields": {
+        "name": "Podcast name",
+        "nameHint": "If left empty, the selected filenames will be joined with \", \".",
+        "description": "Description",
+        "optional": "(optional)"
+      },
+      "placeholders": {
+        "name": "e.g. Macroeconomics Lecture 4 — Recap",
+        "description": "Outline the angle or talking points for this podcast..."
+      },
+      "errors": {
+        "load": "Failed to load folder contents.",
+        "nameRequired": "Please enter a podcast name.",
+        "filesRequired": "Please select at least one source file.",
+        "failed": "Failed to create the podcast."
+      }
+    },
+    "detail": {
+      "crumb": "Player",
+      "aiGenerated": "AI Generated",
+      "generating": "This podcast is still being generated. It will become playable once it's ready.",
+      "backToList": "Back to list",
+      "play": "Play",
+      "pause": "Pause",
+      "replay10": "Rewind 10 seconds",
+      "forward10": "Forward 10 seconds",
+      "mute": "Mute",
+      "unmute": "Unmute",
+      "speed": "Playback speed",
+      "progress": "Playback position",
+      "audioError": "Failed to load the audio. Please try again later.",
+      "transcript": "Transcript"
+    }
+  },
+  "auth": {
+    "signInWithGoogle": "Continue with Google",
+    "toDashboard": "Go to Dashboard",
+    "idOnlyNotice": "We only obtain an identifier for your account. We do not store your email address or name.",
+    "consentBefore": "By continuing, you agree to our ",
+    "termsLink": "Terms of Service",
+    "consentMiddle": " and ",
+    "privacyLink": "Privacy Policy",
+    "consentAfter": "."
+  },
+  "hero": {
+    "title": "Folder structure for NotebookLM.",
+    "subtitle": "Streamline your research, project management, and study notes with a tool designed for high-density information environments.",
+    "ctaPrimary": "Start for Free"
+  },
+  "features": {
+    "synthesis": {
+      "title": "Organize with folders",
+      "body": "Keep PDFs, notes, and text files neatly organized in projects and nested folders. One place for everything — lectures, research, or personal study."
+    },
+    "library": {
+      "title": "Chat with your materials",
+      "body": "Ask the AI questions grounded in your project files. Summarize a paper, rephrase a chapter, or dig into the details — all based on what you've actually uploaded."
+    },
+    "research": {
+      "title": "AI-generated podcasts",
+      "body": "Select any files and let AI turn them into an audio explanation. Get a podcast-style summary in minutes — perfect for reviewing on the go."
+    },
+    "collaborate": {
+      "title": "Track your progress",
+      "body": "The dashboard shows recently opened files and an AI-generated learning summary at a glance. Pick up exactly where you left off, every time."
+    }
+  },
+  "cta": {
+    "title": "Scale your knowledge potential.",
+    "body": "Join thousands of professionals using kioku to capture, connect, and recall everything that matters.",
+    "button": "Get Started for Free"
+  },
+  "tos": {
+    "title": "Terms of Service",
+    "sections": {
+      "intro": {
+        "title": "1. Introduction",
+        "paragraphs": [
+          "Welcome to kioku (the \"Service\"). These Terms of Service (the \"Terms\") set out the conditions under which you may use the Service. By accessing or using the Service, you agree to be bound by all provisions of these Terms.",
+          "If you do not agree to these Terms, please discontinue use of the Service immediately. We reserve the right to modify these Terms at any time without prior notice."
+        ]
+      },
+      "definitions": {
+        "title": "2. Definitions",
+        "lead": "The following terms shall have the meanings set forth below when used in these Terms.",
+        "items": [
+          { "term": "\"We\" / \"Us\"", "desc": " refers to the entity that operates kioku." },
+          { "term": "\"User\"", "desc": " refers to any individual or legal entity that registers for or uses the Service." },
+          { "term": "\"Content\"", "desc": " refers to all information made available through the Service, including text, audio, images, and data." },
+          { "term": "\"AI Models\"", "desc": " refers to the artificial intelligence technologies and algorithms that we provide within the Service." }
+        ]
+      },
+      "service": {
+        "title": "3. Use of the Service",
+        "intro": "Subject to your compliance with these Terms and applicable laws, you are granted a non-exclusive, non-transferable, revocable license to use the Service.",
+        "prohibitedHeading": "Prohibited Activities",
+        "prohibitedLead": "You may not engage in any of the following activities.",
+        "prohibitedItems": [
+          "Acts that violate laws, court judgments, decisions or orders, or legally binding administrative measures.",
+          "Acts that may harm public order or morals.",
+          "Acts that infringe the intellectual property rights, including copyrights, trademarks, and patents, the rights of honor, privacy, or any other legal or contractual rights of us or any third party.",
+          "Acts that interfere with the servers or network systems of the Service, or that abuse the Service through bots, cheat tools, or other technical means.",
+          "Acts of using AI Models to generate harmful, discriminatory, or illegal content."
+        ]
+      },
+      "account": {
+        "title": "4. User Accounts",
+        "body": "Some features of the Service require account registration. Users are responsible for providing accurate and truthful information and keeping it up to date at all times.",
+        "callout": "Users are solely responsible for any damages arising from inadequate management of account credentials, errors in use, or use by third parties; we accept no liability. If you discover unauthorized use of your account, please contact us immediately."
+      },
+      "privacy": {
+        "title": "5. Privacy and Data",
+        "paragraphs": [
+          "We respect your privacy and handle personal information appropriately. For details on how we collect, use, and share personal information, please refer to our Privacy Policy.",
+          "Data you input into the Service (such as prompts and uploaded files) may be used to provide the Service and to improve the quality of our AI Models. We recommend that you do not input confidential information or sensitive personally identifiable information."
+        ]
+      },
+      "ip": {
+        "title": "6. Intellectual Property",
+        "paragraphs": [
+          "Intellectual property rights in the Service and all programs, software, trademarks, and logos related to the Service belong to us or to third parties holding legitimate rights.",
+          "The treatment of copyrights and other rights in content generated by users through the Service shall be governed by the rights in the underlying source data and the applicable laws of the relevant country. We do not claim ownership of user-generated content but are granted a right to use it to the extent necessary to operate the Service."
+        ]
+      }
+    }
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "sections": {
+      "intro": {
+        "paragraphs": [
+          "kioku (\"we\" or \"us\") takes your privacy extremely seriously. This Privacy Policy describes what information we collect, and how we use and protect it, in connection with our AI-powered learning platform (the \"Service\")."
+        ]
+      },
+      "collected": {
+        "title": "1. Information We Collect",
+        "lead": "To deliver the Service effectively, we collect the following information.",
+        "items": [
+          { "term": "Account information:", "desc": " Name, email address, affiliated institution, and other information provided when you create an account." },
+          { "term": "Uploaded materials:", "desc": " Learning materials such as PDFs, documents, and images that you intentionally upload for AI-based analysis or summarization." },
+          { "term": "Conversation history:", "desc": " Logs of questions, prompts, and generated responses involving the AI assistant (used to maintain learning context)." },
+          { "term": "Usage data:", "desc": " Technical information such as access logs, device information, and IP addresses, used to monitor system performance and maintain security." }
+        ]
+      },
+      "aiCommitment": {
+        "title": "2. Our Commitments on AI Models and Data Use",
+        "lead": "We recognize that, given the educational nature of the Service, materials you upload may contain highly sensitive information. We strictly adhere to the following principles.",
+        "cards": [
+          {
+            "title": "Not used to train foundation models",
+            "body": "Personal learning materials, notes, and PDFs uploaded by users are not used as training data for kioku's overall AI foundation models."
+          },
+          {
+            "title": "Tenant isolation",
+            "body": "Your data is logically isolated, and another customer's AI will never generate responses based on the contents of your documents."
+          }
+        ]
+      },
+      "sharing": {
+        "title": "3. Information Sharing and Third Parties",
+        "lead": "We do not share, sell, or rent your personal information or uploaded data to third parties, except in the following cases.",
+        "items": [
+          "When you have given explicit consent.",
+          "When it is necessary to use external infrastructure providers (such as cloud hosting or specific AI API providers) that are essential to delivering the Service. We enter into strict data processing agreements with these providers and prohibit any use of data outside the agreed purposes.",
+          "When disclosure is required by law."
+        ]
+      },
+      "retention": {
+        "title": "4. Data Retention and Deletion",
+        "paragraphs": [
+          "We retain your data only while your account remains active or as long as necessary to provide the Service. You may request complete deletion of your data and your account at any time from the account settings screen. Once we receive a deletion request, your data — including backups — will be securely erased from our systems."
+        ]
+      },
+      "rights": {
+        "title": "5. Your Rights",
+        "lead": "You have the following rights with respect to your data.",
+        "cards": [
+          { "title": "Data export", "body": "You can download your saved notes and conversation history in a standard format." },
+          { "title": "Complete deletion", "body": "The right to immediately delete specific uploaded files or your entire account." }
+        ]
+      },
+      "contact": {
+        "title": "6. Contact Us",
+        "lead": "For any questions or concerns about this Privacy Policy or our data handling practices, or to exercise your rights, please contact us at the address below.",
+        "email": "privacy@kioku.example.com"
+      }
+    }
+  }
+}

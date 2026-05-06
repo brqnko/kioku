@@ -1,0 +1,44 @@
+{
+  "db_name": "MySQL",
+  "query": "\n            SELECT\n                ai_learning_summary,\n                ai_learning_summary_updated_at,\n                recent_seen_file_ids as \"recent_seen_file_ids: sqlx::types::Json<Vec<uuid::Uuid>>\"\n            FROM user\n            WHERE user_id = ?\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "ai_learning_summary",
+        "type_info": {
+          "type": "VarString",
+          "flags": "NOT_NULL | NO_DEFAULT_VALUE",
+          "max_size": 2048
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "ai_learning_summary_updated_at",
+        "type_info": {
+          "type": "Datetime",
+          "flags": "NOT_NULL | BINARY | NO_DEFAULT_VALUE",
+          "max_size": 19
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "recent_seen_file_ids: sqlx::types::Json<Vec<uuid::Uuid>>",
+        "type_info": {
+          "type": "Blob",
+          "flags": "NOT_NULL | BLOB | BINARY | NO_DEFAULT_VALUE",
+          "max_size": 4294967295
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "131ddeef9433068fb9aecc46404ecbe0235431050b291a353b30b8208007b76f"
+}

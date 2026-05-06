@@ -17,6 +17,7 @@ RUN apt-get update && \
 # install rust
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
+ENV RUST_BACKTRACE=1
 
 # install mold
 RUN MOLD_VERSION=2.41.0 && \

@@ -10,10 +10,15 @@
     "generate": "orval"
   },
   "dependencies": {
+    "@milkdown/core": "^7.20.0",
+    "@milkdown/plugin-listener": "^7.20.0",
+    "@milkdown/preset-commonmark": "^7.20.0",
+    "@milkdown/preset-gfm": "^7.20.0",
+    "@milkdown/theme-nord": "^7.20.0",
     "@tailwindcss/vite": "^4.2.4",
     "i18next": "^26.0.4",
-    "i18next-browser-languagedetector": "^8.2.1",
     "ky": "^1.7.2",
+    "marked": "^18.0.3",
     "preact": "^10.29.1",
     "preact-iso": "^2.11.1",
     "preact-render-to-string": "^6.6.7",

@@ -16,7 +16,10 @@ CREATE TABLE `podcast` (
   `podcast_created_at` datetime NOT NULL,
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`podcast_id`)
+  `audio_storage_id` varbinary(16) NOT NULL,
+  `project_id` varbinary(16) NOT NULL,
+  PRIMARY KEY (`podcast_id`),
+  KEY `idx_project_created_at` (`project_id`,`podcast_created_at`,`podcast_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci
 ```
 
@@ -35,6 +38,8 @@ CREATE TABLE `podcast` (
 | podcast_created_at | datetime |  | false |  |  |  |  |
 | created_at | datetime | current_timestamp() | false |  |  |  |  |
 | updated_at | datetime | current_timestamp() | false | on update current_timestamp() |  |  |  |
+| audio_storage_id | varbinary(16) |  | false |  |  |  |  |
+| project_id | varbinary(16) |  | false |  |  |  |  |
 
 ## Constraints
 
@@ -48,6 +53,7 @@ CREATE TABLE `podcast` (
 
 | Name | Definition |
 | ---- | ---------- |
+| idx_project_created_at | KEY idx_project_created_at (project_id, podcast_created_at, podcast_id) USING BTREE |
 | PRIMARY | PRIMARY KEY (podcast_id) USING BTREE |
 
 ## Relations

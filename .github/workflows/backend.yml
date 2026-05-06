@@ -1,0 +1,92 @@
+name: backend
+
+on:
+  pull_request:
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend.yml'
+  push:
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend.yml'
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    permissions:
+      contents: read
+
+    services:
+      mariadb:
+        image: mariadb:lts
+        env:
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: kioku_test
+          MARIADB_USER: kioku
+          MARIADB_PASSWORD: kioku
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "healthcheck.sh --connect --innodb_initialized"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+          --health-start-period 30s
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: backend
+
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: sqlx-cli
+
+      - uses: k1LoW/setup-tbls@v1
+        with:
+          version: v1.93.0
+
+      - name: Run migrations
+        env:
+          DATABASE_URL: mysql://kioku:kioku@127.0.0.1:3306/kioku_test
+        run: sqlx migrate run
+
+      - name: Generate tbls docs
+        run: tbls doc "mysql://kioku:kioku@127.0.0.1:3306/kioku_test" docs/schema --er-format svg --rm-dist --force
+
+      - name: Generate OpenAPI spec
+        env:
+          SQLX_OFFLINE: "true"
+        run: cargo run --bin gen_spec > ../shared/api/openapi.yaml
+
+      - name: Check OpenAPI spec is up to date
+        run: |
+          if [ -n "$(git status --porcelain ../shared/api/openapi.yaml)" ]; then
+            echo "::error::openapi.yaml is out of date. Run './scripts/generate-spec.sh' and commit the changes."
+            git diff ../shared/api/openapi.yaml
+            exit 1
+          fi
+
+      - name: Check sqlx prepare is up to date
+        env:
+          DATABASE_URL: mysql://kioku:kioku@127.0.0.1:3306/kioku_test
+        run: cargo sqlx prepare --check
+
+      - name: Clippy
+        env:
+          SQLX_OFFLINE: "true"
+        run: cargo clippy --all-targets -- -D warnings
+
+      - name: Test
+        env:
+          DATABASE_URL: mysql://kioku:kioku@127.0.0.1:3306/kioku_test
+        run: cargo test

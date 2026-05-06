@@ -101,6 +101,7 @@ create table `podcast` (
     `name` varchar(256) not null,
     `description` varchar(1024) not null,
     `user_id` varbinary(16) not null,
+    `project_id` varbinary(16) not null,
 
     `used_file_ids` json not null,
     `podcast_script` json not null,

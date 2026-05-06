@@ -10,9 +10,91 @@ interface RequestConfig {
   responseType?: "json" | "blob" | "text";
 }
 
+const UNSAFE_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+const RETRY_MARKER = "x-auth-retried";
+
+function readCookie(name: string): string | undefined {
+  if (typeof document === "undefined") return undefined;
+  const match = document.cookie.match(
+    new RegExp(`(?:^|; )${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}=([^;]*)`),
+  );
+  return match ? decodeURIComponent(match[1]) : undefined;
+}
+
+let refreshing: Promise<boolean> | null = null;
+
+function refreshTokens(): Promise<boolean> {
+  if (refreshing) return refreshing;
+  refreshing = (async () => {
+    try {
+      const csrf = readCookie("csrf");
+      const headers: Record<string, string> = {};
+      if (csrf) headers["x-csrf-token"] = csrf;
+      const res = await ky.post("api/auth/refresh", {
+        prefixUrl: "",
+        credentials: "include",
+        throwHttpErrors: false,
+        headers,
+      });
+      return res.ok;
+    } catch {
+      return false;
+    } finally {
+      refreshing = null;
+    }
+  })();
+  return refreshing;
+}
+
 export const kyInstance = ky.create({
   prefixUrl: "/api",
   credentials: "include",
+  hooks: {
+    beforeRequest: [
+      (request) => {
+        if (UNSAFE_METHODS.has(request.method)) {
+          if (!request.headers.has("x-csrf-token")) {
+            const csrf = readCookie("csrf");
+            if (csrf) request.headers.set("x-csrf-token", csrf);
+          }
+        }
+      },
+    ],
+    afterResponse: [
+      async (request, _options, response) => {
+        if (response.status !== 401) return;
+        if (request.url.includes("/auth/refresh")) return;
+        if (request.headers.get(RETRY_MARKER)) return;
+
+        const ok = await refreshTokens();
+        if (!ok) {
+          if (
+            typeof window !== "undefined" &&
+            window.location.pathname !== "/"
+          ) {
+            window.location.href = "/";
+          }
+          return;
+        }
+
+        const retryHeaders = new Headers(request.headers);
+        retryHeaders.set(RETRY_MARKER, "1");
+        const csrf = readCookie("csrf");
+        if (csrf && UNSAFE_METHODS.has(request.method)) {
+          retryHeaders.set("x-csrf-token", csrf);
+        }
+        return kyInstance(request.url, {
+          method: request.method,
+          headers: retryHeaders,
+          body:
+            request.method === "GET" || request.method === "HEAD"
+              ? undefined
+              : await request.clone().arrayBuffer(),
+          prefixUrl: "",
+        });
+      },
+    ],
+  },
 });
 
 export const customInstance = <T>(config: RequestConfig): Promise<T> => {

@@ -13,12 +13,15 @@ CREATE TABLE `file` (
   `user_id` varbinary(16) NOT NULL,
   `storage_id` varbinary(16) NOT NULL,
   `file_size` bigint(20) unsigned NOT NULL,
-  `parent_folder_id` varbinary(16) NOT NULL,
+  `parent_id` varbinary(16) NOT NULL,
   `uploaded_at` datetime NOT NULL,
   `changed_at` datetime NOT NULL,
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`file_id`)
+  `storage_type` tinyint(3) unsigned NOT NULL,
+  `parent_kind` tinyint(3) unsigned NOT NULL,
+  PRIMARY KEY (`file_id`),
+  KEY `idx_parent_name` (`parent_kind`,`parent_id`,`name`,`file_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci
 ```
 
@@ -34,11 +37,13 @@ CREATE TABLE `file` (
 | user_id | varbinary(16) |  | false |  |  |  |  |
 | storage_id | varbinary(16) |  | false |  |  |  |  |
 | file_size | bigint(20) unsigned |  | false |  |  |  |  |
-| parent_folder_id | varbinary(16) |  | false |  |  |  |  |
+| parent_id | varbinary(16) |  | false |  |  |  |  |
 | uploaded_at | datetime |  | false |  |  |  |  |
 | changed_at | datetime |  | false |  |  |  |  |
 | created_at | datetime | current_timestamp() | false |  |  |  |  |
 | updated_at | datetime | current_timestamp() | false | on update current_timestamp() |  |  |  |
+| storage_type | tinyint(3) unsigned |  | false |  |  |  |  |
+| parent_kind | tinyint(3) unsigned |  | false |  |  |  |  |
 
 ## Constraints
 
@@ -50,6 +55,7 @@ CREATE TABLE `file` (
 
 | Name | Definition |
 | ---- | ---------- |
+| idx_parent_name | KEY idx_parent_name (parent_kind, parent_id, name, file_id) USING BTREE |
 | PRIMARY | PRIMARY KEY (file_id) USING BTREE |
 
 ## Relations

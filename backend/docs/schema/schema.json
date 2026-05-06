@@ -303,9 +303,29 @@
           "nullable": false,
           "default": "current_timestamp()",
           "extra_def": "on update current_timestamp()"
+        },
+        {
+          "name": "audio_storage_id",
+          "type": "varbinary(16)",
+          "nullable": false
+        },
+        {
+          "name": "project_id",
+          "type": "varbinary(16)",
+          "nullable": false
         }
       ],
       "indexes": [
+        {
+          "name": "idx_project_created_at",
+          "def": "KEY idx_project_created_at (project_id, podcast_created_at, podcast_id) USING BTREE",
+          "table": "podcast",
+          "columns": [
+            "project_id",
+            "podcast_created_at",
+            "podcast_id"
+          ]
+        },
         {
           "name": "PRIMARY",
           "def": "PRIMARY KEY (podcast_id) USING BTREE",
@@ -338,7 +358,7 @@
           "table": "podcast"
         }
       ],
-      "def": "CREATE TABLE `podcast` (\n  `podcast_id` varbinary(16) NOT NULL,\n  `name` varchar(256) NOT NULL,\n  `description` varchar(1024) NOT NULL,\n  `user_id` varbinary(16) NOT NULL,\n  `used_file_ids` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`used_file_ids`)),\n  `podcast_script` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`podcast_script`)),\n  `podcast_created_at` datetime NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT current_timestamp(),\n  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),\n  PRIMARY KEY (`podcast_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci"
+      "def": "CREATE TABLE `podcast` (\n  `podcast_id` varbinary(16) NOT NULL,\n  `name` varchar(256) NOT NULL,\n  `description` varchar(1024) NOT NULL,\n  `user_id` varbinary(16) NOT NULL,\n  `used_file_ids` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`used_file_ids`)),\n  `podcast_script` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`podcast_script`)),\n  `podcast_created_at` datetime NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT current_timestamp(),\n  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),\n  `audio_storage_id` varbinary(16) NOT NULL,\n  `project_id` varbinary(16) NOT NULL,\n  PRIMARY KEY (`podcast_id`),\n  KEY `idx_project_created_at` (`project_id`,`podcast_created_at`,`podcast_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci"
     },
     {
       "name": "folder",
@@ -350,7 +370,7 @@
           "nullable": false
         },
         {
-          "name": "parent_folder_id",
+          "name": "parent_id",
           "type": "varbinary(16)",
           "nullable": false
         },
@@ -391,9 +411,30 @@
           "nullable": false,
           "default": "current_timestamp()",
           "extra_def": "on update current_timestamp()"
+        },
+        {
+          "name": "parent_kind",
+          "type": "tinyint(3) unsigned",
+          "nullable": false
+        },
+        {
+          "name": "depth",
+          "type": "tinyint(3) unsigned",
+          "nullable": false
         }
       ],
       "indexes": [
+        {
+          "name": "idx_parent_name",
+          "def": "KEY idx_parent_name (parent_kind, parent_id, name, folder_id) USING BTREE",
+          "table": "folder",
+          "columns": [
+            "parent_kind",
+            "parent_id",
+            "name",
+            "folder_id"
+          ]
+        },
         {
           "name": "PRIMARY",
           "def": "PRIMARY KEY (folder_id) USING BTREE",
@@ -414,7 +455,7 @@
           ]
         }
       ],
-      "def": "CREATE TABLE `folder` (\n  `folder_id` varbinary(16) NOT NULL,\n  `parent_folder_id` varbinary(16) NOT NULL,\n  `name` varchar(256) NOT NULL,\n  `description` varchar(1024) NOT NULL,\n  `user_id` varbinary(16) NOT NULL,\n  `uploaded_at` datetime NOT NULL,\n  `changed_at` datetime NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT current_timestamp(),\n  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),\n  PRIMARY KEY (`folder_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci"
+      "def": "CREATE TABLE `folder` (\n  `folder_id` varbinary(16) NOT NULL,\n  `parent_id` varbinary(16) NOT NULL,\n  `name` varchar(256) NOT NULL,\n  `description` varchar(1024) NOT NULL,\n  `user_id` varbinary(16) NOT NULL,\n  `uploaded_at` datetime NOT NULL,\n  `changed_at` datetime NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT current_timestamp(),\n  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),\n  `parent_kind` tinyint(3) unsigned NOT NULL,\n  `depth` tinyint(3) unsigned NOT NULL,\n  PRIMARY KEY (`folder_id`),\n  KEY `idx_parent_name` (`parent_kind`,`parent_id`,`name`,`folder_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci"
     },
     {
       "name": "file_embedding",
@@ -461,6 +502,14 @@
       ],
       "indexes": [
         {
+          "name": "idx_file_id",
+          "def": "KEY idx_file_id (file_id) USING BTREE",
+          "table": "file_embedding",
+          "columns": [
+            "file_id"
+          ]
+        },
+        {
           "name": "PRIMARY",
           "def": "PRIMARY KEY (file_embedding_id) USING BTREE",
           "table": "file_embedding",
@@ -480,7 +529,7 @@
           ]
         }
       ],
-      "def": "CREATE TABLE `file_embedding` (\n  `file_embedding_id` varbinary(16) NOT NULL,\n  `file_id` varbinary(16) NOT NULL,\n  `original_text` varchar(512) NOT NULL,\n  `embedding` vector(1024) NOT NULL,\n  `indexed_at` datetime NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT current_timestamp(),\n  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),\n  PRIMARY KEY (`file_embedding_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci"
+      "def": "CREATE TABLE `file_embedding` (\n  `file_embedding_id` varbinary(16) NOT NULL,\n  `file_id` varbinary(16) NOT NULL,\n  `original_text` varchar(512) NOT NULL,\n  `embedding` vector(1024) NOT NULL,\n  `indexed_at` datetime NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT current_timestamp(),\n  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),\n  PRIMARY KEY (`file_embedding_id`),\n  KEY `idx_file_id` (`file_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci"
     },
     {
       "name": "refresh_token",
@@ -552,11 +601,27 @@
       ],
       "indexes": [
         {
+          "name": "idx_user_id",
+          "def": "KEY idx_user_id (user_id) USING BTREE",
+          "table": "refresh_token",
+          "columns": [
+            "user_id"
+          ]
+        },
+        {
           "name": "PRIMARY",
           "def": "PRIMARY KEY (refresh_token_id) USING BTREE",
           "table": "refresh_token",
           "columns": [
             "refresh_token_id"
+          ]
+        },
+        {
+          "name": "uk_token_hash",
+          "def": "UNIQUE KEY uk_token_hash (token_hash) USING BTREE",
+          "table": "refresh_token",
+          "columns": [
+            "token_hash"
           ]
         }
       ],
@@ -569,9 +634,18 @@
           "columns": [
             "refresh_token_id"
           ]
+        },
+        {
+          "name": "uk_token_hash",
+          "type": "UNIQUE",
+          "def": "UNIQUE KEY uk_token_hash (token_hash)",
+          "table": "refresh_token",
+          "columns": [
+            "token_hash"
+          ]
         }
       ],
-      "def": "CREATE TABLE `refresh_token` (\n  `refresh_token_id` varbinary(16) NOT NULL,\n  `user_id` varbinary(16) NOT NULL,\n  `token_hash` varchar(256) NOT NULL,\n  `generation` int(11) NOT NULL,\n  `ip_address` varchar(64) NOT NULL,\n  `user_agent` varchar(512) NOT NULL,\n  `access_token_jti` varbinary(16) NOT NULL,\n  `activated_at` datetime NOT NULL,\n  `last_used_at` datetime NOT NULL,\n  `expires_at` datetime NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT current_timestamp(),\n  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),\n  PRIMARY KEY (`refresh_token_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci"
+      "def": "CREATE TABLE `refresh_token` (\n  `refresh_token_id` varbinary(16) NOT NULL,\n  `user_id` varbinary(16) NOT NULL,\n  `token_hash` varchar(256) NOT NULL,\n  `generation` int(11) NOT NULL,\n  `ip_address` varchar(64) NOT NULL,\n  `user_agent` varchar(512) NOT NULL,\n  `access_token_jti` varbinary(16) NOT NULL,\n  `activated_at` datetime NOT NULL,\n  `last_used_at` datetime NOT NULL,\n  `expires_at` datetime NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT current_timestamp(),\n  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),\n  PRIMARY KEY (`refresh_token_id`),\n  UNIQUE KEY `uk_token_hash` (`token_hash`),\n  KEY `idx_user_id` (`user_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci"
     },
     {
       "name": "chat",
@@ -685,7 +759,7 @@
           "nullable": false
         },
         {
-          "name": "parent_folder_id",
+          "name": "parent_id",
           "type": "varbinary(16)",
           "nullable": false
         },
@@ -711,9 +785,30 @@
           "nullable": false,
           "default": "current_timestamp()",
           "extra_def": "on update current_timestamp()"
+        },
+        {
+          "name": "storage_type",
+          "type": "tinyint(3) unsigned",
+          "nullable": false
+        },
+        {
+          "name": "parent_kind",
+          "type": "tinyint(3) unsigned",
+          "nullable": false
         }
       ],
       "indexes": [
+        {
+          "name": "idx_parent_name",
+          "def": "KEY idx_parent_name (parent_kind, parent_id, name, file_id) USING BTREE",
+          "table": "file",
+          "columns": [
+            "parent_kind",
+            "parent_id",
+            "name",
+            "file_id"
+          ]
+        },
         {
           "name": "PRIMARY",
           "def": "PRIMARY KEY (file_id) USING BTREE",
@@ -734,7 +829,156 @@
           ]
         }
       ],
-      "def": "CREATE TABLE `file` (\n  `file_id` varbinary(16) NOT NULL,\n  `name` varchar(256) NOT NULL,\n  `description` varchar(1024) NOT NULL,\n  `user_id` varbinary(16) NOT NULL,\n  `storage_id` varbinary(16) NOT NULL,\n  `file_size` bigint(20) unsigned NOT NULL,\n  `parent_folder_id` varbinary(16) NOT NULL,\n  `uploaded_at` datetime NOT NULL,\n  `changed_at` datetime NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT current_timestamp(),\n  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),\n  PRIMARY KEY (`file_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci"
+      "def": "CREATE TABLE `file` (\n  `file_id` varbinary(16) NOT NULL,\n  `name` varchar(256) NOT NULL,\n  `description` varchar(1024) NOT NULL,\n  `user_id` varbinary(16) NOT NULL,\n  `storage_id` varbinary(16) NOT NULL,\n  `file_size` bigint(20) unsigned NOT NULL,\n  `parent_id` varbinary(16) NOT NULL,\n  `uploaded_at` datetime NOT NULL,\n  `changed_at` datetime NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT current_timestamp(),\n  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),\n  `storage_type` tinyint(3) unsigned NOT NULL,\n  `parent_kind` tinyint(3) unsigned NOT NULL,\n  PRIMARY KEY (`file_id`),\n  KEY `idx_parent_name` (`parent_kind`,`parent_id`,`name`,`file_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci"
+    },
+    {
+      "name": "project",
+      "type": "BASE TABLE",
+      "columns": [
+        {
+          "name": "project_id",
+          "type": "varbinary(16)",
+          "nullable": false
+        },
+        {
+          "name": "created_by",
+          "type": "varbinary(16)",
+          "nullable": false
+        },
+        {
+          "name": "name",
+          "type": "varchar(256)",
+          "nullable": false
+        },
+        {
+          "name": "description",
+          "type": "varchar(512)",
+          "nullable": false
+        },
+        {
+          "name": "indexed_at",
+          "type": "datetime",
+          "nullable": false,
+          "default": "current_timestamp()"
+        },
+        {
+          "name": "last_seen_at",
+          "type": "datetime",
+          "nullable": false,
+          "default": "current_timestamp()"
+        },
+        {
+          "name": "last_seen_file_id",
+          "type": "varbinary(16)",
+          "nullable": false
+        },
+        {
+          "name": "created_at",
+          "type": "datetime",
+          "nullable": false,
+          "default": "current_timestamp()"
+        },
+        {
+          "name": "updated_at",
+          "type": "datetime",
+          "nullable": false,
+          "default": "current_timestamp()",
+          "extra_def": "on update current_timestamp()"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "idx_created_by_last_seen_at_asc",
+          "def": "KEY idx_created_by_last_seen_at_asc (created_by, last_seen_at, project_id) USING BTREE",
+          "table": "project",
+          "columns": [
+            "created_by",
+            "last_seen_at",
+            "project_id"
+          ]
+        },
+        {
+          "name": "idx_created_by_last_seen_at_desc",
+          "def": "KEY idx_created_by_last_seen_at_desc (created_by, last_seen_at, project_id) USING BTREE",
+          "table": "project",
+          "columns": [
+            "created_by",
+            "last_seen_at",
+            "project_id"
+          ]
+        },
+        {
+          "name": "PRIMARY",
+          "def": "PRIMARY KEY (project_id) USING BTREE",
+          "table": "project",
+          "columns": [
+            "project_id"
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "PRIMARY",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (project_id)",
+          "table": "project",
+          "columns": [
+            "project_id"
+          ]
+        }
+      ],
+      "def": "CREATE TABLE `project` (\n  `project_id` varbinary(16) NOT NULL,\n  `created_by` varbinary(16) NOT NULL,\n  `name` varchar(256) NOT NULL,\n  `description` varchar(512) NOT NULL,\n  `indexed_at` datetime NOT NULL DEFAULT current_timestamp(),\n  `last_seen_at` datetime NOT NULL DEFAULT current_timestamp(),\n  `last_seen_file_id` varbinary(16) NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT current_timestamp(),\n  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),\n  PRIMARY KEY (`project_id`),\n  KEY `idx_created_by_last_seen_at_desc` (`created_by`,`last_seen_at` DESC,`project_id`),\n  KEY `idx_created_by_last_seen_at_asc` (`created_by`,`last_seen_at`,`project_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci"
+    },
+    {
+      "name": "text_storage",
+      "type": "BASE TABLE",
+      "columns": [
+        {
+          "name": "storage_id",
+          "type": "varbinary(16)",
+          "nullable": false
+        },
+        {
+          "name": "content",
+          "type": "longtext",
+          "nullable": false
+        },
+        {
+          "name": "created_at",
+          "type": "datetime",
+          "nullable": false,
+          "default": "current_timestamp()"
+        },
+        {
+          "name": "updated_at",
+          "type": "datetime",
+          "nullable": false,
+          "default": "current_timestamp()",
+          "extra_def": "on update current_timestamp()"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "PRIMARY",
+          "def": "PRIMARY KEY (storage_id) USING BTREE",
+          "table": "text_storage",
+          "columns": [
+            "storage_id"
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "PRIMARY",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (storage_id)",
+          "table": "text_storage",
+          "columns": [
+            "storage_id"
+          ]
+        }
+      ],
+      "def": "CREATE TABLE `text_storage` (\n  `storage_id` varbinary(16) NOT NULL,\n  `content` longtext NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT current_timestamp(),\n  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),\n  PRIMARY KEY (`storage_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci"
     }
   ],
   "driver": {

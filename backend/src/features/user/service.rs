@@ -14,48 +14,59 @@ pub struct ExchangeResult {
 #[async_trait::async_trait]
 pub trait OIDCClient: Send + Sync {
     async fn code_url(&self) -> Result<CodeUrlResult, anyhow::Error>;
-    async fn exchange_and_verify(&self, code: String, nonce: String) -> Result<ExchangeResult, anyhow::Error>;
+    async fn exchange_and_verify(
+        &self,
+        code: String,
+        nonce: String,
+    ) -> Result<ExchangeResult, anyhow::Error>;
 }
+
+type GoogleOIDCClient = openidconnect::Client<
+    openidconnect::EmptyAdditionalClaims,
+    openidconnect::core::CoreAuthDisplay,
+    openidconnect::core::CoreGenderClaim,
+    openidconnect::core::CoreJweContentEncryptionAlgorithm,
+    openidconnect::core::CoreJsonWebKey,
+    openidconnect::core::CoreAuthPrompt,
+    openidconnect::StandardErrorResponse<openidconnect::core::CoreErrorResponseType>,
+    openidconnect::StandardTokenResponse<
+        openidconnect::IdTokenFields<
+            openidconnect::EmptyAdditionalClaims,
+            openidconnect::EmptyExtraTokenFields,
+            openidconnect::core::CoreGenderClaim,
+            openidconnect::core::CoreJweContentEncryptionAlgorithm,
+            openidconnect::core::CoreJwsSigningAlgorithm,
+        >,
+        openidconnect::core::CoreTokenType,
+    >,
+    openidconnect::StandardTokenIntrospectionResponse<
+        openidconnect::EmptyExtraTokenFields,
+        openidconnect::core::CoreTokenType,
+    >,
+    openidconnect::core::CoreRevocableToken,
+    openidconnect::StandardErrorResponse<openidconnect::RevocationErrorResponseType>,
+    openidconnect::EndpointSet,
+    openidconnect::EndpointNotSet,
+    openidconnect::EndpointNotSet,
+    openidconnect::EndpointSet,
+    openidconnect::EndpointMaybeSet,
+    openidconnect::EndpointMaybeSet,
+>;
 
 pub struct GoogleOIDCClientImpl {
     http_client: reqwest::Client,
-    client: openidconnect::Client<
-        openidconnect::EmptyAdditionalClaims,
-        openidconnect::core::CoreAuthDisplay,
-        openidconnect::core::CoreGenderClaim,
-        openidconnect::core::CoreJweContentEncryptionAlgorithm,
-        openidconnect::core::CoreJsonWebKey,
-        openidconnect::core::CoreAuthPrompt,
-        openidconnect::StandardErrorResponse<openidconnect::core::CoreErrorResponseType>,
-        openidconnect::StandardTokenResponse<
-            openidconnect::IdTokenFields<
-                openidconnect::EmptyAdditionalClaims,
-                openidconnect::EmptyExtraTokenFields,
-                openidconnect::core::CoreGenderClaim,
-                openidconnect::core::CoreJweContentEncryptionAlgorithm,
-                openidconnect::core::CoreJwsSigningAlgorithm
-            >,
-            openidconnect::core::CoreTokenType
-        >,
-        openidconnect::StandardTokenIntrospectionResponse<
-            openidconnect::EmptyExtraTokenFields,
-            openidconnect::core::CoreTokenType,
-        >,
-        openidconnect::core::CoreRevocableToken,
-        openidconnect::StandardErrorResponse<openidconnect::RevocationErrorResponseType>,
-        openidconnect::EndpointSet,
-        openidconnect::EndpointNotSet,
-        openidconnect::EndpointNotSet,
-        openidconnect::EndpointSet,
-        openidconnect::EndpointMaybeSet,
-        openidconnect::EndpointMaybeSet
-    >
+    client: GoogleOIDCClient,
 }
 
 impl GoogleOIDCClientImpl {
-    pub async fn new(id: String, secret: String, issuer_url: String, redirect_url: String) -> Result<Self, anyhow::Error> {
-        use openidconnect::*;
+    pub async fn new(
+        id: String,
+        secret: String,
+        issuer_url: String,
+        redirect_url: String,
+    ) -> Result<Self, anyhow::Error> {
         use openidconnect::core::*;
+        use openidconnect::*;
 
         #[derive(Clone, Debug, serde::Deserialize, serde::Serialize)]
         struct RevocationEndpointProviderMetadata {
@@ -87,7 +98,8 @@ impl GoogleOIDCClientImpl {
             .redirect(reqwest::redirect::Policy::none())
             .build()?;
 
-        let provider_metadata = GoogleProviderMetadata::discover_async(issuer_url, &http_client).await?;
+        let provider_metadata =
+            GoogleProviderMetadata::discover_async(issuer_url, &http_client).await?;
 
         let revocation_endpoint = provider_metadata
             .additional_metadata()
@@ -95,8 +107,8 @@ impl GoogleOIDCClientImpl {
             .clone();
 
         let client = CoreClient::from_provider_metadata(provider_metadata, id, Some(secret))
-            .set_redirect_uri(RedirectUrl::new(redirect_url)?,)
-            .set_revocation_url(  RevocationUrl::new(revocation_endpoint)?);
+            .set_redirect_uri(RedirectUrl::new(redirect_url)?)
+            .set_revocation_url(RevocationUrl::new(revocation_endpoint)?);
 
         Ok(Self {
             http_client,
@@ -108,7 +120,6 @@ impl GoogleOIDCClientImpl {
 #[async_trait::async_trait]
 impl OIDCClient for GoogleOIDCClientImpl {
     async fn code_url(&self) -> Result<CodeUrlResult, anyhow::Error> {
-        
         let (authorize_url, csrf_state, nonce) = self.client
             .authorize_url(
                 openidconnect::AuthenticationFlow::<openidconnect::core::CoreResponseType>::AuthorizationCode,
@@ -124,8 +135,13 @@ impl OIDCClient for GoogleOIDCClientImpl {
         })
     }
 
-    async fn exchange_and_verify(&self, code: String, nonce: String) -> Result<ExchangeResult, anyhow::Error> {
-        let token_response = self.client
+    async fn exchange_and_verify(
+        &self,
+        code: String,
+        nonce: String,
+    ) -> Result<ExchangeResult, anyhow::Error> {
+        let token_response = self
+            .client
             .exchange_code(openidconnect::AuthorizationCode::new(code))?
             .request_async(&self.http_client)
             .await?;
@@ -135,10 +151,7 @@ impl OIDCClient for GoogleOIDCClientImpl {
             .ok_or_else(|| anyhow::anyhow!("ID token not found"))?;
 
         let nonce = openidconnect::Nonce::new(nonce);
-        let claims = id_token.claims(
-            &self.client.id_token_verifier(),
-            &nonce,
-        )?;
+        let claims = id_token.claims(&self.client.id_token_verifier(), &nonce)?;
 
         Ok(ExchangeResult {
             iss: claims.issuer().to_string(),
