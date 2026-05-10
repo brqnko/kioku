@@ -106,7 +106,7 @@ export default function DashboardPage() {
               </h2>
               <a
                 href="/library"
-                class="text-text-muted-dark text-xs hover:text-text-primary transition-colors flex items-center gap-1 no-underline"
+                class="text-text-muted-dark text-xs hover:text-text-primary flex items-center gap-1 no-underline"
               >
                 {t("dashboard.recent.toLibrary")}
                 <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
@@ -134,7 +134,7 @@ export default function DashboardPage() {
                   <a
                     key={file.id}
                     href={`/files/${file.id}`}
-                    class="bg-surface-dark border border-border-dark rounded-xl p-4 flex flex-col gap-4 hover:bg-overlay-faint hover:border-overlay-medium transition-all duration-200 group no-underline text-inherit"
+                    class="bg-surface-dark border border-border-dark rounded-xl p-4 flex flex-col gap-4 hover:bg-overlay-faint hover:border-overlay-medium group no-underline text-inherit"
                   >
                     <div class="flex items-start">
                       <div class={`w-10 h-10 rounded-lg flex items-center justify-center ${toneClass[tone]}`}>
@@ -142,7 +142,7 @@ export default function DashboardPage() {
                       </div>
                     </div>
                     <div>
-                      <h3 class="text-sm font-bold truncate mb-1 group-hover:text-accent-blue transition-colors">
+                      <h3 class="text-sm font-bold truncate mb-1 group-hover:text-accent-blue">
                         {file.name}
                       </h3>
                       <p class="text-xs text-text-disabled">

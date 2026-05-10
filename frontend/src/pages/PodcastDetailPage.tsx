@@ -222,7 +222,7 @@ export default function PodcastDetailPage() {
                     class="h-2 w-full bg-surface-container-high rounded-full overflow-hidden relative cursor-pointer group"
                   >
                     <div
-                      class="absolute left-0 top-0 h-full bg-text-primary group-hover:bg-accent-blue transition-colors rounded-full"
+                      class="absolute left-0 top-0 h-full bg-text-primary group-hover:bg-accent-blue rounded-full"
                       style={{ width: `${progress}%` }}
                     />
                   </div>
@@ -242,7 +242,7 @@ export default function PodcastDetailPage() {
                         ? t("podcast.detail.unmute")
                         : t("podcast.detail.mute")
                     }
-                    class="p-2 rounded hover:bg-overlay-faint text-text-secondary hover:text-text-primary transition-colors flex items-center justify-center cursor-pointer"
+                    class="p-2 rounded hover:bg-overlay-faint text-text-secondary hover:text-text-primary flex items-center justify-center cursor-pointer"
                   >
                     <span class="material-symbols-outlined">
                       {muted ? "volume_off" : "volume_up"}
@@ -255,7 +255,7 @@ export default function PodcastDetailPage() {
                       onClick={() => skip(-10)}
                       aria-label={t("podcast.detail.replay10")}
                       title={t("podcast.detail.replay10")}
-                      class="p-2 rounded hover:bg-overlay-faint text-text-secondary hover:text-text-primary transition-colors flex items-center justify-center cursor-pointer"
+                      class="p-2 rounded hover:bg-overlay-faint text-text-secondary hover:text-text-primary flex items-center justify-center cursor-pointer"
                     >
                       <span class="material-symbols-outlined text-[28px]">
                         replay_10
@@ -270,7 +270,7 @@ export default function PodcastDetailPage() {
                           ? t("podcast.detail.pause")
                           : t("podcast.detail.play")
                       }
-                      class="w-16 h-16 rounded-full bg-cta text-cta-fg flex items-center justify-center hover:bg-cta-hover transition-colors shadow-lg active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
+                      class="w-16 h-16 rounded-full bg-cta text-cta-fg flex items-center justify-center hover:bg-cta-hover shadow-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <span
                         class="material-symbols-outlined text-[32px]"
@@ -284,7 +284,7 @@ export default function PodcastDetailPage() {
                       onClick={() => skip(10)}
                       aria-label={t("podcast.detail.forward10")}
                       title={t("podcast.detail.forward10")}
-                      class="p-2 rounded hover:bg-overlay-faint text-text-secondary hover:text-text-primary transition-colors flex items-center justify-center cursor-pointer"
+                      class="p-2 rounded hover:bg-overlay-faint text-text-secondary hover:text-text-primary flex items-center justify-center cursor-pointer"
                     >
                       <span class="material-symbols-outlined text-[28px]">
                         forward_10
@@ -297,7 +297,7 @@ export default function PodcastDetailPage() {
                     onClick={cycleRate}
                     aria-label={t("podcast.detail.speed")}
                     title={t("podcast.detail.speed")}
-                    class="px-3 py-1.5 rounded border border-border-subtle hover:bg-overlay-faint text-text-secondary hover:text-text-primary transition-colors text-xs font-medium cursor-pointer min-w-[3rem]"
+                    class="px-3 py-1.5 rounded border border-border-subtle hover:bg-overlay-faint text-text-secondary hover:text-text-primary text-xs font-medium cursor-pointer min-w-[3rem]"
                   >
                     {playbackRate}x
                   </button>

@@ -94,7 +94,7 @@ export default function ProjectPodcastsPage() {
             </div>
             <a
               href={`/projects/${projectId}/podcasts/new`}
-              class="flex items-center gap-2 bg-cta text-cta-fg px-6 py-2 rounded-lg font-bold transition-all shadow-[0_2px_8px_rgba(0,0,0,0.2)] hover:bg-cta-hover active:scale-[0.98] no-underline"
+              class="flex items-center gap-2 bg-cta text-cta-fg px-6 py-2 rounded-lg font-bold shadow-[0_2px_8px_rgba(0,0,0,0.2)] hover:bg-cta-hover no-underline"
             >
               <span class="material-symbols-outlined text-[20px]">
                 add_circle
@@ -136,7 +136,7 @@ export default function ProjectPodcastsPage() {
               {items.map((podcast) => (
                 <div
                   key={podcast.id}
-                  class="relative group rounded-xl bg-surface-dark border border-border-subtle hover:border-overlay-medium transition-colors"
+                  class="relative group rounded-xl bg-surface-dark border border-border-subtle hover:border-overlay-medium"
                 >
                   <a
                     href={detailHref(podcast.id)}
@@ -185,7 +185,7 @@ export default function ProjectPodcastsPage() {
                 type="button"
                 onClick={loadMore}
                 disabled={loadingMore}
-                class="px-6 py-2 border border-border-subtle rounded-full text-text-secondary hover:text-text-primary hover:bg-overlay-faint transition-colors text-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                class="px-6 py-2 border border-border-subtle rounded-full text-text-secondary hover:text-text-primary hover:bg-overlay-faint text-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span class="material-symbols-outlined text-[18px]">
                   expand_more

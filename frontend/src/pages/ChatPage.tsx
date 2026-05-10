@@ -62,7 +62,7 @@ export default function ChatPage() {
               type="button"
               onClick={loadMore}
               disabled={loadingMore}
-              class="px-4 py-2 border border-overlay-medium text-text-primary text-sm font-semibold rounded-lg hover:bg-overlay-faint transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              class="px-4 py-2 border border-overlay-medium text-text-primary text-sm font-semibold rounded-lg hover:bg-overlay-faint cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loadingMore ? t("chat.loading") : t("chat.loadMore")}
             </button>

@@ -121,7 +121,7 @@ export function RenameItemDialog({
             maxLength={256}
             required
             disabled={submitting}
-            class="w-full bg-surface-container-high border border-border-dark rounded-lg px-4 py-2.5 text-base text-text-primary placeholder:text-text-disabled focus:outline-none focus:ring-1 focus:ring-accent-blue/50 focus:border-accent-blue/50 transition-all disabled:opacity-50"
+            class="w-full bg-surface-container-high border border-border-dark rounded-lg px-4 py-2.5 text-base text-text-primary placeholder:text-text-disabled focus:outline-none focus:ring-1 focus:ring-accent-blue/50 focus:border-accent-blue/50 disabled:opacity-50"
           />
         </div>
 
@@ -142,7 +142,7 @@ export function RenameItemDialog({
             maxLength={1024}
             rows={3}
             disabled={submitting}
-            class="w-full bg-surface-container-high border border-border-dark rounded-lg px-4 py-2.5 text-base text-text-primary placeholder:text-text-disabled focus:outline-none focus:ring-1 focus:ring-accent-blue/50 focus:border-accent-blue/50 transition-all disabled:opacity-50 resize-y leading-[1.5]"
+            class="w-full bg-surface-container-high border border-border-dark rounded-lg px-4 py-2.5 text-base text-text-primary placeholder:text-text-disabled focus:outline-none focus:ring-1 focus:ring-accent-blue/50 focus:border-accent-blue/50 disabled:opacity-50 resize-y leading-[1.5]"
           />
         </div>
 
@@ -157,14 +157,14 @@ export function RenameItemDialog({
             type="button"
             onClick={handleClose}
             disabled={submitting}
-            class="px-4 py-2 rounded-lg text-sm font-bold text-text-muted-dark hover:text-text-primary hover:bg-overlay-faint transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-4 py-2 rounded-lg text-sm font-bold text-text-muted-dark hover:text-text-primary hover:bg-overlay-faint cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {t("renameItem.cancel")}
           </button>
           <button
             type="submit"
             disabled={submitting}
-            class="px-4 py-2 bg-cta text-cta-fg rounded-lg text-sm font-bold hover:bg-cta-hover transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-4 py-2 bg-cta text-cta-fg rounded-lg text-sm font-bold hover:bg-cta-hover cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {submitting ? t("renameItem.submitting") : t("renameItem.submit")}
           </button>

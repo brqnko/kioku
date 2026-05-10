@@ -55,12 +55,21 @@ impl Config {
 async fn main() -> anyhow::Result<()> {
     use std::sync::Arc;
 
-    tracing_subscriber::fmt()
-        .with_env_filter(
-            tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info,tower_http=info")),
-        )
-        .init();
+    let otel_guard = backend::util::otel::init("kioku-backend")?;
+
+    {
+        use tracing_subscriber::layer::SubscriberExt as _;
+        use tracing_subscriber::util::SubscriberInitExt as _;
+
+        let env_filter = tracing_subscriber::EnvFilter::try_from_default_env()
+            .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info,tower_http=info"));
+
+        tracing_subscriber::registry()
+            .with(env_filter)
+            .with(tracing_subscriber::fmt::layer())
+            .with(tracing_opentelemetry::layer().with_tracer(backend::util::otel::tracer()))
+            .init();
+    }
 
     rustls::crypto::ring::default_provider()
         .install_default()
@@ -142,6 +151,9 @@ async fn main() -> anyhow::Result<()> {
             backend::util::podcast_request::PodcastRequestServiceImpl::new(redis_pool.clone()),
         );
 
+    let code_runner_client: Arc<dyn backend::util::code_runner::CodeRunnerClient> =
+        Arc::new(backend::util::code_runner::WandboxClient::new()?);
+
     let app = Arc::new(backend::app::App::new(backend::app::AppArgs {
         pool,
         oidc_client,
@@ -154,6 +166,7 @@ async fn main() -> anyhow::Result<()> {
         tts_client,
         pdf2md_service,
         podcast_request_service,
+        code_runner_client,
         mysql_kind: config.mysql_kind,
         access_token_duration: chrono::Duration::hours(1),
         refresh_token_duration: chrono::Duration::days(7),
@@ -166,6 +179,8 @@ async fn main() -> anyhow::Result<()> {
     axum::serve(listener, backend::server::router(app))
         .with_graceful_shutdown(shutdown_signal())
         .await?;
+
+    otel_guard.shutdown();
 
     Ok(())
 }

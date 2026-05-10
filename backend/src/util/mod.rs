@@ -1,8 +1,10 @@
+pub mod code_runner;
 pub mod dialect;
 pub mod embedding;
 pub mod jti_blacklist;
 pub mod jwt;
 pub mod llm;
+pub mod otel;
 pub mod pdf2md;
 pub mod podcast_request;
 pub mod random;

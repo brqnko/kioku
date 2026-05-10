@@ -49,6 +49,7 @@ pub struct App {
     pub pdf2md_service: std::sync::Arc<dyn crate::util::pdf2md::Pdf2MdService>,
     pub podcast_request_service:
         std::sync::Arc<dyn crate::util::podcast_request::PodcastRequestService>,
+    pub code_runner_client: std::sync::Arc<dyn crate::util::code_runner::CodeRunnerClient>,
 }
 
 pub struct AppArgs {
@@ -64,6 +65,7 @@ pub struct AppArgs {
     pub pdf2md_service: std::sync::Arc<dyn crate::util::pdf2md::Pdf2MdService>,
     pub podcast_request_service:
         std::sync::Arc<dyn crate::util::podcast_request::PodcastRequestService>,
+    pub code_runner_client: std::sync::Arc<dyn crate::util::code_runner::CodeRunnerClient>,
     pub mysql_kind: crate::util::dialect::MySQLKind,
     pub access_token_duration: chrono::Duration,
     pub refresh_token_duration: chrono::Duration,
@@ -84,6 +86,7 @@ impl App {
             tts_client,
             pdf2md_service,
             podcast_request_service,
+            code_runner_client,
             mysql_kind,
             access_token_duration,
             refresh_token_duration,
@@ -144,6 +147,7 @@ impl App {
             tts_client,
             pdf2md_service,
             podcast_request_service,
+            code_runner_client,
         }
     }
 }

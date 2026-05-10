@@ -915,6 +915,80 @@ pub async fn list_folder_children(
     )
 }
 
+// run code
+
+#[derive(serde::Deserialize, utoipa::ToSchema)]
+pub struct RunCodeBody {
+    #[schema(max_length = 65536)]
+    code: String,
+    #[schema(max_length = 64)]
+    compiler: String,
+    #[schema(max_length = 32768)]
+    stdin: Option<String>,
+    #[schema(max_length = 4096)]
+    compiler_options: Option<String>,
+    #[schema(max_length = 4096)]
+    compiler_option_raw: Option<String>,
+    #[schema(max_length = 4096)]
+    runtime_option_raw: Option<String>,
+}
+
+#[derive(serde::Serialize, utoipa::ToSchema)]
+pub struct RunCodeResponse {
+    status: Option<String>,
+    signal: Option<String>,
+    compiler_output: Option<String>,
+    compiler_error: Option<String>,
+    compiler_message: Option<String>,
+    program_output: Option<String>,
+    program_error: Option<String>,
+    program_message: Option<String>,
+}
+
+#[utoipa::path(
+    post,
+    path = "/files/run",
+    security(("Bearer" = [])),
+    request_body = inline(RunCodeBody),
+    responses(
+        (status = 200, body = inline(RunCodeResponse)),
+        (status = 400, body = crate::server::schema::ErrorBody),
+        (status = 401, body = crate::server::schema::ErrorBody),
+        (status = 500, body = crate::server::schema::ErrorBody),
+        (status = 502, body = crate::server::schema::ErrorBody),
+    )
+)]
+pub async fn run_code(
+    axum::extract::Extension(_user_id): axum::extract::Extension<uuid::Uuid>,
+    axum::extract::State(app): axum::extract::State<std::sync::Arc<crate::app::App>>,
+    axum::Json(body): axum::Json<RunCodeBody>,
+) -> crate::server::HandlerResult<axum::Json<RunCodeResponse>> {
+    let input = super::usecase::RunCodeInput {
+        code: body.code,
+        compiler: body.compiler,
+        stdin: body.stdin,
+        compiler_options: body.compiler_options,
+        compiler_option_raw: body.compiler_option_raw,
+        runtime_option_raw: body.runtime_option_raw,
+    };
+    let output = super::usecase::run_code(&app, input).await;
+
+    crate::server::schema::HandlerResult(output.map(|r| {
+        r.map(|o| {
+            axum::Json(RunCodeResponse {
+                status: o.status,
+                signal: o.signal,
+                compiler_output: o.compiler_output,
+                compiler_error: o.compiler_error,
+                compiler_message: o.compiler_message,
+                program_output: o.program_output,
+                program_error: o.program_error,
+                program_message: o.program_message,
+            })
+        })
+    }))
+}
+
 pub fn protected_router() -> utoipa_axum::router::OpenApiRouter<std::sync::Arc<crate::app::App>> {
     use utoipa_axum::routes;
 
@@ -930,4 +1004,5 @@ pub fn protected_router() -> utoipa_axum::router::OpenApiRouter<std::sync::Arc<c
         .routes(routes!(get_file_ancestors))
         .routes(routes!(list_project_children))
         .routes(routes!(list_folder_children))
+        .routes(routes!(run_code))
 }

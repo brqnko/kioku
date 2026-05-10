@@ -129,7 +129,7 @@ export default function FolderPage() {
               type="button"
               onClick={() => setEditFolderOpen(true)}
               disabled={!folder}
-              class="px-4 py-2 border border-border-dark text-text-primary font-semibold rounded-lg text-sm hover:bg-overlay-faint transition-colors flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              class="px-4 py-2 border border-border-dark text-text-primary font-semibold rounded-lg text-sm hover:bg-overlay-faint flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span class="material-symbols-outlined text-[20px]">edit</span>
               {t("folder.editFolder")}
@@ -137,7 +137,7 @@ export default function FolderPage() {
             <button
               type="button"
               onClick={() => setFolderDialogOpen(true)}
-              class="px-4 py-2 border border-border-dark text-text-primary font-semibold rounded-lg text-sm hover:bg-overlay-faint transition-colors flex items-center gap-2 cursor-pointer"
+              class="px-4 py-2 border border-border-dark text-text-primary font-semibold rounded-lg text-sm hover:bg-overlay-faint flex items-center gap-2 cursor-pointer"
             >
               <span class="material-symbols-outlined text-[20px]">
                 create_new_folder
@@ -147,7 +147,7 @@ export default function FolderPage() {
             <button
               type="button"
               onClick={() => setUploadDialogOpen(true)}
-              class="px-4 py-2 border border-border-dark text-text-primary font-semibold rounded-lg text-sm hover:bg-overlay-faint transition-colors flex items-center gap-2 cursor-pointer"
+              class="px-4 py-2 border border-border-dark text-text-primary font-semibold rounded-lg text-sm hover:bg-overlay-faint flex items-center gap-2 cursor-pointer"
             >
               <span class="material-symbols-outlined text-[20px]">note_add</span>
               {t("project.upload.label")}
@@ -221,7 +221,7 @@ export default function FolderPage() {
                 {folders.map((child) => (
                   <tr
                     key={child.id}
-                    class="hover:bg-overlay-faint transition-colors group cursor-pointer"
+                    class="hover:bg-overlay-faint group cursor-pointer"
                     onClick={() => {
                       window.location.href = `/folders/${child.id}`;
                     }}
@@ -281,7 +281,7 @@ export default function FolderPage() {
                   return (
                     <tr
                       key={file.id}
-                      class="hover:bg-overlay-faint transition-colors group cursor-pointer"
+                      class="hover:bg-overlay-faint group cursor-pointer"
                       onClick={() => {
                         window.location.href = `/files/${file.id}`;
                       }}
@@ -347,7 +347,7 @@ export default function FolderPage() {
                 type="button"
                 onClick={loadMore}
                 disabled={loadingMore}
-                class="px-4 py-2 border border-overlay-medium text-text-primary text-sm font-semibold rounded-lg hover:bg-overlay-faint transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                class="px-4 py-2 border border-overlay-medium text-text-primary text-sm font-semibold rounded-lg hover:bg-overlay-faint cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loadingMore ? t("project.loading") : t("library.loadMore")}
               </button>

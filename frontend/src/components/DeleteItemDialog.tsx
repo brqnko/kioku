@@ -87,7 +87,7 @@ export function DeleteItemDialog({
             type="button"
             onClick={handleClose}
             disabled={submitting}
-            class="px-4 py-2 rounded-lg text-sm font-bold text-text-muted-dark hover:text-text-primary hover:bg-overlay-faint transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-4 py-2 rounded-lg text-sm font-bold text-text-muted-dark hover:text-text-primary hover:bg-overlay-faint cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {t("deleteItem.cancel")}
           </button>
@@ -95,7 +95,7 @@ export function DeleteItemDialog({
             type="button"
             onClick={handleDelete}
             disabled={submitting}
-            class="px-4 py-2 rounded-lg text-sm font-bold text-white bg-danger hover:bg-danger/90 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-4 py-2 rounded-lg text-sm font-bold text-white bg-danger hover:bg-danger/90 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {submitting ? t("deleteItem.submitting") : t("deleteItem.submit")}
           </button>

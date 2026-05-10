@@ -177,10 +177,10 @@ export default function PrivacyPolicyPage() {
         <div class="max-w-[1200px] mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
           <span class="text-xl font-black text-charcoal dark:text-white">kioku</span>
           <div class="flex gap-6 text-sm text-taupe dark:text-white/50">
-            <a class="hover:text-charcoal dark:hover:text-white transition-colors" href="/privacy">
+            <a class="hover:text-charcoal dark:hover:text-white" href="/privacy">
               {t("footer.privacy")}
             </a>
-            <a class="hover:text-charcoal dark:hover:text-white transition-colors" href="/tos">
+            <a class="hover:text-charcoal dark:hover:text-white" href="/tos">
               {t("footer.terms")}
             </a>
           </div>

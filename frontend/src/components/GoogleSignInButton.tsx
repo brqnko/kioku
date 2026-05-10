@@ -52,7 +52,7 @@ export default function GoogleSignInButton({
       <button
         type="button"
         onClick={handleClick}
-        class="flex items-center justify-center gap-3 rounded-lg bg-white dark:bg-surface-dark px-8 py-3 text-base font-medium text-charcoal dark:text-white border border-border-light dark:border-border-dark hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
+        class="flex items-center justify-center gap-3 rounded-lg bg-white dark:bg-surface-dark px-8 py-3 text-base font-medium text-charcoal dark:text-white border border-border-light dark:border-border-dark hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer"
       >
         <GoogleIcon />
         {t("auth.signInWithGoogle")}
@@ -64,7 +64,7 @@ export default function GoogleSignInButton({
           href="/tos"
           target="_blank"
           rel="noopener noreferrer"
-          class="underline hover:text-charcoal dark:hover:text-white transition-colors"
+          class="underline hover:text-charcoal dark:hover:text-white"
         >
           {t("auth.termsLink")}
         </a>
@@ -73,7 +73,7 @@ export default function GoogleSignInButton({
           href="/privacy"
           target="_blank"
           rel="noopener noreferrer"
-          class="underline hover:text-charcoal dark:hover:text-white transition-colors"
+          class="underline hover:text-charcoal dark:hover:text-white"
         >
           {t("auth.privacyLink")}
         </a>

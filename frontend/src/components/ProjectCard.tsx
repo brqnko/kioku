@@ -92,7 +92,7 @@ export function ProjectCard({
 
   return (
     <>
-      <div class="group relative flex flex-col min-h-[160px] rounded-xl border border-border-subtle bg-surface-dark hover:border-text-disabled transition-colors duration-200 shadow-[0_2px_8px_rgba(0,0,0,0.2)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.3)]">
+      <div class="group relative flex flex-col min-h-[160px] rounded-xl border border-border-subtle bg-surface-dark hover:border-text-disabled shadow-[0_2px_8px_rgba(0,0,0,0.2)]">
         {/* Full-card link — sits behind content */}
         <a
           href={href}
@@ -153,7 +153,7 @@ export function ProjectCard({
                 }
                 onKeyDown={(e) => e.key === "Enter" && handleRenameSubmit()}
                 autofocus
-                class="w-full h-9 bg-surface-dark border border-border-subtle rounded-md px-3 text-sm text-text-primary placeholder:text-text-disabled focus:outline-none focus:border-accent-blue transition-colors"
+                class="w-full h-9 bg-surface-dark border border-border-subtle rounded-md px-3 text-sm text-text-primary placeholder:text-text-disabled focus:outline-none focus:border-accent-blue"
               />
             </div>
             <div class="flex flex-col gap-1.5">
@@ -167,7 +167,7 @@ export function ProjectCard({
                   setRenameDesc((e.target as HTMLInputElement).value)
                 }
                 placeholder={t("renameItem.descriptionPlaceholder")}
-                class="w-full h-9 bg-surface-dark border border-border-subtle rounded-md px-3 text-sm text-text-primary placeholder:text-text-disabled focus:outline-none focus:border-accent-blue transition-colors"
+                class="w-full h-9 bg-surface-dark border border-border-subtle rounded-md px-3 text-sm text-text-primary placeholder:text-text-disabled focus:outline-none focus:border-accent-blue"
               />
             </div>
           </div>
@@ -175,7 +175,7 @@ export function ProjectCard({
             <button
               type="button"
               onClick={() => setRenameOpen(false)}
-              class="px-4 py-2 text-sm text-text-secondary hover:text-text-primary border border-border-subtle rounded-lg hover:bg-overlay-faint transition-colors cursor-pointer bg-transparent"
+              class="px-4 py-2 text-sm text-text-secondary hover:text-text-primary border border-border-subtle rounded-lg hover:bg-overlay-faint cursor-pointer bg-transparent"
             >
               {t("renameItem.cancel")}
             </button>
@@ -183,7 +183,7 @@ export function ProjectCard({
               type="button"
               onClick={handleRenameSubmit}
               disabled={renameSubmitting || !renameInput.trim()}
-              class="px-4 py-2 text-sm font-bold bg-cta text-cta-fg rounded-lg hover:bg-cta-hover transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              class="px-4 py-2 text-sm font-bold bg-cta text-cta-fg rounded-lg hover:bg-cta-hover cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {renameSubmitting
                 ? t("renameItem.submitting")
@@ -211,7 +211,7 @@ export function ProjectCard({
             <button
               type="button"
               onClick={() => setDeleteOpen(false)}
-              class="px-4 py-2 text-sm text-text-secondary hover:text-text-primary border border-border-subtle rounded-lg hover:bg-overlay-faint transition-colors cursor-pointer bg-transparent"
+              class="px-4 py-2 text-sm text-text-secondary hover:text-text-primary border border-border-subtle rounded-lg hover:bg-overlay-faint cursor-pointer bg-transparent"
             >
               {t("deleteItem.cancel")}
             </button>
@@ -219,7 +219,7 @@ export function ProjectCard({
               type="button"
               onClick={handleDeleteConfirm}
               disabled={deleteSubmitting}
-              class="px-4 py-2 text-sm font-bold bg-danger/10 text-danger hover:bg-danger/20 rounded-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              class="px-4 py-2 text-sm font-bold bg-danger/10 text-danger hover:bg-danger/20 rounded-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {deleteSubmitting
                 ? t("deleteItem.submitting")

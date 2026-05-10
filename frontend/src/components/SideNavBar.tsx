@@ -27,7 +27,7 @@ export default function SideNavBar() {
   const recentFiles = dashboard?.recent_seen_files?.slice(0, 5) ?? [];
 
   const navItemClass = (active: boolean) =>
-    `flex items-center gap-3 px-3 py-2 rounded-lg no-underline cursor-pointer transition-colors ${
+    `flex items-center gap-3 px-3 py-2 rounded-lg no-underline cursor-pointer ${
       active
         ? "bg-overlay-soft text-text-primary font-medium"
         : "text-text-secondary hover:text-text-primary hover:bg-overlay-faint"
@@ -74,7 +74,7 @@ export default function SideNavBar() {
                 <a
                   key={file.id}
                   href={`/files/${file.id}`}
-                  class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg no-underline text-text-secondary hover:text-text-primary hover:bg-overlay-faint transition-colors cursor-pointer"
+                  class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg no-underline text-text-secondary hover:text-text-primary hover:bg-overlay-faint cursor-pointer"
                 >
                   <span class={`material-symbols-outlined text-[16px] shrink-0 ${tone}`}>
                     {icon}
@@ -94,7 +94,7 @@ export default function SideNavBar() {
             href={REPORT_FORM_URL}
             target="_blank"
             rel="noopener noreferrer"
-            class="flex items-center gap-1.5 text-xs text-text-secondary hover:text-text-primary no-underline transition-colors"
+            class="flex items-center gap-1.5 text-xs text-text-secondary hover:text-text-primary no-underline"
           >
             <span class="material-symbols-outlined text-[14px]">flag</span>
             {t("nav.report")}
@@ -102,7 +102,7 @@ export default function SideNavBar() {
           <hr class="border-border-subtle my-1" />
           <a
             href="/"
-            class="text-xs text-text-secondary hover:text-text-primary no-underline transition-colors"
+            class="text-xs text-text-secondary hover:text-text-primary no-underline"
           >
             {t("nav.about")}
           </a>
@@ -110,20 +110,20 @@ export default function SideNavBar() {
             href="https://github.com/brqnko/kioku"
             target="_blank"
             rel="noopener noreferrer"
-            class="text-xs text-text-secondary hover:text-text-primary no-underline transition-colors"
+            class="text-xs text-text-secondary hover:text-text-primary no-underline"
           >
             GitHub
           </a>
           <span class="flex gap-3">
             <a
               href="/tos"
-              class="text-xs text-text-secondary hover:text-text-primary no-underline transition-colors"
+              class="text-xs text-text-secondary hover:text-text-primary no-underline"
             >
               {t("footer.terms")}
             </a>
             <a
               href="/privacy"
-              class="text-xs text-text-secondary hover:text-text-primary no-underline transition-colors"
+              class="text-xs text-text-secondary hover:text-text-primary no-underline"
             >
               {t("footer.privacy")}
             </a>
@@ -132,7 +132,7 @@ export default function SideNavBar() {
         <button
           type="button"
           onClick={() => setDialogOpen(true)}
-          class="w-full bg-cta text-cta-fg hover:bg-cta-hover font-bold rounded-lg py-2 flex items-center justify-center gap-2 transition-all duration-200 ease-in-out cursor-pointer active:scale-[0.98]"
+          class="w-full bg-cta text-cta-fg hover:bg-cta-hover font-bold rounded-lg py-2 flex items-center justify-center gap-2 cursor-pointer"
         >
           <span class="material-symbols-outlined text-[18px]">add</span>
           <span class="text-sm">{t("nav.newProject")}</span>
