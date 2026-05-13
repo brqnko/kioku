@@ -50,7 +50,7 @@
     "tailwindcss": "^4.2.1"
   },
   "devDependencies": {
-    "@iconify-json/material-symbols": "^1.2.63",
+    "@iconify-json/material-symbols": "^1.2.71",
     "@preact/preset-vite": "^2.10.5",
     "eslint": "^9.39.4",
     "eslint-config-preact": "^2.0.0",
