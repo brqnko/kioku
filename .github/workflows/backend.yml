@@ -49,7 +49,7 @@ jobs:
 
       - uses: taiki-e/install-action@v2
         with:
-          tool: sqlx-cli
+          tool: sqlx-cli@0.8.6
 
       - uses: k1LoW/setup-tbls@v1
         with:

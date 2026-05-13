@@ -13,6 +13,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: sqlx-cli@0.8.6
+
+      - name: Run migrations
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: sqlx migrate run
+
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1
         with:
@@ -23,9 +34,5 @@ jobs:
             set -euo pipefail
             cd ~/kioku
             git pull origin main
-            set -a
-            source .env
-            set +a
-            (cd backend && sqlx migrate run)
             docker compose up -d --build
             docker wait kioku-frontend-1

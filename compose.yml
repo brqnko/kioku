@@ -2,6 +2,7 @@ services:
   backend:
     build:
       context: ./backend
+    container_name: kioku-backend
     expose:
       - "3000"
     env_file:
@@ -16,6 +17,7 @@ services:
   frontend:
     build:
       context: ./frontend
+    container_name: kioku-frontend
     volumes:
       - frontend-dist:/output
     restart: "no"
@@ -34,4 +36,4 @@ secrets:
 networks:
   app-network:
     external: true
-    name: kioku-network
+    name: anti-yt-network
