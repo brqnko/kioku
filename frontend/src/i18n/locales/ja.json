@@ -43,7 +43,9 @@
     "collapse": "サイドバーをたたむ",
     "sidebar": "サイドバー",
     "report": "問題を報告",
-    "recentFiles": "最近みたファイル"
+    "recentFiles": "最近みたファイル",
+    "openMenu": "メニューを開く",
+    "closeMenu": "メニューを閉じる"
   },
   "profile": {
     "tabs": {
@@ -300,6 +302,7 @@
     }
   },
   "projectChat": {
+    "back": "戻る",
     "newChat": "新しいチャット",
     "creating": "作成中...",
     "newChatName": "チャット {{date}}",

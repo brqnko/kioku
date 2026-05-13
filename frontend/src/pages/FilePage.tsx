@@ -191,7 +191,7 @@ export default function FilePage() {
       <SideNavBar />
       <TopAppBar />
       <main class="ml-[var(--sidebar-width)] min-h-[calc(100vh-3.5rem)] overflow-y-auto transition-[margin-left] duration-200 ease-in-out">
-        <div class="w-full max-w-4xl mx-auto px-12 py-16">
+        <div class="w-full max-w-4xl mx-auto px-4 py-8 tablet:px-12 tablet:py-16">
           {error && (
             <p class="text-sm text-danger mb-4">{t("file.errors.load")}</p>
           )}
@@ -201,7 +201,7 @@ export default function FilePage() {
           )}
 
           {file && (
-            <header class="mb-12">
+            <header class="mb-8 tablet:mb-12">
               <nav class="flex items-center gap-2 text-text-secondary text-sm font-medium flex-wrap mb-6">
                 <a
                   href="/library"
@@ -235,7 +235,7 @@ export default function FilePage() {
                 <span class="text-text-primary">{file.name}</span>
               </nav>
 
-              <div class="flex items-start justify-between gap-4 mb-6">
+              <div class="flex flex-col tablet:flex-row tablet:items-start tablet:justify-between gap-2 tablet:gap-4 mb-6">
                 {editingName ? (
                   <input
                     ref={nameInputRef}
@@ -255,7 +255,7 @@ export default function FilePage() {
                       }
                     }}
                     maxLength={256}
-                    class="flex-1 min-w-0 font-bold tracking-tight text-text-primary text-[54px] leading-[1.04] bg-transparent border-none outline-none focus:ring-0 p-0 -ml-1 px-1 rounded -mr-2"
+                    class="flex-1 min-w-0 font-bold tracking-tight text-text-primary text-[32px] leading-[1.15] tablet:text-[54px] tablet:leading-[1.04] bg-transparent border-none outline-none focus:ring-0 p-0 -ml-1 px-1 rounded -mr-2"
                   />
                 ) : (
                   <h1
@@ -268,7 +268,7 @@ export default function FilePage() {
                         startEditName();
                       }
                     }}
-                    class="flex-1 min-w-0 font-bold tracking-tight text-text-primary text-[54px] leading-[1.04] cursor-text rounded -ml-1 px-1 hover:bg-overlay-faint"
+                    class="flex-1 min-w-0 font-bold tracking-tight text-text-primary text-[32px] leading-[1.15] tablet:text-[54px] tablet:leading-[1.04] cursor-text rounded -ml-1 px-1 hover:bg-overlay-faint"
                   >
                     {file.name}
                   </h1>
@@ -305,7 +305,7 @@ export default function FilePage() {
 
               <div class="flex flex-col gap-2 text-sm text-text-secondary">
                 <div class="flex items-center gap-4">
-                  <span class="flex items-center gap-2 w-32">
+                  <span class="flex items-center gap-2 w-24 tablet:w-32">
                     <span class="material-symbols-outlined text-[16px]">
                       calendar_today
                     </span>
@@ -325,7 +325,7 @@ export default function FilePage() {
                   </button>
                 </div>
                 <div class="flex items-center gap-4">
-                  <span class="flex items-center gap-2 w-32">
+                  <span class="flex items-center gap-2 w-24 tablet:w-32">
                     <span class="material-symbols-outlined text-[16px]">
                       update
                     </span>
@@ -345,7 +345,7 @@ export default function FilePage() {
                   </button>
                 </div>
                 <div class="flex items-center gap-4">
-                  <span class="flex items-center gap-2 w-32">
+                  <span class="flex items-center gap-2 w-24 tablet:w-32">
                     <span class="material-symbols-outlined text-[16px]">
                       database
                     </span>
@@ -356,7 +356,7 @@ export default function FilePage() {
                   </span>
                 </div>
                 <div class="flex items-start gap-4">
-                  <span class="flex items-center gap-2 w-32 shrink-0 mt-0.5">
+                  <span class="flex items-center gap-2 w-24 tablet:w-32 shrink-0 mt-0.5">
                     <span class="material-symbols-outlined text-[16px]">
                       notes
                     </span>
@@ -405,7 +405,7 @@ export default function FilePage() {
           )}
 
           {isText && draft !== null && file && (
-            <div class="rounded-lg border border-border-subtle bg-surface-container-low p-6">
+            <div class="rounded-lg border border-border-subtle bg-surface-container-low p-3 tablet:p-6">
               <MarkdownEditor
                 key={fileId}
                 defaultValue={draft}

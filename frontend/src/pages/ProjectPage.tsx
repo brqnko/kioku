@@ -60,7 +60,7 @@ export default function ProjectPage() {
     <div class="min-h-screen bg-background-dark text-text-primary">
       <SideNavBar />
       <TopAppBar />
-      <main class="ml-[var(--sidebar-width)] p-8 min-h-[calc(100vh-3.5rem)] overflow-y-auto transition-[margin-left] duration-200 ease-in-out">
+      <main class="ml-[var(--sidebar-width)] p-4 tablet:p-8 min-h-[calc(100vh-3.5rem)] overflow-y-auto transition-[margin-left] duration-200 ease-in-out">
         <section class="mb-8 flex items-end justify-between flex-wrap gap-4">
           <div class="flex flex-col gap-3">
             <nav class="flex items-center gap-2 text-text-secondary text-sm font-medium">
@@ -83,7 +83,7 @@ export default function ProjectPage() {
               </p>
             )}
           </div>
-          <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2 tablet:gap-3 flex-wrap">
             <button
               type="button"
               onClick={() => setEditProjectOpen(true)}
@@ -137,19 +137,19 @@ export default function ProjectPage() {
             <table class="w-full text-left border-collapse">
               <thead>
                 <tr class="bg-surface-dark/40 text-text-secondary text-sm border-b border-border-subtle">
-                  <th class="px-6 py-3 font-semibold">
+                  <th class="px-3 py-3 tablet:px-6 font-semibold">
                     {t("project.table.name")}
                   </th>
-                  <th class="px-6 py-3 font-semibold">
+                  <th class="hidden tablet:table-cell px-3 py-3 tablet:px-6 font-semibold">
                     {t("project.table.type")}
                   </th>
-                  <th class="px-6 py-3 font-semibold">
+                  <th class="hidden tablet:table-cell px-3 py-3 tablet:px-6 font-semibold">
                     {t("project.table.size")}
                   </th>
-                  <th class="px-6 py-3 font-semibold">
+                  <th class="px-3 py-3 tablet:px-6 font-semibold">
                     {t("project.table.modified")}
                   </th>
-                  <th class="px-6 py-3 font-semibold text-right">
+                  <th class="px-3 py-3 tablet:px-6 font-semibold text-right">
                     {t("project.table.action")}
                   </th>
                 </tr>
@@ -159,7 +159,7 @@ export default function ProjectPage() {
                   <tr>
                     <td
                       colSpan={5}
-                      class="px-6 py-8 text-sm text-text-secondary text-center"
+                      class="px-3 py-8 tablet:px-6 text-sm text-text-secondary text-center"
                     >
                       {t("project.loading")}
                     </td>
@@ -170,7 +170,7 @@ export default function ProjectPage() {
                   <tr>
                     <td
                       colSpan={5}
-                      class="px-6 py-8 text-sm text-text-secondary text-center"
+                      class="px-3 py-8 tablet:px-6 text-sm text-text-secondary text-center"
                     >
                       {t("project.empty")}
                     </td>
@@ -185,7 +185,7 @@ export default function ProjectPage() {
                       window.location.href = `/folders/${folder.id}`;
                     }}
                   >
-                    <td class="px-6 py-3">
+                    <td class="px-3 py-3 tablet:px-6">
                       <div class="flex items-center gap-3 min-w-0">
                         <span
                           class={`material-symbols-outlined ${folderTone(folder.id)}`}
@@ -205,14 +205,14 @@ export default function ProjectPage() {
                         </div>
                       </div>
                     </td>
-                    <td class="px-6 py-3 text-sm text-text-secondary">
+                    <td class="hidden tablet:table-cell px-3 py-3 tablet:px-6 text-sm text-text-secondary">
                       {t("project.table.folder")}
                     </td>
-                    <td class="px-6 py-3 text-sm text-text-secondary">—</td>
-                    <td class="px-6 py-3 text-sm text-text-secondary">
+                    <td class="hidden tablet:table-cell px-3 py-3 tablet:px-6 text-sm text-text-secondary">—</td>
+                    <td class="px-3 py-3 tablet:px-6 text-sm text-text-secondary">
                       {formatDate(folder.changed_at, i18n.language)}
                     </td>
-                    <td class="px-6 py-3 text-right">
+                    <td class="px-3 py-3 tablet:px-6 text-right">
                       <RowActionMenu
                         ariaLabel={t("project.table.more")}
                         onEdit={() =>
@@ -245,7 +245,7 @@ export default function ProjectPage() {
                         window.location.href = `/files/${file.id}`;
                       }}
                     >
-                      <td class="px-6 py-3">
+                      <td class="px-3 py-3 tablet:px-6">
                         <div class="flex items-center gap-3 min-w-0">
                           <span
                             class={`material-symbols-outlined ${meta.tone}`}
@@ -264,16 +264,16 @@ export default function ProjectPage() {
                           </div>
                         </div>
                       </td>
-                      <td class="px-6 py-3 text-sm text-text-secondary">
+                      <td class="hidden tablet:table-cell px-3 py-3 tablet:px-6 text-sm text-text-secondary">
                         {meta.type}
                       </td>
-                      <td class="px-6 py-3 text-sm text-text-secondary">
+                      <td class="hidden tablet:table-cell px-3 py-3 tablet:px-6 text-sm text-text-secondary">
                         {formatSize(file.file_size)}
                       </td>
-                      <td class="px-6 py-3 text-sm text-text-secondary">
+                      <td class="px-3 py-3 tablet:px-6 text-sm text-text-secondary">
                         {formatDate(file.changed_at, i18n.language)}
                       </td>
-                      <td class="px-6 py-3 text-right">
+                      <td class="px-3 py-3 tablet:px-6 text-right">
                         <RowActionMenu
                           ariaLabel={t("project.table.more")}
                           onEdit={() =>

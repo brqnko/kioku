@@ -108,7 +108,7 @@ export function UploadDialog({
   return (
     <Dialog open={open} onClose={onClose} ariaLabel={t("upload.title")}>
       <form onSubmit={handleSubmit} class="flex flex-col">
-        <div class="p-6 border-b border-border-dark">
+        <div class="p-4 tablet:p-6 border-b border-border-dark">
           <h2 class="text-[22px] leading-[1.27] font-bold tracking-tight text-text-primary">
             {t("upload.title")}
           </h2>
@@ -141,7 +141,7 @@ export function UploadDialog({
           </div>
         </div>
 
-        <div class="p-6 flex flex-col gap-4">
+        <div class="p-4 tablet:p-6 flex flex-col gap-4">
           {mode === "file" && (
             <div class="flex flex-col gap-2">
               <button
@@ -218,7 +218,7 @@ export function UploadDialog({
           {error && <p class="text-sm text-danger">{error}</p>}
         </div>
 
-        <div class="p-6 bg-surface-container-low/50 flex items-center justify-end gap-4 border-t border-border-dark">
+        <div class="p-4 tablet:p-6 bg-surface-container-low/50 flex items-center justify-end gap-4 border-t border-border-dark">
           <button
             type="button"
             onClick={onClose}

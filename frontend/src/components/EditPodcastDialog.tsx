@@ -77,7 +77,7 @@ export function EditPodcastDialog({
 
   return (
     <Dialog open={open} onClose={handleClose} ariaLabel={t("renameItem.title")} maxWidth="max-w-[480px]">
-      <form onSubmit={handleSubmit} class="p-6 flex flex-col gap-4">
+      <form onSubmit={handleSubmit} class="p-4 tablet:p-6 flex flex-col gap-4">
         <h2 class="text-[18px] leading-[1.3] font-bold tracking-tight text-text-primary">
           {t("renameItem.title")}
         </h2>

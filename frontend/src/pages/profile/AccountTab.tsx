@@ -165,7 +165,7 @@ export default function AccountTab() {
         </Field>
 
         <Field label={t("profile.account.language")} bordered>
-          <div class="relative w-fit min-w-[200px]" ref={langRef}>
+          <div class="relative w-full tablet:w-fit min-w-[200px]" ref={langRef}>
             <button
               type="button"
               onClick={() => setLangOpen(!langOpen)}
@@ -215,7 +215,7 @@ export default function AccountTab() {
         </Field>
 
         <Field label={t("profile.account.theme")} bordered>
-          <div class="relative w-fit min-w-[200px]" ref={themeRef}>
+          <div class="relative w-full tablet:w-fit min-w-[200px]" ref={themeRef}>
             <button
               type="button"
               onClick={() => setThemeOpen(!themeOpen)}

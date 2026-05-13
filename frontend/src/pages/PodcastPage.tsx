@@ -37,7 +37,7 @@ export default function PodcastPage() {
     <div class="min-h-screen bg-background-dark text-text-primary">
       <SideNavBar />
       <TopAppBar />
-      <main class="ml-[var(--sidebar-width)] p-8 min-h-[calc(100vh-3.5rem)] overflow-y-auto transition-[margin-left] duration-200 ease-in-out">
+      <main class="ml-[var(--sidebar-width)] p-4 tablet:p-8 min-h-[calc(100vh-3.5rem)] overflow-y-auto transition-[margin-left] duration-200 ease-in-out">
         <header class="flex flex-col gap-2 mb-6">
           <h1 class="text-[22px] leading-[1.27] font-bold tracking-tight">
             {t("podcast.selectProject.title")}

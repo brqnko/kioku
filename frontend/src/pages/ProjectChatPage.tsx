@@ -366,7 +366,7 @@ export default function ProjectChatPage() {
 
       <div class="ml-[var(--sidebar-width)] flex h-[calc(100vh-3.5rem)] overflow-hidden transition-[margin-left] duration-200 ease-in-out">
         {/* ── Sessions panel ── */}
-        <aside class="w-64 shrink-0 border-r border-border-subtle flex flex-col bg-surface-container-low overflow-hidden">
+        <aside class={`${activeChatId ? "hidden tablet:flex" : "flex"} w-full tablet:w-64 tablet:shrink-0 border-r border-border-subtle flex-col bg-surface-container-low overflow-hidden`}>
           <div class="shrink-0 p-3 border-b border-border-subtle">
             <button
               type="button"
@@ -450,21 +450,29 @@ export default function ProjectChatPage() {
         </aside>
 
         {/* ── Chat panel ── */}
-        <section class="flex flex-1 flex-col min-w-0 bg-background-dark overflow-hidden">
+        <section class={`${!activeChatId ? "hidden tablet:flex" : "flex"} flex-1 flex-col min-w-0 bg-background-dark overflow-hidden`}>
           {activeChatId ? (
             <>
               {/* Header */}
-              <div class="shrink-0 h-12 border-b border-border-subtle flex items-center px-6 gap-2 overflow-hidden">
+              <div class="shrink-0 h-12 border-b border-border-subtle flex items-center px-3 tablet:px-6 gap-2 overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setActiveChatId(null)}
+                  aria-label={t("projectChat.back")}
+                  class="tablet:hidden flex items-center justify-center w-8 h-8 rounded hover:bg-overlay-faint cursor-pointer bg-transparent border-none text-text-secondary shrink-0"
+                >
+                  <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+                </button>
                 <a
                   href="/chat"
-                  class="text-xs text-text-disabled hover:text-text-secondary no-underline whitespace-nowrap"
+                  class="hidden tablet:inline text-xs text-text-disabled hover:text-text-secondary no-underline whitespace-nowrap"
                 >
                   {t("nav.chat")}
                 </a>
-                <span class="text-text-disabled text-xs shrink-0">/</span>
+                <span class="hidden tablet:inline text-text-disabled text-xs shrink-0">/</span>
                 <a
                   href={`/projects/${projectId}`}
-                  class="text-xs text-text-secondary hover:text-text-primary no-underline truncate shrink-0 max-w-[140px]"
+                  class="text-xs text-text-secondary hover:text-text-primary no-underline truncate min-w-0"
                 >
                   {project?.name ?? "…"}
                 </a>
@@ -479,7 +487,7 @@ export default function ProjectChatPage() {
               </div>
 
               {/* Messages */}
-              <div class="flex-1 overflow-y-auto px-6 py-6 flex flex-col gap-6">
+              <div class="flex-1 overflow-y-auto px-3 py-4 tablet:px-6 tablet:py-6 flex flex-col gap-6">
                 {chatLoading ? (
                   <p class="text-sm text-text-disabled text-center py-8">
                     {t("chat.loading")}
@@ -499,7 +507,7 @@ export default function ProjectChatPage() {
               </div>
 
               {/* Input area */}
-              <div class="shrink-0 px-6 pb-4 pt-2">
+              <div class="shrink-0 px-3 tablet:px-6 pb-4 pt-2">
                 <div class="max-w-3xl mx-auto">
                   {sendError && (
                     <p class="text-xs text-danger mb-2 text-center">
@@ -592,7 +600,7 @@ export default function ProjectChatPage() {
         ariaLabel={t("renameItem.title")}
         maxWidth="max-w-[420px]"
       >
-        <div class="p-6 flex flex-col gap-5">
+        <div class="p-4 tablet:p-6 flex flex-col gap-5">
           <h2 class="text-[22px] font-bold leading-tight">
             {t("renameItem.title")}
           </h2>
@@ -640,7 +648,7 @@ export default function ProjectChatPage() {
         ariaLabel={t("deleteItem.title")}
         maxWidth="max-w-[420px]"
       >
-        <div class="p-6 flex flex-col gap-5">
+        <div class="p-4 tablet:p-6 flex flex-col gap-5">
           <h2 class="text-[22px] font-bold leading-tight">
             {t("deleteItem.title")}
           </h2>

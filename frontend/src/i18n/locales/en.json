@@ -43,7 +43,9 @@
     "collapse": "Collapse sidebar",
     "sidebar": "Sidebar",
     "report": "Report a problem",
-    "recentFiles": "Recent Files"
+    "recentFiles": "Recent Files",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
   },
   "profile": {
     "tabs": {
@@ -300,6 +302,7 @@
     }
   },
   "projectChat": {
+    "back": "Back",
     "newChat": "New Chat",
     "creating": "Creating...",
     "newChatName": "Chat {{date}}",

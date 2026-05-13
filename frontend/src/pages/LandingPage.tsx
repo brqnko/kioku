@@ -265,7 +265,7 @@ export default function LandingPage() {
         <section class="max-w-7xl mx-auto px-6 md:px-8 mb-14 md:mb-20">
           <div class="grid lg:grid-cols-[1.05fr_1fr] items-center gap-12 lg:gap-20">
             <Reveal class="flex flex-col gap-6 md:gap-8 lg:pl-16 xl:pl-24">
-              <h1 class="text-5xl md:text-6xl xl:text-7xl font-bold text-charcoal dark:text-white leading-[1.05] tracking-tight">
+              <h1 class="text-4xl md:text-6xl xl:text-7xl font-bold text-charcoal dark:text-white leading-[1.05] tracking-tight">
                 {t("hero.title")}
               </h1>
               {isAuthenticated ? (
@@ -322,7 +322,7 @@ export default function LandingPage() {
                   <PodcastMock t={t} />
                 );
               const mockBlock = (
-                <div class="relative">
+                <div class="relative max-w-full overflow-hidden">
                   <div
                     aria-hidden="true"
                     class="pointer-events-none absolute inset-0 flex items-center justify-center"
@@ -331,7 +331,7 @@ export default function LandingPage() {
                       class={`w-[750px] h-[450px] rounded-[100%] blur-3xl ${blurClass}`}
                     />
                   </div>
-                  <div class="relative md:origin-top-left md:scale-[0.8] md:w-[125%] md:[margin-bottom:-20%]">
+                  <div class="relative origin-top-left scale-[0.45] w-[222%] -mb-[35%] tablet:scale-[0.65] tablet:w-[154%] tablet:-mb-[25%] md:scale-[0.8] md:w-[125%] md:[margin-bottom:-20%]">
                     {mockNode}
                   </div>
                 </div>

@@ -3,7 +3,7 @@
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 @theme {
-  --breakpoint-tablet: 657px;
+  --breakpoint-tablet: 768px;
   --breakpoint-wide: 1313px;
   --font-display: "Inter", -apple-system, "system-ui", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif;
 
@@ -58,11 +58,17 @@
   --color-text: var(--color-charcoal);
   --color-bg: var(--color-background-light);
   --sidebar-width: 16rem;
+  --sidebar-scrim: rgba(0, 0, 0, 0.5);
+}
+
+html[data-sidebar-mode="overlay"] {
+  --sidebar-width: 0px;
 }
 
 [data-theme="light"] {
   --color-text: rgba(0, 0, 0, 0.95);
   --color-bg: #ffffff;
+  --sidebar-scrim: rgba(0, 0, 0, 0.35);
 
   --color-background-dark: #ffffff;
   --color-card-dark: #ffffff;
