@@ -12,8 +12,29 @@ mod docs {
     use crate::features::user::handler::*;
     use crate::server::schema::*;
 
+    pub struct SecurityAddon;
+
+    impl utoipa::Modify for SecurityAddon {
+        fn modify(&self, openapi: &mut utoipa::openapi::OpenApi) {
+            use utoipa::openapi::security::{ApiKey, ApiKeyValue, SecurityScheme};
+
+            let components = openapi
+                .components
+                .get_or_insert_with(utoipa::openapi::Components::new);
+            components.add_security_scheme(
+                "cookieAuth",
+                SecurityScheme::ApiKey(ApiKey::Cookie(ApiKeyValue::new("access_token"))),
+            );
+            components.add_security_scheme(
+                "csrfToken",
+                SecurityScheme::ApiKey(ApiKey::Header(ApiKeyValue::new("x-csrf-token"))),
+            );
+        }
+    }
+
     #[derive(utoipa::OpenApi)]
     #[openapi(
+        modifiers(&SecurityAddon),
         paths(
             handler::health,
             oidc_start,
@@ -35,6 +56,7 @@ mod docs {
             request_upload_url,
             create_file,
             get_file_content,
+            get_file_raw,
             update_file,
             update_file_text,
             remove_file,
@@ -46,6 +68,8 @@ mod docs {
             get_file_ancestors,
             list_project_children,
             list_folder_children,
+            run_code,
+            list_compilers,
             create_podcast,
             list_podcasts,
             get_podcast,
@@ -66,6 +90,65 @@ pub fn api_doc() -> utoipa::openapi::OpenApi {
     use utoipa::OpenApi as _;
 
     docs::ApiDoc::openapi()
+}
+
+struct HeaderExtractor<'a>(&'a axum::http::HeaderMap);
+
+impl<'a> opentelemetry::propagation::Extractor for HeaderExtractor<'a> {
+    fn get(&self, key: &str) -> Option<&str> {
+        self.0.get(key).and_then(|v| v.to_str().ok())
+    }
+
+    fn keys(&self) -> Vec<&str> {
+        self.0.keys().map(|k| k.as_str()).collect()
+    }
+}
+
+fn make_otel_span<B>(req: &axum::http::Request<B>) -> tracing::Span {
+    use tracing_opentelemetry::OpenTelemetrySpanExt as _;
+
+    let span = tracing::info_span!(
+        "http_request",
+        otel.kind = "server",
+        http.request.method = %req.method(),
+        url.path = %req.uri().path(),
+    );
+    let parent = opentelemetry::global::get_text_map_propagator(|propagator| {
+        propagator.extract(&HeaderExtractor(req.headers()))
+    });
+    let _ = span.set_parent(parent);
+    span
+}
+
+fn http_duration_histogram() -> &'static opentelemetry::metrics::Histogram<f64> {
+    use std::sync::OnceLock;
+    static H: OnceLock<opentelemetry::metrics::Histogram<f64>> = OnceLock::new();
+    H.get_or_init(|| {
+        opentelemetry::global::meter("kioku-backend")
+            .f64_histogram("http.server.request.duration")
+            .with_unit("s")
+            .build()
+    })
+}
+
+async fn metrics_mw(
+    req: axum::extract::Request,
+    next: axum::middleware::Next,
+) -> axum::response::Response {
+    let start = std::time::Instant::now();
+    let method = req.method().clone();
+    let path = req.uri().path().to_string();
+    let response = next.run(req).await;
+    let status = response.status().as_u16() as i64;
+    http_duration_histogram().record(
+        start.elapsed().as_secs_f64(),
+        &[
+            opentelemetry::KeyValue::new("http.request.method", method.to_string()),
+            opentelemetry::KeyValue::new("url.path", path),
+            opentelemetry::KeyValue::new("http.response.status_code", status),
+        ],
+    );
+    response
 }
 
 pub fn router(app: std::sync::Arc<crate::app::App>) -> axum::Router {
@@ -91,15 +174,14 @@ pub fn router(app: std::sync::Arc<crate::app::App>) -> axum::Router {
         .merge(protected)
         .split_for_parts();
 
-    let router = router
+    router
         .merge(<utoipa_redoc::Redoc<_> as utoipa_redoc::Servable<_>>::with_url("/redoc", api))
         .with_state(app)
+        .layer(axum::extract::DefaultBodyLimit::max(32 * 1024 * 1024))
+        .layer(axum::middleware::from_fn(metrics_mw))
         .layer(
             tower_http::trace::TraceLayer::new_for_http()
-                .make_span_with(
-                    tower_http::trace::DefaultMakeSpan::new().level(tracing::Level::INFO),
-                )
-                .on_request(tower_http::trace::DefaultOnRequest::new().level(tracing::Level::INFO))
+                .make_span_with(make_otel_span)
                 .on_response(
                     tower_http::trace::DefaultOnResponse::new().level(tracing::Level::INFO),
                 ),
@@ -107,10 +189,5 @@ pub fn router(app: std::sync::Arc<crate::app::App>) -> axum::Router {
         .layer(tower_http::request_id::PropagateRequestIdLayer::x_request_id())
         .layer(tower_http::request_id::SetRequestIdLayer::x_request_id(
             tower_http::request_id::MakeRequestUuid,
-        ));
-
-    #[cfg(debug_assertions)]
-    let router = router.layer(axum::middleware::from_fn(middleware::dev_delay::dev_delay));
-
-    router
+        ))
 }

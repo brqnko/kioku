@@ -119,7 +119,7 @@ export function UploadDialog({
             <button
               type="button"
               onClick={() => setMode("file")}
-              class={`px-4 py-1.5 rounded-md text-sm font-medium transition-all cursor-pointer ${
+              class={`px-4 py-1.5 rounded-md text-sm font-medium cursor-pointer ${
                 mode === "file"
                   ? "bg-overlay-soft text-text-primary"
                   : "text-text-muted-dark hover:text-text-primary"
@@ -130,7 +130,7 @@ export function UploadDialog({
             <button
               type="button"
               onClick={() => setMode("text")}
-              class={`px-4 py-1.5 rounded-md text-sm font-medium transition-all cursor-pointer ${
+              class={`px-4 py-1.5 rounded-md text-sm font-medium cursor-pointer ${
                 mode === "text"
                   ? "bg-overlay-soft text-text-primary"
                   : "text-text-muted-dark hover:text-text-primary"
@@ -147,7 +147,7 @@ export function UploadDialog({
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                class="w-full border border-dashed border-border-dark rounded-lg px-4 py-8 text-center hover:border-overlay-strong hover:bg-overlay-faint transition-all cursor-pointer flex flex-col items-center gap-2"
+                class="w-full border border-dashed border-border-dark rounded-lg px-4 py-8 text-center hover:border-overlay-strong hover:bg-overlay-faint cursor-pointer flex flex-col items-center gap-2"
               >
                 <span class="material-symbols-outlined text-text-muted-dark text-[28px]">
                   upload_file
@@ -191,7 +191,7 @@ export function UploadDialog({
                   placeholder={t("upload.text.namePlaceholder")}
                   maxLength={256}
                   required
-                  class="w-full bg-surface-container-high border border-border-dark rounded-lg px-4 py-2.5 text-base text-text-primary placeholder:text-text-disabled focus:outline-none focus:ring-1 focus:ring-accent-blue/50 focus:border-accent-blue/50 transition-all"
+                  class="w-full bg-surface-container-high border border-border-dark rounded-lg px-4 py-2.5 text-base text-text-primary placeholder:text-text-disabled focus:outline-none focus:ring-1 focus:ring-accent-blue/50 focus:border-accent-blue/50"
                 />
               </div>
               <div class="flex flex-col gap-2">
@@ -209,7 +209,7 @@ export function UploadDialog({
                   }
                   placeholder={t("upload.text.bodyPlaceholder")}
                   rows={8}
-                  class="w-full bg-surface-container-high border border-border-dark rounded-lg px-4 py-2.5 text-base text-text-primary placeholder:text-text-disabled focus:outline-none focus:ring-1 focus:ring-accent-blue/50 focus:border-accent-blue/50 transition-all resize-y font-mono"
+                  class="w-full bg-surface-container-high border border-border-dark rounded-lg px-4 py-2.5 text-base text-text-primary placeholder:text-text-disabled focus:outline-none focus:ring-1 focus:ring-accent-blue/50 focus:border-accent-blue/50 resize-y font-mono"
                 />
               </div>
             </>
@@ -223,14 +223,14 @@ export function UploadDialog({
             type="button"
             onClick={onClose}
             disabled={submitting}
-            class="px-6 py-2.5 rounded-lg text-sm font-bold text-text-muted-dark hover:text-text-primary hover:bg-overlay-faint transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-6 py-2.5 rounded-lg text-sm font-bold text-text-muted-dark hover:text-text-primary hover:bg-overlay-faint cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {t("upload.cancel")}
           </button>
           <button
             type="submit"
             disabled={submitting}
-            class="px-6 py-2.5 bg-cta text-cta-fg rounded-lg text-sm font-bold hover:bg-cta-hover transition-colors shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-6 py-2.5 bg-cta text-cta-fg rounded-lg text-sm font-bold hover:bg-cta-hover shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {submitting ? t("upload.submitting") : t("upload.submit")}
           </button>

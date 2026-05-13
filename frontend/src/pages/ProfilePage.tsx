@@ -49,7 +49,7 @@ function TabButton({ active, onClick, label }: TabButtonProps) {
     <button
       type="button"
       onClick={onClick}
-      class={`px-5 py-1.5 rounded-full text-sm font-bold transition-all cursor-pointer border-none whitespace-nowrap ${
+      class={`px-5 py-1.5 rounded-full text-sm font-bold cursor-pointer border-none whitespace-nowrap ${
         active
           ? "bg-cta text-cta-fg"
           : "bg-transparent text-text-muted-dark hover:text-text-primary"

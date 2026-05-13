@@ -83,18 +83,21 @@ impl ParentId {
 
 pub enum ContentType {
     ApplicationPdf,
+    ImagePng,
 }
 
 impl ContentType {
     pub fn as_mime(&self) -> &'static str {
         match self {
             Self::ApplicationPdf => "application/pdf",
+            Self::ImagePng => "image/png",
         }
     }
 
     pub fn from_mime(s: &str) -> Result<Self, crate::domain::DomainError> {
         match s {
             "application/pdf" => Ok(Self::ApplicationPdf),
+            "image/png" => Ok(Self::ImagePng),
             other => Err(crate::domain::DomainError::new(
                 "invalid_content_type",
                 format!("unsupported content type: {other}"),
@@ -444,7 +447,7 @@ mod tests {
 
     #[rstest]
     #[case("application/pdf", true)]
-    #[case("image/png", false)]
+    #[case("image/png", true)]
     #[case("image/jpeg", false)]
     #[case("audio/mpeg", false)]
     #[case("text/markdown", false)]

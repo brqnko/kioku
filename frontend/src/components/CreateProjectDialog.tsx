@@ -85,7 +85,7 @@ export function CreateProjectDialog({ open, onClose }: CreateProjectDialogProps)
               placeholder={t("createProject.placeholders.name")}
               maxLength={256}
               required
-              class="w-full bg-surface-container-high border border-border-dark rounded-lg px-4 py-2.5 text-base text-text-primary placeholder:text-text-disabled focus:outline-none focus:ring-1 focus:ring-accent-blue/50 focus:border-accent-blue/50 transition-all"
+              class="w-full bg-surface-container-high border border-border-dark rounded-lg px-4 py-2.5 text-base text-text-primary placeholder:text-text-disabled focus:outline-none focus:ring-1 focus:ring-accent-blue/50 focus:border-accent-blue/50"
             />
           </div>
 
@@ -108,7 +108,7 @@ export function CreateProjectDialog({ open, onClose }: CreateProjectDialogProps)
               placeholder={t("createProject.placeholders.description")}
               rows={3}
               maxLength={512}
-              class="w-full bg-surface-container-high border border-border-dark rounded-lg px-4 py-2.5 text-base text-text-primary placeholder:text-text-disabled focus:outline-none focus:ring-1 focus:ring-accent-blue/50 focus:border-accent-blue/50 transition-all resize-none"
+              class="w-full bg-surface-container-high border border-border-dark rounded-lg px-4 py-2.5 text-base text-text-primary placeholder:text-text-disabled focus:outline-none focus:ring-1 focus:ring-accent-blue/50 focus:border-accent-blue/50 resize-none"
             />
           </div>
 
@@ -120,14 +120,14 @@ export function CreateProjectDialog({ open, onClose }: CreateProjectDialogProps)
             type="button"
             onClick={onClose}
             disabled={submitting}
-            class="px-6 py-2.5 rounded-lg text-sm font-bold text-text-muted-dark hover:text-text-primary hover:bg-overlay-faint transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-6 py-2.5 rounded-lg text-sm font-bold text-text-muted-dark hover:text-text-primary hover:bg-overlay-faint cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {t("createProject.cancel")}
           </button>
           <button
             type="submit"
             disabled={submitting}
-            class="px-6 py-2.5 bg-cta text-cta-fg rounded-lg text-sm font-bold hover:bg-cta-hover transition-colors shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-6 py-2.5 bg-cta text-cta-fg rounded-lg text-sm font-bold hover:bg-cta-hover shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {submitting ? t("createProject.submitting") : t("createProject.submit")}
           </button>

@@ -55,7 +55,7 @@ pub struct ChatResponse {
 #[utoipa::path(
     post,
     path = "/projects/{project_id}/chats",
-    security(("Bearer" = [])),
+    security(("cookieAuth" = [], "csrfToken" = [])),
     params(
         ("project_id" = uuid::Uuid, Path, description = "Project ID"),
     ),
@@ -134,7 +134,7 @@ pub struct ListChatsResponse {
 #[utoipa::path(
     get,
     path = "/projects/{project_id}/chats",
-    security(("Bearer" = [])),
+    security(("cookieAuth" = [], "csrfToken" = [])),
     params(
         ("project_id" = uuid::Uuid, Path, description = "Project ID"),
         ListChatsQuery,
@@ -217,7 +217,7 @@ pub struct GetChatResponse {
 #[utoipa::path(
     get,
     path = "/projects/{project_id}/chats/{chat_id}",
-    security(("Bearer" = [])),
+    security(("cookieAuth" = [], "csrfToken" = [])),
     params(
         ("project_id" = uuid::Uuid, Path, description = "Project ID"),
         ("chat_id" = uuid::Uuid, Path, description = "Chat ID"),
@@ -283,7 +283,7 @@ pub struct SendMessageResponse {
 #[utoipa::path(
     post,
     path = "/projects/{project_id}/chats/{chat_id}/messages",
-    security(("Bearer" = [])),
+    security(("cookieAuth" = [], "csrfToken" = [])),
     params(
         ("project_id" = uuid::Uuid, Path, description = "Project ID"),
         ("chat_id" = uuid::Uuid, Path, description = "Chat ID"),
@@ -334,7 +334,7 @@ pub struct UpdateChatBody {
 #[utoipa::path(
     patch,
     path = "/projects/{project_id}/chats/{chat_id}",
-    security(("Bearer" = [])),
+    security(("cookieAuth" = [], "csrfToken" = [])),
     params(
         ("project_id" = uuid::Uuid, Path, description = "Project ID"),
         ("chat_id" = uuid::Uuid, Path, description = "Chat ID"),
@@ -382,7 +382,7 @@ pub async fn update_chat(
 #[utoipa::path(
     delete,
     path = "/projects/{project_id}/chats/{chat_id}",
-    security(("Bearer" = [])),
+    security(("cookieAuth" = [], "csrfToken" = [])),
     params(
         ("project_id" = uuid::Uuid, Path, description = "Project ID"),
         ("chat_id" = uuid::Uuid, Path, description = "Chat ID"),

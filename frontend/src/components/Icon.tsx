@@ -3,6 +3,10 @@ import DarkMode from "~icons/material-symbols/dark-mode-outline";
 import Computer from "~icons/material-symbols/computer-outline";
 import Translate from "~icons/material-symbols/translate";
 import Check from "~icons/material-symbols/check";
+import Warning from "~icons/material-symbols/warning-outline";
+import ErrorOutline from "~icons/material-symbols/error-outline";
+import CheckCircle from "~icons/material-symbols/check-circle-outline";
+import Close from "~icons/material-symbols/close";
 
 const iconMap: Record<string, string> = {
   light_mode: LightMode,
@@ -10,6 +14,10 @@ const iconMap: Record<string, string> = {
   computer: Computer,
   translate: Translate,
   check: Check,
+  warning: Warning,
+  error: ErrorOutline,
+  check_circle: CheckCircle,
+  close: Close,
 };
 
 interface IconProps {

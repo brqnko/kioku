@@ -16,9 +16,21 @@
     "terms": "Terms",
     "copyright": "© 2025 kioku."
   },
+  "legal": {
+    "navTerms": "Terms of Service",
+    "navPrivacy": "Privacy Policy"
+  },
   "notFound": {
     "title": "404",
     "message": "Page not found"
+  },
+  "notification": {
+    "region": "Notifications",
+    "dismiss": "Dismiss",
+    "rateLimit": {
+      "generic": "Too many requests. Please try again later.",
+      "specific": "Rate limit reached. Please wait a moment and try again."
+    }
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -410,8 +422,15 @@
   },
   "hero": {
     "title": "Folder structure for NotebookLM.",
-    "subtitle": "Streamline your research, project management, and study notes with a tool designed for high-density information environments.",
+    "feature1": "Organize materials by project",
+    "feature2": "Chat with AI grounded in your files",
+    "feature3": "Learn with AI-generated podcasts",
     "ctaPrimary": "Start for Free"
+  },
+  "statement": {
+    "heading": "Drowning in information you can't recall?",
+    "body1": "PDFs and notes scattered across folders, never findable when you need them. AI tools that answer without ever seeing what you've saved. kioku gathers your materials in one place, and the AI works from what you've actually uploaded.",
+    "body2": "Capture knowledge well, and actually use it."
   },
   "features": {
     "synthesis": {
@@ -425,16 +444,38 @@
     "research": {
       "title": "AI-generated podcasts",
       "body": "Select any files and let AI turn them into an audio explanation. Get a podcast-style summary in minutes — perfect for reviewing on the go."
-    },
-    "collaborate": {
-      "title": "Track your progress",
-      "body": "The dashboard shows recently opened files and an AI-generated learning summary at a glance. Pick up exactly where you left off, every time."
     }
   },
   "cta": {
     "title": "Scale your knowledge potential.",
     "body": "Join thousands of professionals using kioku to capture, connect, and recall everything that matters.",
+    "description": "Organize materials, chat with AI, make knowledge stick.\nStart for <b>free</b>.",
     "button": "Get Started for Free"
+  },
+  "mock": {
+    "library": {
+      "project1": "Economics — Lecture Notes",
+      "project1Desc": "Macroeconomics slides and personal notes",
+      "project1Time": "updated 3 days ago",
+      "project2": "Thesis Research",
+      "project2Desc": "Related papers and reference summaries",
+      "project2Time": "updated yesterday",
+      "project3": "Reading Notes",
+      "project3Desc": "Highlights from this term's reading list",
+      "project3Time": "updated 1 week ago"
+    },
+    "chat": {
+      "title": "AI Chat",
+      "user": "Summarize this chapter in 3 points.",
+      "ai": "Based on the uploaded \"Chapter 4.pdf\", the three key points are:\n1. Demand curve shifts and equilibrium price\n2. Price elasticity and total revenue\n3. Deadweight loss from government intervention"
+    },
+    "podcast": {
+      "name": "Macroeconomics — Week 4 Recap",
+      "speaker1": "Host",
+      "text1": "Today we'll walk through the key points from Chapter 4.",
+      "speaker2": "Guest",
+      "text2": "Let's start with how demand-curve shifts move the equilibrium price."
+    }
   },
   "tos": {
     "title": "Terms of Service",

@@ -3,6 +3,7 @@ pub enum DomainErrorKind {
     BadInput,
     NotFound,
     Forbidden,
+    Upstream,
 }
 
 #[derive(Debug)]
@@ -28,6 +29,7 @@ impl From<DomainError> for (u16, crate::server::schema::ErrorBody) {
             DomainErrorKind::BadInput => 400,
             DomainErrorKind::NotFound => 404,
             DomainErrorKind::Forbidden => 403,
+            DomainErrorKind::Upstream => 502,
         };
         (
             status,

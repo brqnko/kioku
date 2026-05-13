@@ -68,7 +68,7 @@ export default function PodcastPage() {
             <a
               key={project.id}
               href={`/projects/${project.id}/podcasts`}
-              class="flex flex-col min-h-[160px] p-4 rounded-xl border border-border-subtle bg-surface-dark hover:border-text-disabled transition-colors duration-200 shadow-[0_2px_8px_rgba(0,0,0,0.2)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.3)] no-underline text-inherit"
+              class="flex flex-col min-h-[160px] p-4 rounded-xl border border-border-subtle bg-surface-dark hover:border-text-disabled shadow-[0_2px_8px_rgba(0,0,0,0.2)] no-underline text-inherit"
             >
               <h3 class="text-base font-medium text-text-primary mb-1 line-clamp-1">
                 {project.name}
@@ -96,7 +96,7 @@ export default function PodcastPage() {
               type="button"
               onClick={loadMore}
               disabled={loadingMore}
-              class="px-4 py-2 border border-overlay-medium text-text-primary text-sm font-semibold rounded-lg hover:bg-overlay-faint transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              class="px-4 py-2 border border-overlay-medium text-text-primary text-sm font-semibold rounded-lg hover:bg-overlay-faint cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loadingMore ? t("podcast.loading") : t("podcast.loadMore")}
             </button>

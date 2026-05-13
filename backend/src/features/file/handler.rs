@@ -44,7 +44,7 @@ pub struct RequestUploadUrlResponse {
 #[utoipa::path(
     post,
     path = "/files/upload-url",
-    security(("Bearer" = [])),
+    security(("cookieAuth" = [], "csrfToken" = [])),
     request_body = inline(RequestUploadUrlBody),
     responses(
         (status = 200, body = inline(RequestUploadUrlResponse)),
@@ -133,7 +133,7 @@ fn file_response(file: super::domain::File) -> FileResponse {
 #[utoipa::path(
     post,
     path = "/files",
-    security(("Bearer" = [])),
+    security(("cookieAuth" = [], "csrfToken" = [])),
     request_body = inline(CreateFileBody),
     responses(
         (status = 200, body = inline(FileResponse)),
@@ -191,7 +191,7 @@ pub struct GetFileContentResponse {
 #[utoipa::path(
     get,
     path = "/files/{file_id}/content",
-    security(("Bearer" = [])),
+    security(("cookieAuth" = [], "csrfToken" = [])),
     params(
         ("file_id" = uuid::Uuid, Path, description = "File ID"),
     ),
@@ -245,6 +245,37 @@ pub async fn get_file_content(
     }))
 }
 
+// get file raw
+
+#[utoipa::path(
+    get,
+    path = "/files/{file_id}/raw",
+    security(("cookieAuth" = [], "csrfToken" = [])),
+    params(
+        ("file_id" = uuid::Uuid, Path, description = "File ID"),
+    ),
+    responses(
+        (status = 302, description = "Redirect to presigned URL"),
+        (status = 400, body = crate::server::schema::ErrorBody),
+        (status = 401, body = crate::server::schema::ErrorBody),
+        (status = 403, body = crate::server::schema::ErrorBody),
+        (status = 404, body = crate::server::schema::ErrorBody),
+        (status = 500, body = crate::server::schema::ErrorBody),
+    )
+)]
+pub async fn get_file_raw(
+    axum::extract::Extension(user_id): axum::extract::Extension<uuid::Uuid>,
+    axum::extract::State(app): axum::extract::State<std::sync::Arc<crate::app::App>>,
+    axum::extract::Path(file_id): axum::extract::Path<uuid::Uuid>,
+) -> crate::server::HandlerResult<axum::response::Redirect> {
+    let input = super::usecase::GetFileRawUrlInput { user_id, file_id };
+    let output = super::usecase::get_file_raw_url(&app, input).await;
+
+    crate::server::schema::HandlerResult(
+        output.map(|r| r.map(|o| axum::response::Redirect::temporary(&o.url))),
+    )
+}
+
 // update file
 
 #[derive(serde::Deserialize, utoipa::ToSchema)]
@@ -258,7 +289,7 @@ pub struct UpdateFileBody {
 #[utoipa::path(
     patch,
     path = "/files/{file_id}",
-    security(("Bearer" = [])),
+    security(("cookieAuth" = [], "csrfToken" = [])),
     params(
         ("file_id" = uuid::Uuid, Path, description = "File ID"),
     ),
@@ -302,7 +333,7 @@ pub struct UpdateFileTextBody {
 #[utoipa::path(
     put,
     path = "/files/{file_id}/text",
-    security(("Bearer" = [])),
+    security(("cookieAuth" = [], "csrfToken" = [])),
     params(
         ("file_id" = uuid::Uuid, Path, description = "File ID"),
     ),
@@ -329,18 +360,18 @@ pub async fn update_file_text(
     };
     let output = super::usecase::update_file_text(&app, input).await;
 
-    if let Ok(Ok(o)) = &output {
-        let app = app.clone();
-        let file_id = o.file.id;
-        tokio::spawn(async move {
-            let input = super::usecase::IndexFileInput { file_id };
-            match super::usecase::index_file(&app, input).await {
-                Ok(Ok(_)) => tracing::info!(%file_id, "index_file finished"),
-                Ok(Err(err)) => tracing::error!(%file_id, ?err, "index_file domain error"),
-                Err(err) => tracing::error!(%file_id, ?err, "index_file failed"),
-            }
-        });
-    }
+    // if let Ok(Ok(o)) = &output {
+    //     let app = app.clone();
+    //     let file_id = o.file.id;
+    //     tokio::spawn(async move {
+    //         let input = super::usecase::IndexFileInput { file_id };
+    //         match super::usecase::index_file(&app, input).await {
+    //             Ok(Ok(_)) => tracing::info!(%file_id, "index_file finished"),
+    //             Ok(Err(err)) => tracing::error!(%file_id, ?err, "index_file domain error"),
+    //             Err(err) => tracing::error!(%file_id, ?err, "index_file failed"),
+    //         }
+    //     });
+    // }
 
     crate::server::schema::HandlerResult(
         output.map(|r| r.map(|o| axum::Json(file_response(o.file)))),
@@ -352,7 +383,7 @@ pub async fn update_file_text(
 #[utoipa::path(
     delete,
     path = "/files/{file_id}",
-    security(("Bearer" = [])),
+    security(("cookieAuth" = [], "csrfToken" = [])),
     params(
         ("file_id" = uuid::Uuid, Path, description = "File ID"),
     ),
@@ -423,7 +454,7 @@ fn folder_response(folder: super::domain::Folder) -> FolderResponse {
 #[utoipa::path(
     post,
     path = "/folders",
-    security(("Bearer" = [])),
+    security(("cookieAuth" = [], "csrfToken" = [])),
     request_body = inline(CreateFolderBody),
     responses(
         (status = 200, body = inline(FolderResponse)),
@@ -458,7 +489,7 @@ pub async fn create_folder(
 #[utoipa::path(
     get,
     path = "/folders/{folder_id}",
-    security(("Bearer" = [])),
+    security(("cookieAuth" = [], "csrfToken" = [])),
     params(
         ("folder_id" = uuid::Uuid, Path, description = "Folder ID"),
     ),
@@ -511,7 +542,7 @@ pub struct UpdateFolderBody {
 #[utoipa::path(
     patch,
     path = "/folders/{folder_id}",
-    security(("Bearer" = [])),
+    security(("cookieAuth" = [], "csrfToken" = [])),
     params(
         ("folder_id" = uuid::Uuid, Path, description = "Folder ID"),
     ),
@@ -549,7 +580,7 @@ pub async fn update_folder(
 #[utoipa::path(
     delete,
     path = "/folders/{folder_id}",
-    security(("Bearer" = [])),
+    security(("cookieAuth" = [], "csrfToken" = [])),
     params(
         ("folder_id" = uuid::Uuid, Path, description = "Folder ID"),
     ),
@@ -618,7 +649,7 @@ fn build_list_ancestors_response(
 #[utoipa::path(
     get,
     path = "/folders/{folder_id}/ancestors",
-    security(("Bearer" = [])),
+    security(("cookieAuth" = [], "csrfToken" = [])),
     params(
         ("folder_id" = uuid::Uuid, Path, description = "Folder ID"),
     ),
@@ -647,7 +678,7 @@ pub async fn get_folder_ancestors(
 #[utoipa::path(
     get,
     path = "/files/{file_id}/ancestors",
-    security(("Bearer" = [])),
+    security(("cookieAuth" = [], "csrfToken" = [])),
     params(
         ("file_id" = uuid::Uuid, Path, description = "File ID"),
     ),
@@ -830,7 +861,7 @@ fn build_list_children_response(
 #[utoipa::path(
     get,
     path = "/projects/{project_id}/children",
-    security(("Bearer" = [])),
+    security(("cookieAuth" = [], "csrfToken" = [])),
     params(
         ("project_id" = uuid::Uuid, Path, description = "Project ID"),
         ListChildrenQuery,
@@ -874,7 +905,7 @@ pub async fn list_project_children(
 #[utoipa::path(
     get,
     path = "/folders/{folder_id}/children",
-    security(("Bearer" = [])),
+    security(("cookieAuth" = [], "csrfToken" = [])),
     params(
         ("folder_id" = uuid::Uuid, Path, description = "Folder ID"),
         ListChildrenQuery,
@@ -915,6 +946,131 @@ pub async fn list_folder_children(
     )
 }
 
+// run code
+
+#[derive(serde::Deserialize, utoipa::ToSchema)]
+pub struct RunCodeBody {
+    #[schema(max_length = 65536)]
+    code: String,
+    #[schema(max_length = 64)]
+    compiler: String,
+    #[schema(max_length = 32768)]
+    stdin: Option<String>,
+    #[schema(max_length = 4096)]
+    compiler_options: Option<String>,
+    #[schema(max_length = 4096)]
+    compiler_option_raw: Option<String>,
+    #[schema(max_length = 4096)]
+    runtime_option_raw: Option<String>,
+}
+
+#[derive(serde::Serialize, utoipa::ToSchema)]
+pub struct RunCodeResponse {
+    status: Option<String>,
+    signal: Option<String>,
+    compiler_output: Option<String>,
+    compiler_error: Option<String>,
+    compiler_message: Option<String>,
+    program_output: Option<String>,
+    program_error: Option<String>,
+    program_message: Option<String>,
+}
+
+#[utoipa::path(
+    post,
+    path = "/files/run",
+    security(("cookieAuth" = [], "csrfToken" = [])),
+    request_body = inline(RunCodeBody),
+    responses(
+        (status = 200, body = inline(RunCodeResponse)),
+        (status = 400, body = crate::server::schema::ErrorBody),
+        (status = 401, body = crate::server::schema::ErrorBody),
+        (status = 500, body = crate::server::schema::ErrorBody),
+        (status = 502, body = crate::server::schema::ErrorBody),
+    )
+)]
+pub async fn run_code(
+    axum::extract::Extension(_user_id): axum::extract::Extension<uuid::Uuid>,
+    axum::extract::State(app): axum::extract::State<std::sync::Arc<crate::app::App>>,
+    axum::Json(body): axum::Json<RunCodeBody>,
+) -> crate::server::HandlerResult<axum::Json<RunCodeResponse>> {
+    let input = super::usecase::RunCodeInput {
+        code: body.code,
+        compiler: body.compiler,
+        stdin: body.stdin,
+        compiler_options: body.compiler_options,
+        compiler_option_raw: body.compiler_option_raw,
+        runtime_option_raw: body.runtime_option_raw,
+    };
+    let output = super::usecase::run_code(&app, input).await;
+
+    crate::server::schema::HandlerResult(output.map(|r| {
+        r.map(|o| {
+            axum::Json(RunCodeResponse {
+                status: o.status,
+                signal: o.signal,
+                compiler_output: o.compiler_output,
+                compiler_error: o.compiler_error,
+                compiler_message: o.compiler_message,
+                program_output: o.program_output,
+                program_error: o.program_error,
+                program_message: o.program_message,
+            })
+        })
+    }))
+}
+
+// list compilers
+
+#[derive(serde::Serialize, utoipa::ToSchema)]
+pub struct CompilerSummary {
+    name: String,
+    language: String,
+    display_name: String,
+    version: String,
+}
+
+#[derive(serde::Serialize, utoipa::ToSchema)]
+pub struct ListCompilersResponse {
+    #[schema(inline)]
+    compilers: Vec<CompilerSummary>,
+}
+
+#[utoipa::path(
+    get,
+    path = "/code/compilers",
+    security(("cookieAuth" = [], "csrfToken" = [])),
+    responses(
+        (status = 200, body = inline(ListCompilersResponse)),
+        (status = 401, body = crate::server::schema::ErrorBody),
+        (status = 500, body = crate::server::schema::ErrorBody),
+        (status = 502, body = crate::server::schema::ErrorBody),
+    )
+)]
+pub async fn list_compilers(
+    axum::extract::Extension(_user_id): axum::extract::Extension<uuid::Uuid>,
+    axum::extract::State(app): axum::extract::State<std::sync::Arc<crate::app::App>>,
+) -> crate::server::HandlerResult<axum::Json<ListCompilersResponse>> {
+    let output = super::usecase::list_compilers(&app).await;
+
+    crate::server::schema::HandlerResult(output.map(|r| {
+        r.map(|o| {
+            axum::Json(ListCompilersResponse {
+                compilers: o
+                    .compilers
+                    .into_iter()
+                    .map(|c| CompilerSummary {
+                        name: c.name,
+                        language: c.language,
+                        display_name: c.display_name,
+                        version: c.version,
+                    })
+                    .collect(),
+            })
+        })
+    }))
+}
+
 pub fn protected_router() -> utoipa_axum::router::OpenApiRouter<std::sync::Arc<crate::app::App>> {
     use utoipa_axum::routes;
 
@@ -922,6 +1078,7 @@ pub fn protected_router() -> utoipa_axum::router::OpenApiRouter<std::sync::Arc<c
         .routes(routes!(request_upload_url))
         .routes(routes!(create_file))
         .routes(routes!(get_file_content))
+        .routes(routes!(get_file_raw))
         .routes(routes!(update_file_text))
         .routes(routes!(update_file, remove_file))
         .routes(routes!(create_folder))
@@ -930,4 +1087,6 @@ pub fn protected_router() -> utoipa_axum::router::OpenApiRouter<std::sync::Arc<c
         .routes(routes!(get_file_ancestors))
         .routes(routes!(list_project_children))
         .routes(routes!(list_folder_children))
+        .routes(routes!(run_code))
+        .routes(routes!(list_compilers))
 }

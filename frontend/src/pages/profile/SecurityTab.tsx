@@ -129,7 +129,7 @@ export default function SecurityTab() {
               type="button"
               onClick={() => setConfirmAll(true)}
               disabled={revokingAll}
-              class="text-sm text-danger hover:text-danger/80 py-2 px-4 rounded border border-danger/30 hover:border-danger transition-colors cursor-pointer bg-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+              class="text-sm text-danger hover:text-danger/80 py-2 px-4 rounded border border-danger/30 hover:border-danger cursor-pointer bg-transparent disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {t("profile.security.revokeAll")}
             </button>
@@ -168,7 +168,7 @@ export default function SecurityTab() {
               type="button"
               onClick={() => setPendingRevoke(null)}
               disabled={!!revoking}
-              class="px-5 py-2.5 rounded-lg font-bold text-sm text-text-muted-dark hover:bg-overlay-faint transition-colors cursor-pointer bg-transparent border-none disabled:opacity-50"
+              class="px-5 py-2.5 rounded-lg font-bold text-sm text-text-muted-dark hover:bg-overlay-faint cursor-pointer bg-transparent border-none disabled:opacity-50"
             >
               {t("profile.cancel")}
             </button>
@@ -176,7 +176,7 @@ export default function SecurityTab() {
               type="button"
               onClick={revokeOne}
               disabled={!!revoking}
-              class="px-5 py-2.5 bg-danger text-white text-sm font-bold rounded-lg hover:bg-danger/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer border-none"
+              class="px-5 py-2.5 bg-danger text-white text-sm font-bold rounded-lg hover:bg-danger/90 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer border-none"
             >
               {revoking
                 ? t("profile.security.revoking")
@@ -206,7 +206,7 @@ export default function SecurityTab() {
               type="button"
               onClick={() => setConfirmAll(false)}
               disabled={revokingAll}
-              class="px-5 py-2.5 rounded-lg font-bold text-sm text-text-muted-dark hover:bg-overlay-faint transition-colors cursor-pointer bg-transparent border-none disabled:opacity-50"
+              class="px-5 py-2.5 rounded-lg font-bold text-sm text-text-muted-dark hover:bg-overlay-faint cursor-pointer bg-transparent border-none disabled:opacity-50"
             >
               {t("profile.cancel")}
             </button>
@@ -214,7 +214,7 @@ export default function SecurityTab() {
               type="button"
               onClick={revokeAll}
               disabled={revokingAll}
-              class="px-5 py-2.5 bg-danger text-white text-sm font-bold rounded-lg hover:bg-danger/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer border-none"
+              class="px-5 py-2.5 bg-danger text-white text-sm font-bold rounded-lg hover:bg-danger/90 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer border-none"
             >
               {revokingAll
                 ? t("profile.security.revokingAll")
@@ -247,7 +247,7 @@ function SessionRow({
 
   return (
     <div
-      class={`grid grid-cols-12 gap-4 p-4 items-center hover:bg-overlay-faint transition-colors ${
+      class={`grid grid-cols-12 gap-4 p-4 items-center hover:bg-overlay-faint ${
         isLast ? "" : "border-b border-border-dark"
       }`}
     >
@@ -273,7 +273,7 @@ function SessionRow({
           type="button"
           onClick={onRevoke}
           disabled={revoking}
-          class="text-sm text-text-primary py-2 px-4 rounded border border-border-dark hover:border-text-muted-dark transition-colors cursor-pointer bg-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+          class="text-sm text-text-primary py-2 px-4 rounded border border-border-dark hover:border-text-muted-dark cursor-pointer bg-transparent disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {revoking ? t("profile.security.revoking") : t("profile.security.revoke")}
         </button>

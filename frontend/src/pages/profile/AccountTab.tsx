@@ -150,7 +150,7 @@ export default function AccountTab() {
             onInput={(e) =>
               setDisplayName((e.target as HTMLInputElement).value)
             }
-            class="bg-surface-dark border border-border-dark rounded-lg h-9 px-2 text-base text-text-primary focus:border-accent-blue focus:ring-1 focus:ring-accent-blue outline-none transition-colors w-full"
+            class="bg-surface-dark border border-border-dark rounded-lg h-9 px-2 text-base text-text-primary focus:border-accent-blue focus:ring-1 focus:ring-accent-blue outline-none w-full"
           />
           <div class="flex items-center justify-between">
             <p class="text-xs text-text-muted-dark">
@@ -171,7 +171,7 @@ export default function AccountTab() {
               onClick={() => setLangOpen(!langOpen)}
               aria-haspopup="true"
               aria-expanded={langOpen}
-              class="bg-surface-dark border border-border-dark rounded-lg h-9 px-3 text-sm text-text-primary focus:border-accent-blue focus:ring-1 focus:ring-accent-blue outline-none transition-colors w-full flex items-center justify-between gap-2 cursor-pointer"
+              class="bg-surface-dark border border-border-dark rounded-lg h-9 px-3 text-sm text-text-primary focus:border-accent-blue focus:ring-1 focus:ring-accent-blue outline-none w-full flex items-center justify-between gap-2 cursor-pointer"
             >
               <span>{currentLanguage?.label ?? languageCode}</span>
               <span class="material-symbols-outlined text-text-muted-dark text-[18px]">
@@ -194,7 +194,7 @@ export default function AccountTab() {
                         setLanguageCode(lang.code);
                         setLangOpen(false);
                       }}
-                      class={`w-full flex items-center gap-2 px-4 py-2 text-left text-sm font-medium cursor-pointer transition-colors bg-transparent border-none ${
+                      class={`w-full flex items-center gap-2 px-4 py-2 text-left text-sm font-medium cursor-pointer bg-transparent border-none ${
                         active
                           ? "text-primary"
                           : "text-text-secondary hover:bg-overlay-faint"
@@ -221,7 +221,7 @@ export default function AccountTab() {
               onClick={() => setThemeOpen(!themeOpen)}
               aria-haspopup="true"
               aria-expanded={themeOpen}
-              class="bg-surface-dark border border-border-dark rounded-lg h-9 px-3 text-sm text-text-primary focus:border-accent-blue focus:ring-1 focus:ring-accent-blue outline-none transition-colors w-full flex items-center justify-between gap-2 cursor-pointer"
+              class="bg-surface-dark border border-border-dark rounded-lg h-9 px-3 text-sm text-text-primary focus:border-accent-blue focus:ring-1 focus:ring-accent-blue outline-none w-full flex items-center justify-between gap-2 cursor-pointer"
             >
               <span class="flex items-center gap-2">
                 <span
@@ -252,7 +252,7 @@ export default function AccountTab() {
                         setMode(m as ColorMode);
                         setThemeOpen(false);
                       }}
-                      class={`w-full flex items-center gap-2 px-4 py-2 text-left text-sm font-medium cursor-pointer transition-colors bg-transparent border-none ${
+                      class={`w-full flex items-center gap-2 px-4 py-2 text-left text-sm font-medium cursor-pointer bg-transparent border-none ${
                         active
                           ? "text-primary"
                           : "text-text-secondary hover:bg-overlay-faint"
@@ -286,7 +286,7 @@ export default function AccountTab() {
             type="button"
             onClick={handleSave}
             disabled={saving || !nameValid || !dirty}
-            class="px-6 py-2 bg-cta text-cta-fg rounded-lg text-sm font-bold hover:bg-cta-hover transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+            class="px-6 py-2 bg-cta text-cta-fg rounded-lg text-sm font-bold hover:bg-cta-hover cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {saving ? t("profile.saving") : t("profile.save")}
           </button>
@@ -298,7 +298,7 @@ export default function AccountTab() {
           href="https://github.com/brqnko/kioku/issues/new"
           target="_blank"
           rel="noopener noreferrer"
-          class="flex items-center gap-4 p-2 rounded-lg hover:bg-overlay-faint text-text-primary transition-colors text-left w-full h-11 no-underline"
+          class="flex items-center gap-4 p-2 rounded-lg hover:bg-overlay-faint text-text-primary text-left w-full h-11 no-underline"
         >
           <span class="material-symbols-outlined text-text-muted-dark">flag</span>
           <span class="text-base">{t("profile.actions.report")}</span>
@@ -306,7 +306,7 @@ export default function AccountTab() {
         <button
           type="button"
           onClick={() => setShowLogout(true)}
-          class="flex items-center gap-4 p-2 rounded-lg hover:bg-overlay-faint text-text-primary transition-colors text-left w-full h-11 cursor-pointer bg-transparent border-none"
+          class="flex items-center gap-4 p-2 rounded-lg hover:bg-overlay-faint text-text-primary text-left w-full h-11 cursor-pointer bg-transparent border-none"
         >
           <span class="material-symbols-outlined text-text-muted-dark">logout</span>
           <span class="text-base">{t("profile.actions.logout")}</span>
@@ -314,7 +314,7 @@ export default function AccountTab() {
         <button
           type="button"
           onClick={() => setShowDelete(true)}
-          class="flex items-center gap-4 p-2 rounded-lg hover:bg-danger/10 text-danger transition-colors text-left w-full h-11 mt-4 cursor-pointer bg-transparent border-none"
+          class="flex items-center gap-4 p-2 rounded-lg hover:bg-danger/10 text-danger text-left w-full h-11 mt-4 cursor-pointer bg-transparent border-none"
         >
           <span class="material-symbols-outlined">delete</span>
           <span class="text-base font-medium">
@@ -338,14 +338,14 @@ export default function AccountTab() {
             <button
               type="button"
               onClick={() => setShowLogout(false)}
-              class="px-5 py-2.5 rounded-lg font-bold text-sm text-text-muted-dark hover:bg-overlay-faint transition-colors cursor-pointer bg-transparent border-none"
+              class="px-5 py-2.5 rounded-lg font-bold text-sm text-text-muted-dark hover:bg-overlay-faint cursor-pointer bg-transparent border-none"
             >
               {t("profile.cancel")}
             </button>
             <button
               type="button"
               onClick={handleLogout}
-              class="px-5 py-2.5 bg-cta text-cta-fg text-sm font-bold rounded-lg hover:bg-cta-hover transition-colors cursor-pointer border-none"
+              class="px-5 py-2.5 bg-cta text-cta-fg text-sm font-bold rounded-lg hover:bg-cta-hover cursor-pointer border-none"
             >
               {t("profile.actions.logout")}
             </button>
@@ -388,7 +388,7 @@ export default function AccountTab() {
                 setDeleteInput((e.target as HTMLInputElement).value)
               }
               autocomplete="off"
-              class="w-full px-4 py-2.5 bg-surface-container-high border border-border-dark rounded-lg focus:ring-1 focus:ring-danger focus:border-danger outline-none transition-all text-text-primary"
+              class="w-full px-4 py-2.5 bg-surface-container-high border border-border-dark rounded-lg focus:ring-1 focus:ring-danger focus:border-danger outline-none text-text-primary"
             />
           </div>
           <div class="flex justify-end gap-3 mt-2">
@@ -399,7 +399,7 @@ export default function AccountTab() {
                 setDeleteInput("");
               }}
               disabled={deleting}
-              class="px-5 py-2.5 rounded-lg font-bold text-sm text-text-muted-dark hover:bg-overlay-faint transition-colors cursor-pointer bg-transparent border-none disabled:opacity-50"
+              class="px-5 py-2.5 rounded-lg font-bold text-sm text-text-muted-dark hover:bg-overlay-faint cursor-pointer bg-transparent border-none disabled:opacity-50"
             >
               {t("profile.cancel")}
             </button>
@@ -409,7 +409,7 @@ export default function AccountTab() {
               disabled={
                 deleting || deleteInput !== t("profile.deleteConfirm.phrase")
               }
-              class="px-5 py-2.5 bg-danger text-white text-sm font-bold rounded-lg hover:bg-danger/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer border-none"
+              class="px-5 py-2.5 bg-danger text-white text-sm font-bold rounded-lg hover:bg-danger/90 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer border-none"
             >
               {deleting
                 ? t("profile.deleteConfirm.deleting")

@@ -42,37 +42,71 @@ pub async fn create_podcast(
         )));
     }
 
-    let in_progress = app
-        .podcast_request_service
-        .list_by_user(input.user_id)
-        .await?;
-    if in_progress.len() >= super::domain::MAX_CONCURRENT_GENERATIONS {
-        return Ok(Err(crate::domain::DomainError::new(
-            "max_concurrent_podcast_generations_exceeded",
-            format!(
-                "user can have at most {} concurrent podcast generations",
-                super::domain::MAX_CONCURRENT_GENERATIONS
-            ),
-            crate::domain::DomainErrorKind::BadInput,
-        )));
-    }
+    let lock_name = format!("podcast_quota:project:{}", input.project_id.as_simple());
+    let mut tx = app.pool.begin().await?;
+    app.locker.acquire(&mut tx, &lock_name, 10).await?;
 
-    let podcast_id = uuid::Uuid::new_v4();
-    let request = crate::util::podcast_request::PodcastRequest {
-        podcast_id,
-        user_id: input.user_id,
-        project_id: input.project_id,
-        name: input.name,
-        description: input.description,
-        used_file_ids: input.used_file_ids,
-        started_at: chrono::Utc::now(),
-    };
+    let work: Result<Result<CreatePodcastOutput, crate::domain::DomainError>, anyhow::Error> =
+        async move {
+            let in_progress = app
+                .podcast_request_service
+                .list_by_user(input.user_id)
+                .await?;
+            if in_progress.len() >= super::domain::MAX_CONCURRENT_GENERATIONS {
+                return Ok(Err(crate::domain::DomainError::new(
+                    "max_concurrent_podcast_generations_exceeded",
+                    format!(
+                        "user can have at most {} concurrent podcast generations",
+                        super::domain::MAX_CONCURRENT_GENERATIONS
+                    ),
+                    crate::domain::DomainErrorKind::BadInput,
+                )));
+            }
 
-    app.podcast_request_service
-        .save(&request, std::time::Duration::from_secs(3600))
-        .await?;
+            let in_progress_for_project = in_progress
+                .iter()
+                .filter(|r| r.project_id == input.project_id)
+                .count();
+            let persisted_for_project = app
+                .podcast_query_service
+                .count_by_project(input.project_id)
+                .await? as usize;
+            if persisted_for_project + in_progress_for_project
+                >= super::domain::MAX_PODCASTS_PER_PROJECT
+            {
+                return Ok(Err(crate::domain::DomainError::new(
+                    "podcast_per_project_quota_exceeded",
+                    format!(
+                        "project can have at most {} podcasts",
+                        super::domain::MAX_PODCASTS_PER_PROJECT
+                    ),
+                    crate::domain::DomainErrorKind::BadInput,
+                )));
+            }
 
-    Ok(Ok(CreatePodcastOutput { podcast_id }))
+            let podcast_id = uuid::Uuid::new_v4();
+            let request = crate::util::podcast_request::PodcastRequest {
+                podcast_id,
+                user_id: input.user_id,
+                project_id: input.project_id,
+                name: input.name,
+                description: input.description,
+                used_file_ids: input.used_file_ids,
+                started_at: chrono::Utc::now(),
+            };
+
+            app.podcast_request_service
+                .save(&request, std::time::Duration::from_secs(3600))
+                .await?;
+
+            Ok(Ok(CreatePodcastOutput { podcast_id }))
+        }
+        .await;
+
+    app.locker.release(&mut tx, &lock_name).await?;
+    drop(tx);
+
+    work
 }
 
 // generate podcast (worker entry)
@@ -151,27 +185,15 @@ pub async fn generate_podcast(
         Err(err) => return Ok(Err(err)),
     };
 
-    // Step 1: 資料 → custom prompt (英語)
-    let custom_prompt = app
-        .llm_client
-        .complete(
-            crate::util::llm::CopilotImpl::MODEL_GEMINI_3_1_PRO,
-            podcast_intermediate.to_custom_prompt_llm_input(&documents),
-        )
-        .await?
-        .content;
-
-    // Step 2: custom prompt + 資料 → English script
     let english_script = app
         .llm_client
         .complete(
             crate::util::llm::CopilotImpl::MODEL_GEMINI_3_1_PRO,
-            podcast_intermediate.to_script_llm_input(&documents, &custom_prompt),
+            podcast_intermediate.to_script_llm_input(&documents),
         )
         .await?
         .content;
 
-    // Step 3: English → ユーザー言語
     let translated_script = app
         .llm_client
         .complete(
@@ -183,16 +205,15 @@ pub async fn generate_podcast(
 
     let podcast_script = parse_script(&translated_script);
 
-    // 文字数で chunk → TTS 順次呼び出し → audio bytes 連結
     const TTS_CHUNK_CHARS: usize = 10_000;
     let speakers = vec![
         crate::util::tts::SpeakerVoice {
-            speaker: "Ken".to_string(),
-            voice: "Puck".to_string(),
+            speaker: "Charon".to_string(),
+            voice: "Charon".to_string(),
         },
         crate::util::tts::SpeakerVoice {
-            speaker: "Maya".to_string(),
-            voice: "Kore".to_string(),
+            speaker: "Leda".to_string(),
+            voice: "Leda".to_string(),
         },
     ];
     const TTS_MAX_ATTEMPTS: u32 = 3;
@@ -242,8 +263,6 @@ pub async fn generate_podcast(
         audio.extend(part.audio);
     }
 
-    // Gemini returns raw L16 PCM. Concatenate raw PCM across chunks first, then wrap
-    // once with a WAV header so the stored object is browser-playable.
     let sample_rate = crate::util::tts::parse_pcm_sample_rate(&audio_content_type);
     let wav = crate::util::tts::wrap_pcm_as_wav(&audio, sample_rate);
 
@@ -343,7 +362,7 @@ pub async fn get_podcast(
         .storage_service
         .presign_get(
             podcast.audio_storage_id,
-            std::time::Duration::from_secs(3600),
+            std::time::Duration::from_secs(60 * 60),
         )
         .await?
         .url;
@@ -534,7 +553,7 @@ pub async fn update_podcast(
 
     let audio_url = app
         .storage_service
-        .presign_get(view.audio_storage_id, std::time::Duration::from_secs(3600))
+        .presign_get(view.audio_storage_id, std::time::Duration::from_secs(60 * 60))
         .await?
         .url;
 

@@ -408,7 +408,7 @@ pub async fn get_file_content(
         super::domain::StorageType::Object => {
             let presigned = app
                 .storage_service
-                .presign_get(file.storage_id, std::time::Duration::from_secs(60))
+                .presign_get(file.storage_id, std::time::Duration::from_secs(60 * 60))
                 .await?;
             FileContent::Url {
                 url: presigned.url,
@@ -462,6 +462,62 @@ pub async fn get_file_content(
     tx.commit().await?;
 
     Ok(Ok(GetFileContentOutput { file, content }))
+}
+
+// get file raw url
+
+pub struct GetFileRawUrlInput {
+    pub user_id: uuid::Uuid,
+    pub file_id: uuid::Uuid,
+}
+
+pub struct GetFileRawUrlOutput {
+    pub url: String,
+}
+
+pub async fn get_file_raw_url(
+    app: &crate::app::App,
+    input: GetFileRawUrlInput,
+) -> Result<Result<GetFileRawUrlOutput, crate::domain::DomainError>, anyhow::Error> {
+    let file = match app.file_query_service.get_file(input.file_id).await? {
+        Some(ok) => ok,
+        None => {
+            return Ok(Err(crate::domain::DomainError::new(
+                "file_not_found",
+                "file not found".to_string(),
+                crate::domain::DomainErrorKind::NotFound,
+            )));
+        }
+    };
+
+    if file.user_id != input.user_id {
+        return Ok(Err(crate::domain::DomainError::new(
+            "forbidden",
+            "file does not belong to the user".to_string(),
+            crate::domain::DomainErrorKind::Forbidden,
+        )));
+    }
+
+    let storage_type = super::domain::StorageType::try_from(file.storage_type)?;
+    match storage_type {
+        super::domain::StorageType::Object => {}
+        super::domain::StorageType::Text => {
+            return Ok(Err(crate::domain::DomainError::new(
+                "invalid_storage_type",
+                "raw fetch is only supported for object storage".to_string(),
+                crate::domain::DomainErrorKind::BadInput,
+            )));
+        }
+    }
+
+    let presigned = app
+        .storage_service
+        .presign_get(file.storage_id, std::time::Duration::from_secs(60 * 60))
+        .await?;
+
+    Ok(Ok(GetFileRawUrlOutput {
+        url: presigned.url,
+    }))
 }
 
 // index file
@@ -863,10 +919,50 @@ pub struct RemoveFolderInput {
 pub struct RemoveFolderOutput {}
 
 pub async fn remove_folder(
-    _app: &crate::app::App,
-    _input: RemoveFolderInput,
+    app: &crate::app::App,
+    input: RemoveFolderInput,
 ) -> Result<Result<RemoveFolderOutput, crate::domain::DomainError>, anyhow::Error> {
-    todo!()
+    let mut tx = app.pool.begin().await?;
+
+    let folder = match app
+        .folder_repository
+        .find_for_update(&mut tx, input.folder_id)
+        .await?
+    {
+        Some(ok) => ok,
+        None => {
+            return Ok(Err(crate::domain::DomainError::new(
+                "folder_not_found",
+                "folder not found".to_string(),
+                crate::domain::DomainErrorKind::NotFound,
+            )));
+        }
+    };
+
+    if folder.user_id != input.user_id {
+        return Ok(Err(crate::domain::DomainError::new(
+            "forbidden",
+            "folder does not belong to the user".to_string(),
+            crate::domain::DomainErrorKind::Forbidden,
+        )));
+    }
+
+    if app.file_query_service.folder_has_child(folder.id).await? {
+        return Ok(Err(crate::domain::DomainError::new(
+            "folder_not_empty",
+            "folder has children".to_string(),
+            crate::domain::DomainErrorKind::BadInput,
+        )));
+    }
+
+    match app.folder_repository.remove(&mut tx, folder.id).await? {
+        Ok(()) => {}
+        Err(err) => return Ok(Err(err)),
+    }
+
+    tx.commit().await?;
+
+    Ok(Ok(RemoveFolderOutput {}))
 }
 
 // get folder ancestors
@@ -1024,4 +1120,161 @@ pub async fn list_children(
         items: rows,
         next_cursor,
     }))
+}
+
+pub struct RunCodeInput {
+    pub code: String,
+    pub compiler: String,
+    pub stdin: Option<String>,
+    pub compiler_options: Option<String>,
+    pub compiler_option_raw: Option<String>,
+    pub runtime_option_raw: Option<String>,
+}
+
+pub struct RunCodeOutput {
+    pub status: Option<String>,
+    pub signal: Option<String>,
+    pub compiler_output: Option<String>,
+    pub compiler_error: Option<String>,
+    pub compiler_message: Option<String>,
+    pub program_output: Option<String>,
+    pub program_error: Option<String>,
+    pub program_message: Option<String>,
+}
+
+fn is_valid_compiler_id(s: &str) -> bool {
+    !s.is_empty()
+        && s.len() <= crate::util::code_runner::MAX_COMPILER_LEN
+        && s.chars()
+            .all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '_' | '-' | '+'))
+}
+
+pub async fn run_code(
+    app: &crate::app::App,
+    input: RunCodeInput,
+) -> Result<Result<RunCodeOutput, crate::domain::DomainError>, anyhow::Error> {
+    use crate::util::code_runner::{
+        CodeRunnerError, MAX_CODE_LEN, MAX_OPTION_LEN, MAX_STDIN_LEN, RunRequest,
+    };
+
+    if input.code.is_empty() {
+        return Ok(Err(crate::domain::DomainError::new(
+            "code_empty",
+            "code must not be empty".to_string(),
+            crate::domain::DomainErrorKind::BadInput,
+        )));
+    }
+    if input.code.len() > MAX_CODE_LEN {
+        return Ok(Err(crate::domain::DomainError::new(
+            "code_too_large",
+            format!("code must be at most {MAX_CODE_LEN} bytes"),
+            crate::domain::DomainErrorKind::BadInput,
+        )));
+    }
+    if !is_valid_compiler_id(&input.compiler) {
+        return Ok(Err(crate::domain::DomainError::new(
+            "invalid_compiler",
+            "compiler id is invalid".to_string(),
+            crate::domain::DomainErrorKind::BadInput,
+        )));
+    }
+    if let Some(stdin) = input.stdin.as_deref()
+        && stdin.len() > MAX_STDIN_LEN
+    {
+        return Ok(Err(crate::domain::DomainError::new(
+            "stdin_too_large",
+            format!("stdin must be at most {MAX_STDIN_LEN} bytes"),
+            crate::domain::DomainErrorKind::BadInput,
+        )));
+    }
+    for opt in [
+        input.compiler_options.as_deref(),
+        input.compiler_option_raw.as_deref(),
+        input.runtime_option_raw.as_deref(),
+    ] {
+        if let Some(v) = opt
+            && v.len() > MAX_OPTION_LEN
+        {
+            return Ok(Err(crate::domain::DomainError::new(
+                "option_too_large",
+                format!("each option string must be at most {MAX_OPTION_LEN} bytes"),
+                crate::domain::DomainErrorKind::BadInput,
+            )));
+        }
+    }
+
+    let req = RunRequest {
+        code: input.code,
+        compiler: input.compiler,
+        stdin: input.stdin,
+        compiler_options: input.compiler_options,
+        compiler_option_raw: input.compiler_option_raw,
+        runtime_option_raw: input.runtime_option_raw,
+    };
+
+    match app.code_runner_client.run(req).await {
+        Ok(r) => Ok(Ok(RunCodeOutput {
+            status: r.status,
+            signal: r.signal,
+            compiler_output: r.compiler_output,
+            compiler_error: r.compiler_error,
+            compiler_message: r.compiler_message,
+            program_output: r.program_output,
+            program_error: r.program_error,
+            program_message: r.program_message,
+        })),
+        Err(CodeRunnerError::Rejected(msg)) => Ok(Err(crate::domain::DomainError::new(
+            "wandbox_rejected",
+            msg,
+            crate::domain::DomainErrorKind::BadInput,
+        ))),
+        Err(CodeRunnerError::Upstream(_)) => Ok(Err(crate::domain::DomainError::new(
+            "wandbox_unavailable",
+            "code runner upstream is unavailable".to_string(),
+            crate::domain::DomainErrorKind::Upstream,
+        ))),
+    }
+}
+
+// list compilers
+
+pub struct CompilerSummaryOutput {
+    pub name: String,
+    pub language: String,
+    pub display_name: String,
+    pub version: String,
+}
+
+pub struct ListCompilersOutput {
+    pub compilers: Vec<CompilerSummaryOutput>,
+}
+
+pub async fn list_compilers(
+    app: &crate::app::App,
+) -> Result<Result<ListCompilersOutput, crate::domain::DomainError>, anyhow::Error> {
+    use crate::util::code_runner::CodeRunnerError;
+
+    match app.code_runner_client.list_compilers().await {
+        Ok(list) => Ok(Ok(ListCompilersOutput {
+            compilers: list
+                .into_iter()
+                .map(|c| CompilerSummaryOutput {
+                    name: c.name,
+                    language: c.language,
+                    display_name: c.display_name,
+                    version: c.version,
+                })
+                .collect(),
+        })),
+        Err(CodeRunnerError::Rejected(msg)) => Ok(Err(crate::domain::DomainError::new(
+            "wandbox_rejected",
+            msg,
+            crate::domain::DomainErrorKind::BadInput,
+        ))),
+        Err(CodeRunnerError::Upstream(_)) => Ok(Err(crate::domain::DomainError::new(
+            "wandbox_unavailable",
+            "code runner upstream is unavailable".to_string(),
+            crate::domain::DomainErrorKind::Upstream,
+        ))),
+    }
 }

@@ -14,7 +14,7 @@ export default function TopAppBar() {
           aria-label={t(collapsed ? "nav.expand" : "nav.collapse")}
           aria-expanded={!collapsed}
           title={t(collapsed ? "nav.expand" : "nav.collapse")}
-          class="p-1.5 rounded-md hover:bg-overlay-soft text-text-secondary hover:text-text-primary transition-colors duration-200 ease-in-out cursor-pointer flex items-center justify-center bg-transparent border-none"
+          class="p-1.5 rounded-md hover:bg-overlay-soft text-text-secondary hover:text-text-primary cursor-pointer flex items-center justify-center bg-transparent border-none"
         >
           <span class="material-symbols-outlined text-[24px]">menu</span>
         </button>
@@ -27,7 +27,7 @@ export default function TopAppBar() {
       <a
         href="/profile"
         aria-label={t("topbar.settings")}
-        class="text-text-secondary hover:text-text-primary hover:bg-overlay-soft rounded-md p-1.5 cursor-pointer transition-colors duration-200 ease-in-out flex items-center justify-center"
+        class="text-text-secondary hover:text-text-primary hover:bg-overlay-soft rounded-md p-1.5 cursor-pointer flex items-center justify-center"
       >
         <span class="material-symbols-outlined text-[20px]">settings</span>
       </a>

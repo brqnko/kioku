@@ -1,8 +1,7 @@
-import { useMemo } from "preact/hooks";
 import { useTranslation } from "react-i18next";
-import { marked } from "marked";
 import SideNavBar from "../components/SideNavBar";
 import TopAppBar from "../components/TopAppBar";
+import { MarkdownView } from "../components/MarkdownView";
 import { useDashboard } from "../hooks/useDashboard";
 import type { GetDashboard200RecentSeenFilesItem } from "../api/generated/backend.schemas";
 
@@ -41,11 +40,6 @@ function formatRelative(iso: string, locale: string) {
 export default function DashboardPage() {
   const { t, i18n } = useTranslation();
   const { data, error, isLoading } = useDashboard();
-
-  const summaryHtml = useMemo(() => {
-    if (!data?.ai_learning_summary) return "";
-    return marked.parse(data.ai_learning_summary, { async: false }) as string;
-  }, [data?.ai_learning_summary]);
 
   return (
     <div class="min-h-screen bg-background-dark text-text-primary">
@@ -87,10 +81,10 @@ export default function DashboardPage() {
               {data && !data.ai_learning_summary && (
                 <p class="text-sm text-text-muted-dark">{t("dashboard.summary.empty")}</p>
               )}
-              {summaryHtml && (
-                <div
-                  class="markdown-body text-sm text-text-muted-dark leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: summaryHtml }}
+              {data?.ai_learning_summary && (
+                <MarkdownView
+                  source={data.ai_learning_summary}
+                  className="markdown-body text-sm text-text-muted-dark leading-relaxed"
                 />
               )}
             </div>
@@ -106,7 +100,7 @@ export default function DashboardPage() {
               </h2>
               <a
                 href="/library"
-                class="text-text-muted-dark text-xs hover:text-text-primary transition-colors flex items-center gap-1 no-underline"
+                class="text-text-muted-dark text-xs hover:text-text-primary flex items-center gap-1 no-underline"
               >
                 {t("dashboard.recent.toLibrary")}
                 <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
@@ -134,7 +128,7 @@ export default function DashboardPage() {
                   <a
                     key={file.id}
                     href={`/files/${file.id}`}
-                    class="bg-surface-dark border border-border-dark rounded-xl p-4 flex flex-col gap-4 hover:bg-overlay-faint hover:border-overlay-medium transition-all duration-200 group no-underline text-inherit"
+                    class="bg-surface-dark border border-border-dark rounded-xl p-4 flex flex-col gap-4 hover:bg-overlay-faint hover:border-overlay-medium group no-underline text-inherit"
                   >
                     <div class="flex items-start">
                       <div class={`w-10 h-10 rounded-lg flex items-center justify-center ${toneClass[tone]}`}>
@@ -142,7 +136,7 @@ export default function DashboardPage() {
                       </div>
                     </div>
                     <div>
-                      <h3 class="text-sm font-bold truncate mb-1 group-hover:text-accent-blue transition-colors">
+                      <h3 class="text-sm font-bold truncate mb-1 group-hover:text-accent-blue">
                         {file.name}
                       </h3>
                       <p class="text-xs text-text-disabled">

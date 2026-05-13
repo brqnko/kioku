@@ -9,6 +9,7 @@ import { useFileContent, fileContentKeyFor } from "../hooks/useFile";
 import { invalidateAfterMutation } from "../utils/swrCache";
 import { fetchFileAncestors, type BreadcrumbAncestor } from "../hooks/useFolder";
 import { kyInstance } from "../api/mutator";
+import { uploadFile } from "../api/upload";
 import { formatSize } from "../utils/file";
 import type {
   GetFileContent200,
@@ -267,7 +268,7 @@ export default function FilePage() {
                         startEditName();
                       }
                     }}
-                    class="flex-1 min-w-0 font-bold tracking-tight text-text-primary text-[54px] leading-[1.04] cursor-text rounded -ml-1 px-1 hover:bg-overlay-faint transition-colors"
+                    class="flex-1 min-w-0 font-bold tracking-tight text-text-primary text-[54px] leading-[1.04] cursor-text rounded -ml-1 px-1 hover:bg-overlay-faint"
                   >
                     {file.name}
                   </h1>
@@ -316,7 +317,7 @@ export default function FilePage() {
                   <button
                     type="button"
                     onClick={() => copyDate("created", file.uploaded_at)}
-                    class="flex items-center justify-center w-6 h-6 rounded text-text-disabled hover:text-text-secondary hover:bg-overlay-faint transition-colors cursor-pointer bg-transparent border-none"
+                    class="flex items-center justify-center w-6 h-6 rounded text-text-disabled hover:text-text-secondary hover:bg-overlay-faint cursor-pointer bg-transparent border-none"
                   >
                     <span class="material-symbols-outlined text-[14px]">
                       {copiedField === "created" ? "check" : "content_copy"}
@@ -336,7 +337,7 @@ export default function FilePage() {
                   <button
                     type="button"
                     onClick={() => copyDate("updated", file.changed_at)}
-                    class="flex items-center justify-center w-6 h-6 rounded text-text-disabled hover:text-text-secondary hover:bg-overlay-faint transition-colors cursor-pointer bg-transparent border-none"
+                    class="flex items-center justify-center w-6 h-6 rounded text-text-disabled hover:text-text-secondary hover:bg-overlay-faint cursor-pointer bg-transparent border-none"
                   >
                     <span class="material-symbols-outlined text-[14px]">
                       {copiedField === "updated" ? "check" : "content_copy"}
@@ -383,7 +384,7 @@ export default function FilePage() {
                     <button
                       type="button"
                       onClick={startEditDesc}
-                      class="flex-1 min-w-0 -ml-1 px-1 py-0.5 rounded text-left hover:bg-overlay-faint transition-colors cursor-text"
+                      class="flex-1 min-w-0 -ml-1 px-1 py-0.5 rounded text-left hover:bg-overlay-faint cursor-text"
                       aria-label={t("file.description.edit")}
                     >
                       {file.description ? (
@@ -403,12 +404,25 @@ export default function FilePage() {
             </header>
           )}
 
-          {isText && draft !== null && (
+          {isText && draft !== null && file && (
             <div class="rounded-lg border border-border-subtle bg-surface-container-low p-6">
               <MarkdownEditor
                 key={fileId}
                 defaultValue={draft}
                 onChange={setDraft}
+                onImagePaste={async (pasted) => {
+                  const ext = pasted.type.split("/")[1] || "png";
+                  const id = crypto.randomUUID().replace(/-/g, "");
+                  const named = new File([pasted], `image-${id}.${ext}`, {
+                    type: pasted.type,
+                  });
+                  const result = await uploadFile({
+                    file: named,
+                    parentId: file.parent_id,
+                    parentKind: file.parent_kind,
+                  });
+                  return `/api/files/${result.id}/raw`;
+                }}
               />
             </div>
           )}
@@ -431,7 +445,7 @@ export default function FilePage() {
                   href={content.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="inline-flex items-center gap-2 px-4 py-2 bg-cta text-cta-fg font-bold rounded-lg text-sm hover:bg-cta-hover transition-colors no-underline"
+                  class="inline-flex items-center gap-2 px-4 py-2 bg-cta text-cta-fg font-bold rounded-lg text-sm hover:bg-cta-hover no-underline"
                 >
                   <span class="material-symbols-outlined text-[20px]">
                     open_in_new

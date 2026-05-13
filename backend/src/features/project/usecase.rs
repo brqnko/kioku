@@ -26,16 +26,41 @@ pub async fn create_project(
         Err(err) => return Ok(Err(err)),
     };
 
+    let lock_name = format!("project_quota:user:{}", input.user_id.as_simple());
     let mut tx = app.pool.begin().await?;
+    app.locker.acquire(&mut tx, &lock_name, 10).await?;
 
-    match app.project_repository.save(&mut tx, &project).await? {
-        Ok(ok) => ok,
-        Err(err) => return Ok(Err(err)),
-    };
+    let work: Result<Result<(), crate::domain::DomainError>, anyhow::Error> = async {
+        let existing = app
+            .project_query_service
+            .count_by_user(input.user_id)
+            .await?;
+        if existing as usize >= super::domain::MAX_PROJECTS_PER_USER {
+            return Ok(Err(crate::domain::DomainError::new(
+                "project_total_quota_exceeded",
+                format!(
+                    "user can have at most {} projects",
+                    super::domain::MAX_PROJECTS_PER_USER
+                ),
+                crate::domain::DomainErrorKind::BadInput,
+            )));
+        }
+        match app.project_repository.save(&mut tx, &project).await? {
+            Ok(_) => Ok(Ok(())),
+            Err(err) => Ok(Err(err)),
+        }
+    }
+    .await;
 
-    tx.commit().await?;
+    app.locker.release(&mut tx, &lock_name).await?;
 
-    Ok(Ok(CreateProjectOutput { project }))
+    match work? {
+        Ok(()) => {
+            tx.commit().await?;
+            Ok(Ok(CreateProjectOutput { project }))
+        }
+        Err(err) => Ok(Err(err)),
+    }
 }
 
 // list projects

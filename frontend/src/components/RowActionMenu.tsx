@@ -69,7 +69,7 @@ export function RowActionMenu({
         aria-label={ariaLabel}
         aria-haspopup="menu"
         aria-expanded={open}
-        class="material-symbols-outlined text-text-disabled group-hover:text-text-primary hover:text-text-primary transition-colors cursor-pointer rounded-md p-1 hover:bg-overlay-faint bg-transparent border-none"
+        class="material-symbols-outlined text-text-disabled group-hover:text-text-primary hover:text-text-primary cursor-pointer rounded-md p-1 hover:bg-overlay-faint bg-transparent border-none"
         onClick={toggle}
       >
         {icon}

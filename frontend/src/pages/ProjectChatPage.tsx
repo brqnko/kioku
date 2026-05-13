@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from "preact/hooks";
 import { useRoute } from "preact-iso";
 import { useTranslation } from "react-i18next";
-import { marked } from "marked";
 import SideNavBar from "../components/SideNavBar";
 import TopAppBar from "../components/TopAppBar";
 import { Dialog } from "../components/Dialog";
 import { RowActionMenu } from "../components/RowActionMenu";
+import { MarkdownView } from "../components/MarkdownView";
 import { useProject } from "../hooks/useProject";
 import { useChats } from "../hooks/useChat";
 import { kyInstance } from "../api/mutator";
@@ -14,8 +14,6 @@ import type {
   CreateChat200,
   SendMessage200,
 } from "../api/generated/backend.schemas";
-
-marked.use({ breaks: true });
 
 type LocalMessage = {
   role: "user" | "assistant";
@@ -93,7 +91,7 @@ function MessageBubble({
               type="button"
               onClick={() => onCopy(msg.content)}
               title="コピー"
-              class="flex items-center justify-center w-7 h-7 rounded text-text-disabled hover:text-text-secondary hover:bg-overlay-faint transition-colors cursor-pointer bg-transparent border-none"
+              class="flex items-center justify-center w-7 h-7 rounded text-text-disabled hover:text-text-secondary hover:bg-overlay-faint cursor-pointer bg-transparent border-none"
             >
               <span class="material-symbols-outlined text-[15px]">
                 content_copy
@@ -105,7 +103,6 @@ function MessageBubble({
     );
   }
 
-  const html = marked.parse(msg.content) as string;
   return (
     <div class="flex gap-3 max-w-3xl mx-auto w-full">
       <div class="w-7 h-7 rounded-full bg-surface-dark border border-border-subtle flex items-center justify-center shrink-0 mt-0.5">
@@ -117,16 +114,16 @@ function MessageBubble({
         </span>
       </div>
       <div class="flex flex-col gap-2 flex-1 min-w-0 pt-0.5">
-        <div
-          class="text-sm text-text-primary markdown-body leading-relaxed"
-          dangerouslySetInnerHTML={{ __html: html }}
+        <MarkdownView
+          source={msg.content}
+          className="text-sm text-text-primary markdown-body leading-relaxed"
         />
         <div class="flex items-center gap-1 -ml-1">
           <button
             type="button"
             onClick={() => onCopy(msg.content)}
             title="コピー"
-            class="flex items-center justify-center w-7 h-7 rounded text-text-disabled hover:text-text-secondary hover:bg-overlay-faint transition-colors cursor-pointer bg-transparent border-none"
+            class="flex items-center justify-center w-7 h-7 rounded text-text-disabled hover:text-text-secondary hover:bg-overlay-faint cursor-pointer bg-transparent border-none"
           >
             <span class="material-symbols-outlined text-[15px]">
               content_copy
@@ -375,7 +372,7 @@ export default function ProjectChatPage() {
               type="button"
               onClick={handleCreateChat}
               disabled={creating}
-              class="w-full flex items-center justify-center gap-2 bg-cta text-cta-fg font-bold rounded-lg py-2 text-sm hover:bg-cta-hover transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
+              class="w-full flex items-center justify-center gap-2 bg-cta text-cta-fg font-bold rounded-lg py-2 text-sm hover:bg-cta-hover cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {creating ? (
                 <span>{t("projectChat.creating")}</span>
@@ -406,7 +403,7 @@ export default function ProjectChatPage() {
                 return (
                   <div
                     key={chat.id}
-                    class={`group flex items-center rounded-lg transition-colors ${
+                    class={`group flex items-center rounded-lg ${
                       active ? "bg-overlay-soft" : "hover:bg-overlay-faint"
                     }`}
                   >
@@ -426,7 +423,7 @@ export default function ProjectChatPage() {
                         )}
                       </p>
                     </button>
-                    <div class="shrink-0 pr-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div class="shrink-0 pr-1 opacity-0 group-hover:opacity-100">
                       <RowActionMenu
                         icon="more_vert"
                         ariaLabel={t("renameItem.menu") + " / " + t("deleteItem.menu")}
@@ -444,7 +441,7 @@ export default function ProjectChatPage() {
                 type="button"
                 onClick={loadMore}
                 disabled={loadingMore}
-                class="w-full mt-1 py-2 text-xs text-text-secondary hover:text-text-primary disabled:opacity-50 transition-colors cursor-pointer bg-transparent border-none"
+                class="w-full mt-1 py-2 text-xs text-text-secondary hover:text-text-primary disabled:opacity-50 cursor-pointer bg-transparent border-none"
               >
                 {t("chat.loadMore")}
               </button>
@@ -460,14 +457,14 @@ export default function ProjectChatPage() {
               <div class="shrink-0 h-12 border-b border-border-subtle flex items-center px-6 gap-2 overflow-hidden">
                 <a
                   href="/chat"
-                  class="text-xs text-text-disabled hover:text-text-secondary no-underline transition-colors whitespace-nowrap"
+                  class="text-xs text-text-disabled hover:text-text-secondary no-underline whitespace-nowrap"
                 >
                   {t("nav.chat")}
                 </a>
                 <span class="text-text-disabled text-xs shrink-0">/</span>
                 <a
                   href={`/projects/${projectId}`}
-                  class="text-xs text-text-secondary hover:text-text-primary no-underline transition-colors truncate shrink-0 max-w-[140px]"
+                  class="text-xs text-text-secondary hover:text-text-primary no-underline truncate shrink-0 max-w-[140px]"
                 >
                   {project?.name ?? "…"}
                 </a>
@@ -509,7 +506,7 @@ export default function ProjectChatPage() {
                       {sendError}
                     </p>
                   )}
-                  <div class="bg-surface-dark border border-border-subtle focus-within:border-accent-blue rounded-xl p-3 transition-colors shadow-sm">
+                  <div class="bg-surface-dark border border-border-subtle focus-within:border-accent-blue rounded-xl p-3 shadow-sm">
                     <textarea
                       ref={textareaRef}
                       value={input}
@@ -526,7 +523,7 @@ export default function ProjectChatPage() {
                         type="button"
                         onClick={handleSend}
                         disabled={sending || !input.trim()}
-                        class="bg-cta text-cta-fg rounded-lg px-4 py-1.5 text-sm font-bold hover:bg-cta-hover transition-all flex items-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98]"
+                        class="bg-cta text-cta-fg rounded-lg px-4 py-1.5 text-sm font-bold hover:bg-cta-hover flex items-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                       >
                         {sending
                           ? t("projectChat.input.sending")
@@ -561,7 +558,7 @@ export default function ProjectChatPage() {
                 {project && (
                   <a
                     href={`/projects/${projectId}`}
-                    class="text-sm text-text-disabled hover:text-text-secondary no-underline hover:underline transition-colors mb-1 inline-block"
+                    class="text-sm text-text-disabled hover:text-text-secondary no-underline hover:underline mb-1 inline-block"
                   >
                     {project.name}
                   </a>
@@ -575,7 +572,7 @@ export default function ProjectChatPage() {
                   type="button"
                   onClick={handleCreateChat}
                   disabled={creating}
-                  class="bg-cta text-cta-fg font-bold rounded-lg px-6 py-2.5 text-sm hover:bg-cta-hover transition-all cursor-pointer flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
+                  class="bg-cta text-cta-fg font-bold rounded-lg px-6 py-2.5 text-sm hover:bg-cta-hover cursor-pointer flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <span class="material-symbols-outlined text-[18px]">add</span>
                   {creating
@@ -611,14 +608,14 @@ export default function ProjectChatPage() {
                 setRenameInput((e.target as HTMLInputElement).value)
               }
               onKeyDown={(e) => e.key === "Enter" && handleRenameSubmit()}
-              class="w-full h-9 bg-surface-dark border border-border-subtle rounded-md px-3 text-sm text-text-primary placeholder:text-text-disabled focus:outline-none focus:border-accent-blue transition-colors"
+              class="w-full h-9 bg-surface-dark border border-border-subtle rounded-md px-3 text-sm text-text-primary placeholder:text-text-disabled focus:outline-none focus:border-accent-blue"
             />
           </div>
           <div class="flex justify-end gap-3">
             <button
               type="button"
               onClick={() => setRenamingChat(null)}
-              class="px-4 py-2 text-sm text-text-secondary hover:text-text-primary border border-border-subtle rounded-lg hover:bg-overlay-faint transition-colors cursor-pointer bg-transparent"
+              class="px-4 py-2 text-sm text-text-secondary hover:text-text-primary border border-border-subtle rounded-lg hover:bg-overlay-faint cursor-pointer bg-transparent"
             >
               {t("renameItem.cancel")}
             </button>
@@ -626,7 +623,7 @@ export default function ProjectChatPage() {
               type="button"
               onClick={handleRenameSubmit}
               disabled={renameSubmitting || !renameInput.trim()}
-              class="px-4 py-2 text-sm font-bold bg-cta text-cta-fg rounded-lg hover:bg-cta-hover transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              class="px-4 py-2 text-sm font-bold bg-cta text-cta-fg rounded-lg hover:bg-cta-hover cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {renameSubmitting
                 ? t("renameItem.submitting")
@@ -654,7 +651,7 @@ export default function ProjectChatPage() {
             <button
               type="button"
               onClick={() => setDeletingChat(null)}
-              class="px-4 py-2 text-sm text-text-secondary hover:text-text-primary border border-border-subtle rounded-lg hover:bg-overlay-faint transition-colors cursor-pointer bg-transparent"
+              class="px-4 py-2 text-sm text-text-secondary hover:text-text-primary border border-border-subtle rounded-lg hover:bg-overlay-faint cursor-pointer bg-transparent"
             >
               {t("deleteItem.cancel")}
             </button>
@@ -662,7 +659,7 @@ export default function ProjectChatPage() {
               type="button"
               onClick={handleDeleteConfirm}
               disabled={deleteSubmitting}
-              class="px-4 py-2 text-sm font-bold bg-danger/10 text-danger hover:bg-danger/20 rounded-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              class="px-4 py-2 text-sm font-bold bg-danger/10 text-danger hover:bg-danger/20 rounded-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {deleteSubmitting
                 ? t("deleteItem.submitting")

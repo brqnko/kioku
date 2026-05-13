@@ -33,7 +33,7 @@ function FileRow({ file, selected, onToggle }: FileRowProps) {
       type="button"
       onClick={onToggle}
       aria-pressed={selected}
-      class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-overlay-faint cursor-pointer transition-colors text-left bg-transparent border-none"
+      class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-overlay-faint cursor-pointer text-left bg-transparent border-none"
     >
       <input
         type="checkbox"
@@ -132,7 +132,7 @@ function FolderNode({ folder, selectedIds, onToggleFile }: FolderNodeProps) {
               type="button"
               onClick={loadMore}
               disabled={loadingMore}
-              class="w-full text-xs text-text-secondary hover:text-text-primary p-2 transition-colors cursor-pointer bg-transparent border-none disabled:opacity-50"
+              class="w-full text-xs text-text-secondary hover:text-text-primary p-2 cursor-pointer bg-transparent border-none disabled:opacity-50"
             >
               {loadingMore
                 ? t("podcast.create.loading")
@@ -302,7 +302,7 @@ export default function PodcastNewPage() {
                   type="button"
                   onClick={loadMore}
                   disabled={loadingMore}
-                  class="w-full text-xs text-text-secondary hover:text-text-primary p-2 transition-colors cursor-pointer bg-transparent border-none disabled:opacity-50"
+                  class="w-full text-xs text-text-secondary hover:text-text-primary p-2 cursor-pointer bg-transparent border-none disabled:opacity-50"
                 >
                   {loadingMore
                     ? t("podcast.create.loading")
@@ -334,7 +334,7 @@ export default function PodcastNewPage() {
                   }
                   placeholder={t("podcast.create.placeholders.name")}
                   maxLength={256}
-                  class="w-full bg-surface-container-high border border-border-dark rounded-lg px-4 py-2.5 text-base text-text-primary placeholder:text-text-disabled focus:outline-none focus:ring-1 focus:ring-accent-blue/50 focus:border-accent-blue/50 transition-all"
+                  class="w-full bg-surface-container-high border border-border-dark rounded-lg px-4 py-2.5 text-base text-text-primary placeholder:text-text-disabled focus:outline-none focus:ring-1 focus:ring-accent-blue/50 focus:border-accent-blue/50"
                 />
               </div>
 
@@ -357,7 +357,7 @@ export default function PodcastNewPage() {
                   placeholder={t("podcast.create.placeholders.description")}
                   rows={4}
                   maxLength={1024}
-                  class="w-full bg-surface-container-high border border-border-dark rounded-lg px-4 py-2.5 text-base text-text-primary placeholder:text-text-disabled focus:outline-none focus:ring-1 focus:ring-accent-blue/50 focus:border-accent-blue/50 transition-all resize-none"
+                  class="w-full bg-surface-container-high border border-border-dark rounded-lg px-4 py-2.5 text-base text-text-primary placeholder:text-text-disabled focus:outline-none focus:ring-1 focus:ring-accent-blue/50 focus:border-accent-blue/50 resize-none"
                 />
               </div>
             </div>
@@ -369,7 +369,7 @@ export default function PodcastNewPage() {
               <button
                 type="submit"
                 disabled={!canSubmit}
-                class="w-full bg-cta text-cta-fg font-bold py-4 rounded-lg flex items-center justify-center gap-3 active:scale-[0.98] transition-all hover:bg-cta-hover shadow-[0_8px_24px_rgba(0,0,0,0.2)] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
+                class="w-full bg-cta text-cta-fg font-bold py-4 rounded-lg flex items-center justify-center gap-3 hover:bg-cta-hover shadow-[0_8px_24px_rgba(0,0,0,0.2)] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span
                   class="material-symbols-outlined"

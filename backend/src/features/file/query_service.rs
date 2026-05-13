@@ -90,6 +90,8 @@ pub trait QueryService: Send + Sync {
         folder_id: uuid::Uuid,
     ) -> Result<Option<GetFolderView>, anyhow::Error>;
 
+    async fn folder_has_child(&self, folder_id: uuid::Uuid) -> Result<bool, anyhow::Error>;
+
     async fn get_text_content(
         &self,
         storage_id: uuid::Uuid,
@@ -359,6 +361,27 @@ impl QueryService for QueryServiceImpl {
             })),
             None => Ok(None),
         }
+    }
+
+    async fn folder_has_child(&self, folder_id: uuid::Uuid) -> Result<bool, anyhow::Error> {
+        let row = sqlx::query!(
+            r#"
+            SELECT 1 AS `hit!: i32`
+            FROM folder
+            WHERE parent_kind = 1 AND parent_id = ?
+            UNION ALL
+            SELECT 1 AS `hit!: i32`
+            FROM file
+            WHERE parent_kind = 1 AND parent_id = ?
+            LIMIT 1
+            "#,
+            folder_id.as_bytes().as_slice(),
+            folder_id.as_bytes().as_slice(),
+        )
+        .fetch_optional(&self.pool)
+        .await?;
+
+        Ok(row.is_some())
     }
 
     async fn get_text_content(

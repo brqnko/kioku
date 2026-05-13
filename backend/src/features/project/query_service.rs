@@ -32,6 +32,7 @@ pub trait QueryService: Send + Sync {
         project_id: uuid::Uuid,
         user_id: uuid::Uuid,
     ) -> Result<bool, anyhow::Error>;
+    async fn count_by_user(&self, user_id: uuid::Uuid) -> Result<u64, anyhow::Error>;
 }
 
 pub struct QueryServiceImpl {
@@ -193,5 +194,20 @@ impl QueryService for QueryServiceImpl {
         .await?;
 
         Ok(row.is_some())
+    }
+
+    async fn count_by_user(&self, user_id: uuid::Uuid) -> Result<u64, anyhow::Error> {
+        let row = sqlx::query!(
+            r#"
+            SELECT COUNT(*) AS count
+            FROM project
+            WHERE created_by = ?
+            "#,
+            user_id.as_bytes().as_slice(),
+        )
+        .fetch_one(&self.pool)
+        .await?;
+
+        Ok(row.count as u64)
     }
 }

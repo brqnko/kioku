@@ -1,4 +1,5 @@
-pub const MAX_CONCURRENT_GENERATIONS: usize = 16;
+pub const MAX_CONCURRENT_GENERATIONS: usize = 4;
+pub const MAX_PODCASTS_PER_PROJECT: usize = 50;
 
 pub struct PodcastName(pub String);
 
@@ -59,27 +60,17 @@ pub struct PodcastOption {
 }
 
 impl Podcast {
-    /// custom prompt + 資料から、英語 podcast script (Speaker: text 形式) を生成するための入力。
-    /// few-shot で 1 例 (System Design Interview Ch.1 + Alex Xu 風プロンプト → Ken/Maya 対話) を提示。
-    pub fn to_script_llm_input(
-        &self,
-        texts: &[String],
-        custom_prompt: &str,
-    ) -> crate::util::llm::CompletionInput {
+    pub fn to_script_llm_input(&self, texts: &[String]) -> crate::util::llm::CompletionInput {
         let mut source = String::new();
-        for (i, text) in texts.iter().enumerate() {
-            source.push_str(&format!("--- Document {} ---\n{}\n\n", i + 1, text));
+        for text in texts.iter() {
+            source.push_str(&format!("## Document\n{}\n", text));
         }
 
         let example_user = format!(
-            "--- Custom prompt ---\n{}\n\n--- Source material ---\n{}",
-            include_str!("prompts/meta_example_output.txt").trim(),
-            include_str!("prompts/meta_example_source.txt").trim(),
+            "## Document\n{}",
+            include_str!("prompts/script_example_source.txt").trim(),
         );
-        let user = format!(
-            "--- Custom prompt ---\n{}\n\n--- Source material ---\n{source}",
-            custom_prompt.trim(),
-        );
+        let user = format!("--- Source material ---\n{source}");
 
         crate::util::llm::CompletionInput {
             messages: vec![
@@ -105,57 +96,17 @@ impl Podcast {
         }
     }
 
-    /// 資料から、後段 script LLM に渡す英語の "custom prompt" を生成するための入力。
-    /// few-shot で 1 例 (Twitter スレ → Alex Xu 風 system design 解説プロンプト) を提示。
-    pub fn to_custom_prompt_llm_input(
-        &self,
-        texts: &[String],
-    ) -> crate::util::llm::CompletionInput {
-        let mut source = String::new();
-        for (i, text) in texts.iter().enumerate() {
-            source.push_str(&format!("--- Document {} ---\n{}\n\n", i + 1, text));
-        }
-
-        crate::util::llm::CompletionInput {
-            messages: vec![
-                crate::util::llm::Message {
-                    role: crate::util::llm::Role::System,
-                    content: include_str!("prompts/meta_system.txt").trim().to_string(),
-                },
-                crate::util::llm::Message {
-                    role: crate::util::llm::Role::User,
-                    content: format!(
-                        "--- Source material ---\n{}",
-                        include_str!("prompts/meta_example_source.txt").trim()
-                    ),
-                },
-                crate::util::llm::Message {
-                    role: crate::util::llm::Role::Assistant,
-                    content: include_str!("prompts/meta_example_output.txt")
-                        .trim()
-                        .to_string(),
-                },
-                crate::util::llm::Message {
-                    role: crate::util::llm::Role::User,
-                    content: format!("--- Source material ---\n{source}"),
-                },
-            ],
-        }
-    }
-
-    /// 英語 podcast script をユーザー言語に翻訳するための入力。
-    /// few-shot で 1 例 (英語 Ken/Maya → 日本語) を提示。"Ken:" / "Maya:" ラベルは ASCII のまま保持される。
     pub fn to_translation_llm_input(
         &self,
         script: &str,
         target_language_code: &str,
     ) -> crate::util::llm::CompletionInput {
         let example_user = format!(
-            "--- Target language code (BCP-47) ---\nja\n\n--- Script ---\n{}",
+            "## Target language code (BCP-47)\nja\n## Script\n{}",
             include_str!("prompts/translate_example_input.txt").trim(),
         );
         let user = format!(
-            "--- Target language code (BCP-47) ---\n{}\n\n--- Script ---\n{}",
+            "## Target language code (BCP-47)\n{}\n##Script\n{}",
             target_language_code.trim(),
             script.trim(),
         );

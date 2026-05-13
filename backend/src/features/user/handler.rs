@@ -294,7 +294,7 @@ pub struct UserProfileResponse {
 #[utoipa::path(
     get,
     path = "/users/me",
-    security(("Bearer" = [])),
+    security(("cookieAuth" = [], "csrfToken" = [])),
     responses(
         (status = 200, body = inline(UserProfileResponse)),
         (status = 400, body = crate::server::schema::ErrorBody),
@@ -336,7 +336,7 @@ pub struct UpdateUserProfileBody {
 #[utoipa::path(
     patch,
     path = "/users/me",
-    security(("Bearer" = [])),
+    security(("cookieAuth" = [], "csrfToken" = [])),
     request_body = inline(UpdateUserProfileBody),
     responses(
         (status = 200, body = inline(UserProfileResponse)),
@@ -376,7 +376,7 @@ pub async fn update_user_profile(
 #[utoipa::path(
     delete,
     path = "/users/me",
-    security(("Bearer" = [])),
+    security(("cookieAuth" = [], "csrfToken" = [])),
     responses(
         (status = 204, description = "Deleted"),
         (status = 400, body = crate::server::schema::ErrorBody),
@@ -428,7 +428,7 @@ pub struct ListSessionsResponse {
 #[utoipa::path(
     get,
     path = "/users/me/sessions",
-    security(("Bearer" = [])),
+    security(("cookieAuth" = [], "csrfToken" = [])),
     params(ListSessionsQuery),
     responses(
         (status = 200, body = inline(ListSessionsResponse)),
@@ -477,7 +477,7 @@ pub async fn list_sessions(
 #[utoipa::path(
     delete,
     path = "/users/me/sessions/{session_id}",
-    security(("Bearer" = [])),
+    security(("cookieAuth" = [], "csrfToken" = [])),
     params(
         ("session_id" = uuid::Uuid, Path, description = "Session ID to revoke"),
     ),
@@ -511,7 +511,7 @@ pub async fn revoke_session(
 #[utoipa::path(
     delete,
     path = "/users/me/sessions",
-    security(("Bearer" = [])),
+    security(("cookieAuth" = [], "csrfToken" = [])),
     responses(
         (status = 204, description = "All sessions revoked"),
         (status = 400, body = crate::server::schema::ErrorBody),
@@ -556,7 +556,7 @@ pub struct DashboardResponse {
 #[utoipa::path(
     get,
     path = "/users/me/dashboard",
-    security(("Bearer" = [])),
+    security(("cookieAuth" = [], "csrfToken" = [])),
     responses(
         (status = 200, body = inline(DashboardResponse)),
         (status = 400, body = crate::server::schema::ErrorBody),

@@ -16,7 +16,7 @@ export default function DashboardButton({
     <div class={`flex flex-col gap-3 ${alignment}`}>
       <a
         href="/dashboard"
-        class="flex items-center justify-center gap-2 rounded-lg bg-cta px-8 py-3 text-base font-medium text-cta-fg hover:bg-cta-hover transition-colors no-underline"
+        class="flex items-center justify-center gap-2 rounded-lg bg-cta px-8 py-3 text-base font-medium text-cta-fg hover:bg-cta-hover no-underline"
       >
         {t("auth.toDashboard")}
         <span class="material-symbols-outlined text-[20px]">arrow_forward</span>

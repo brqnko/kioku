@@ -149,6 +149,54 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
+  /code/compilers:
+    get:
+      tags: []
+      operationId: list_compilers
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [compilers]
+                properties:
+                  compilers:
+                    type: array
+                    items:
+                      type: object
+                      required: [name, language, display_name, version]
+                      properties:
+                        display_name:
+                          type: string
+                        language:
+                          type: string
+                        name:
+                          type: string
+                        version:
+                          type: string
+        '401':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '502':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+      security:
+      - cookieAuth: []
+        csrfToken: []
   /files:
     post:
       tags: []
@@ -256,7 +304,113 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
       security:
-      - Bearer: []
+      - cookieAuth: []
+        csrfToken: []
+  /files/run:
+    post:
+      tags: []
+      operationId: run_code
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code, compiler]
+              properties:
+                code:
+                  type: string
+                  maxLength: 65536
+                compiler:
+                  type: string
+                  maxLength: 64
+                compiler_option_raw:
+                  type:
+                  - string
+                  - 'null'
+                  maxLength: 4096
+                compiler_options:
+                  type:
+                  - string
+                  - 'null'
+                  maxLength: 4096
+                runtime_option_raw:
+                  type:
+                  - string
+                  - 'null'
+                  maxLength: 4096
+                stdin:
+                  type:
+                  - string
+                  - 'null'
+                  maxLength: 32768
+        required: true
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  compiler_error:
+                    type:
+                    - string
+                    - 'null'
+                  compiler_message:
+                    type:
+                    - string
+                    - 'null'
+                  compiler_output:
+                    type:
+                    - string
+                    - 'null'
+                  program_error:
+                    type:
+                    - string
+                    - 'null'
+                  program_message:
+                    type:
+                    - string
+                    - 'null'
+                  program_output:
+                    type:
+                    - string
+                    - 'null'
+                  signal:
+                    type:
+                    - string
+                    - 'null'
+                  status:
+                    type:
+                    - string
+                    - 'null'
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '401':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '502':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+      security:
+      - cookieAuth: []
+        csrfToken: []
   /files/upload-url:
     post:
       tags: []
@@ -330,7 +484,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
       security:
-      - Bearer: []
+      - cookieAuth: []
+        csrfToken: []
   /files/{file_id}:
     delete:
       tags: []
@@ -377,7 +532,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
       security:
-      - Bearer: []
+      - cookieAuth: []
+        csrfToken: []
     patch:
       tags: []
       operationId: update_file
@@ -477,7 +633,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
       security:
-      - Bearer: []
+      - cookieAuth: []
+        csrfToken: []
   /files/{file_id}/ancestors:
     get:
       tags: []
@@ -564,7 +721,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
       security:
-      - Bearer: []
+      - cookieAuth: []
+        csrfToken: []
   /files/{file_id}/content:
     get:
       tags: []
@@ -677,7 +835,56 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
       security:
-      - Bearer: []
+      - cookieAuth: []
+        csrfToken: []
+  /files/{file_id}/raw:
+    get:
+      tags: []
+      operationId: get_file_raw
+      parameters:
+      - name: file_id
+        in: path
+        description: File ID
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '302':
+          description: Redirect to presigned URL
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '401':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '403':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+      security:
+      - cookieAuth: []
+        csrfToken: []
   /files/{file_id}/text:
     put:
       tags: []
@@ -772,7 +979,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
       security:
-      - Bearer: []
+      - cookieAuth: []
+        csrfToken: []
   /folders:
     post:
       tags: []
@@ -864,7 +1072,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
       security:
-      - Bearer: []
+      - cookieAuth: []
+        csrfToken: []
   /folders/{folder_id}:
     get:
       tags: []
@@ -942,7 +1151,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
       security:
-      - Bearer: []
+      - cookieAuth: []
+        csrfToken: []
     delete:
       tags: []
       operationId: remove_folder
@@ -988,7 +1198,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
       security:
-      - Bearer: []
+      - cookieAuth: []
+        csrfToken: []
     patch:
       tags: []
       operationId: update_folder
@@ -1082,7 +1293,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
       security:
-      - Bearer: []
+      - cookieAuth: []
+        csrfToken: []
   /folders/{folder_id}/ancestors:
     get:
       tags: []
@@ -1169,7 +1381,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
       security:
-      - Bearer: []
+      - cookieAuth: []
+        csrfToken: []
   /folders/{folder_id}/children:
     get:
       tags: []
@@ -1338,7 +1551,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
       security:
-      - Bearer: []
+      - cookieAuth: []
+        csrfToken: []
   /health:
     get:
       tags:
@@ -1461,7 +1675,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
       security:
-      - Bearer: []
+      - cookieAuth: []
+        csrfToken: []
     post:
       tags: []
       operationId: create_project
@@ -1535,7 +1750,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
       security:
-      - Bearer: []
+      - cookieAuth: []
+        csrfToken: []
   /projects/{project_id}:
     get:
       tags: []
@@ -1604,7 +1820,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
       security:
-      - Bearer: []
+      - cookieAuth: []
+        csrfToken: []
     delete:
       tags: []
       operationId: remove_project
@@ -1650,7 +1867,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
       security:
-      - Bearer: []
+      - cookieAuth: []
+        csrfToken: []
     patch:
       tags: []
       operationId: update_project
@@ -1735,7 +1953,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
       security:
-      - Bearer: []
+      - cookieAuth: []
+        csrfToken: []
   /projects/{project_id}/chats:
     get:
       tags: []
@@ -1839,7 +2058,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
       security:
-      - Bearer: []
+      - cookieAuth: []
+        csrfToken: []
     post:
       tags: []
       operationId: create_chat
@@ -1916,7 +2136,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
       security:
-      - Bearer: []
+      - cookieAuth: []
+        csrfToken: []
   /projects/{project_id}/chats/{chat_id}:
     get:
       tags: []
@@ -1954,7 +2175,7 @@ paths:
                     type: array
                     items:
                       type: object
-                      required: [role, content]
+                      required: [role, content, sent_at]
                       properties:
                         content:
                           type: string
@@ -1963,6 +2184,9 @@ paths:
                           enum:
                           - user
                           - assistant
+                        sent_at:
+                          type: string
+                          format: date-time
                   name:
                     type: string
                   project_id:
@@ -2003,7 +2227,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
       security:
-      - Bearer: []
+      - cookieAuth: []
+        csrfToken: []
     delete:
       tags: []
       operationId: remove_chat
@@ -2056,7 +2281,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
       security:
-      - Bearer: []
+      - cookieAuth: []
+        csrfToken: []
   /projects/{project_id}/chats/{chat_id}/messages:
     post:
       tags: []
@@ -2098,7 +2324,7 @@ paths:
                 properties:
                   assistant_message:
                     type: object
-                    required: [role, content]
+                    required: [role, content, sent_at]
                     properties:
                       content:
                         type: string
@@ -2107,12 +2333,15 @@ paths:
                         enum:
                         - user
                         - assistant
+                      sent_at:
+                        type: string
+                        format: date-time
                   last_activity_at:
                     type: string
                     format: date-time
                   user_message:
                     type: object
-                    required: [role, content]
+                    required: [role, content, sent_at]
                     properties:
                       content:
                         type: string
@@ -2121,6 +2350,9 @@ paths:
                         enum:
                         - user
                         - assistant
+                      sent_at:
+                        type: string
+                        format: date-time
         '400':
           description: ''
           content:
@@ -2152,7 +2384,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
       security:
-      - Bearer: []
+      - cookieAuth: []
+        csrfToken: []
   /projects/{project_id}/children:
     get:
       tags: []
@@ -2321,7 +2554,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
       security:
-      - Bearer: []
+      - cookieAuth: []
+        csrfToken: []
   /projects/{project_id}/podcasts:
     get:
       tags: []
@@ -2429,7 +2663,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
       security:
-      - Bearer: []
+      - cookieAuth: []
+        csrfToken: []
     post:
       tags: []
       operationId: create_podcast
@@ -2502,7 +2737,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
       security:
-      - Bearer: []
+      - cookieAuth: []
+        csrfToken: []
   /projects/{project_id}/podcasts/{podcast_id}:
     get:
       tags: []
@@ -2591,7 +2827,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
       security:
-      - Bearer: []
+      - cookieAuth: []
+        csrfToken: []
     delete:
       tags: []
       operationId: remove_podcast
@@ -2644,7 +2881,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
       security:
-      - Bearer: []
+      - cookieAuth: []
+        csrfToken: []
     patch:
       tags: []
       operationId: update_podcast
@@ -2749,7 +2987,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
       security:
-      - Bearer: []
+      - cookieAuth: []
+        csrfToken: []
   /users/me:
     get:
       tags: []
@@ -2803,7 +3042,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
       security:
-      - Bearer: []
+      - cookieAuth: []
+        csrfToken: []
     delete:
       tags: []
       operationId: remove_user
@@ -2841,7 +3081,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
       security:
-      - Bearer: []
+      - cookieAuth: []
+        csrfToken: []
     patch:
       tags: []
       operationId: update_user_profile
@@ -2911,7 +3152,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
       security:
-      - Bearer: []
+      - cookieAuth: []
+        csrfToken: []
   /users/me/dashboard:
     get:
       tags: []
@@ -2982,7 +3224,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
       security:
-      - Bearer: []
+      - cookieAuth: []
+        csrfToken: []
   /users/me/sessions:
     get:
       tags: []
@@ -3067,7 +3310,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
       security:
-      - Bearer: []
+      - cookieAuth: []
+        csrfToken: []
     delete:
       tags: []
       operationId: revoke_all_sessions
@@ -3105,7 +3349,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
       security:
-      - Bearer: []
+      - cookieAuth: []
+        csrfToken: []
   /users/me/sessions/{session_id}:
     delete:
       tags: []
@@ -3152,7 +3397,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
       security:
-      - Bearer: []
+      - cookieAuth: []
+        csrfToken: []
 components:
   schemas:
     ErrorBody:
@@ -3163,3 +3409,12 @@ components:
           type: string
         description:
           type: string
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: access_token
+    csrfToken:
+      type: apiKey
+      in: header
+      name: x-csrf-token
