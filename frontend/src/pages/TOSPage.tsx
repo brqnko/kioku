@@ -95,7 +95,7 @@ export default function TOSPage() {
         return (
           <>
             <p class="m-0">{t("tos.sections.account.body")}</p>
-            <div class="border-l-4 border-primary bg-primary/5 dark:bg-primary/10 rounded-r-lg p-5 mt-2">
+            <div class="border-l-4 border-primary bg-primary/5 dark:bg-primary/10 rounded-r-lg p-6 mt-2">
               <p class="m-0 text-base text-charcoal dark:text-white">
                 {t("tos.sections.account.callout")}
               </p>
@@ -118,7 +118,7 @@ export default function TOSPage() {
       </div>
 
       <div class="max-w-4xl mx-auto">
-        <div class="bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark rounded-2xl overflow-hidden mb-12 shadow-[0_2px_8px_rgba(0,0,0,0.2)]">
+        <div class="bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark rounded-[12px] overflow-hidden mb-12 shadow-[0_1px_3px_rgba(0,0,0,0.1)]">
           <div class="p-10 md:p-16 text-lg text-taupe dark:text-text-muted-dark leading-8 tracking-[0.01em]">
             {sections.map((key, idx) => (
               <Section

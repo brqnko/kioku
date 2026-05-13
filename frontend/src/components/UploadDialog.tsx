@@ -108,10 +108,8 @@ export function UploadDialog({
   return (
     <Dialog open={open} onClose={onClose} ariaLabel={t("upload.title")}>
       <form onSubmit={handleSubmit} class="flex flex-col">
-        <div class="p-4 tablet:p-6 border-b border-border-dark">
-          <h2 class="text-[22px] leading-[1.27] font-bold tracking-tight text-text-primary">
-            {t("upload.title")}
-          </h2>
+        <div class="p-6 border-b border-border-dark">
+          <h2 class="heading-h2">{t("upload.title")}</h2>
         </div>
 
         <div class="px-6 pt-4">
@@ -119,10 +117,10 @@ export function UploadDialog({
             <button
               type="button"
               onClick={() => setMode("file")}
-              class={`px-4 py-1.5 rounded-md text-sm font-medium cursor-pointer ${
+              class={`px-4 py-1.5 rounded-md text-sm font-medium cursor-pointer border-none ${
                 mode === "file"
                   ? "bg-overlay-soft text-text-primary"
-                  : "text-text-muted-dark hover:text-text-primary"
+                  : "bg-transparent text-text-secondary hover:text-text-primary"
               }`}
             >
               {t("upload.tabs.file")}
@@ -130,10 +128,10 @@ export function UploadDialog({
             <button
               type="button"
               onClick={() => setMode("text")}
-              class={`px-4 py-1.5 rounded-md text-sm font-medium cursor-pointer ${
+              class={`px-4 py-1.5 rounded-md text-sm font-medium cursor-pointer border-none ${
                 mode === "text"
                   ? "bg-overlay-soft text-text-primary"
-                  : "text-text-muted-dark hover:text-text-primary"
+                  : "bg-transparent text-text-secondary hover:text-text-primary"
               }`}
             >
               {t("upload.tabs.text")}
@@ -141,21 +139,21 @@ export function UploadDialog({
           </div>
         </div>
 
-        <div class="p-4 tablet:p-6 flex flex-col gap-4">
+        <div class="p-6 flex flex-col gap-4">
           {mode === "file" && (
             <div class="flex flex-col gap-2">
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                class="w-full border border-dashed border-border-dark rounded-lg px-4 py-8 text-center hover:border-overlay-strong hover:bg-overlay-faint cursor-pointer flex flex-col items-center gap-2"
+                class="w-full border border-dashed border-border-dark rounded-lg px-4 py-8 text-center hover:border-overlay-strong hover:bg-overlay-faint cursor-pointer flex flex-col items-center gap-2 bg-transparent text-text-primary"
               >
-                <span class="material-symbols-outlined text-text-muted-dark text-[28px]">
+                <span class="material-symbols-outlined text-text-secondary text-[28px]">
                   upload_file
                 </span>
                 {file ? (
                   <span class="text-sm text-text-primary">{file.name}</span>
                 ) : (
-                  <span class="text-sm text-text-muted-dark">
+                  <span class="text-sm text-text-secondary">
                     {t("upload.file.cta")}
                   </span>
                 )}
@@ -177,7 +175,7 @@ export function UploadDialog({
               <div class="flex flex-col gap-2">
                 <label
                   for="upload-text-name"
-                  class="text-sm font-bold text-text-muted-dark"
+                  class="text-caption font-bold text-text-secondary"
                 >
                   {t("upload.text.name")}
                 </label>
@@ -191,13 +189,13 @@ export function UploadDialog({
                   placeholder={t("upload.text.namePlaceholder")}
                   maxLength={256}
                   required
-                  class="w-full bg-surface-container-high border border-border-dark rounded-lg px-4 py-2.5 text-base text-text-primary placeholder:text-text-disabled focus:outline-none focus:ring-1 focus:ring-accent-blue/50 focus:border-accent-blue/50"
+                  class="input-field"
                 />
               </div>
               <div class="flex flex-col gap-2">
                 <label
                   for="upload-text-body"
-                  class="text-sm font-bold text-text-muted-dark"
+                  class="text-caption font-bold text-text-secondary"
                 >
                   {t("upload.text.body")}
                 </label>
@@ -209,7 +207,7 @@ export function UploadDialog({
                   }
                   placeholder={t("upload.text.bodyPlaceholder")}
                   rows={8}
-                  class="w-full bg-surface-container-high border border-border-dark rounded-lg px-4 py-2.5 text-base text-text-primary placeholder:text-text-disabled focus:outline-none focus:ring-1 focus:ring-accent-blue/50 focus:border-accent-blue/50 resize-y font-mono"
+                  class="textarea-field font-mono"
                 />
               </div>
             </>
@@ -218,20 +216,16 @@ export function UploadDialog({
           {error && <p class="text-sm text-danger">{error}</p>}
         </div>
 
-        <div class="p-4 tablet:p-6 bg-surface-container-low/50 flex items-center justify-end gap-4 border-t border-border-dark">
+        <div class="p-6 bg-surface-container-low/50 flex items-center justify-end gap-3 border-t border-border-dark">
           <button
             type="button"
             onClick={onClose}
             disabled={submitting}
-            class="px-6 py-2.5 rounded-lg text-sm font-bold text-text-muted-dark hover:text-text-primary hover:bg-overlay-faint cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            class="btn-ghost"
           >
             {t("upload.cancel")}
           </button>
-          <button
-            type="submit"
-            disabled={submitting}
-            class="px-6 py-2.5 bg-cta text-cta-fg rounded-lg text-sm font-bold hover:bg-cta-hover shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-          >
+          <button type="submit" disabled={submitting} class="btn-primary">
             {submitting ? t("upload.submitting") : t("upload.submit")}
           </button>
         </div>

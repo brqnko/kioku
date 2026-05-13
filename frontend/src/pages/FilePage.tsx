@@ -317,7 +317,8 @@ export default function FilePage() {
                   <button
                     type="button"
                     onClick={() => copyDate("created", file.uploaded_at)}
-                    class="flex items-center justify-center w-6 h-6 rounded text-text-disabled hover:text-text-secondary hover:bg-overlay-faint cursor-pointer bg-transparent border-none"
+                    aria-label={t("file.copy", { defaultValue: "Copy" })}
+                    class="icon-button"
                   >
                     <span class="material-symbols-outlined text-[14px]">
                       {copiedField === "created" ? "check" : "content_copy"}
@@ -337,7 +338,8 @@ export default function FilePage() {
                   <button
                     type="button"
                     onClick={() => copyDate("updated", file.changed_at)}
-                    class="flex items-center justify-center w-6 h-6 rounded text-text-disabled hover:text-text-secondary hover:bg-overlay-faint cursor-pointer bg-transparent border-none"
+                    aria-label={t("file.copy", { defaultValue: "Copy" })}
+                    class="icon-button"
                   >
                     <span class="material-symbols-outlined text-[14px]">
                       {copiedField === "updated" ? "check" : "content_copy"}
@@ -405,7 +407,7 @@ export default function FilePage() {
           )}
 
           {isText && draft !== null && file && (
-            <div class="rounded-lg border border-border-subtle bg-surface-container-low p-3 tablet:p-6">
+            <div class="rounded-lg border border-border-subtle bg-surface-container-low overflow-hidden">
               <MarkdownEditor
                 key={fileId}
                 defaultValue={draft}
@@ -429,7 +431,7 @@ export default function FilePage() {
 
           {content?.kind === "url" &&
             (file?.name.toLowerCase().endsWith(".pdf") ? (
-              <div class="rounded-xl border border-border-subtle overflow-hidden bg-surface-container-low">
+              <div class="rounded-[12px] border border-border-subtle overflow-hidden bg-surface-container-low">
                 <iframe
                   src={content.url}
                   title={file?.name ?? "PDF"}
@@ -445,7 +447,7 @@ export default function FilePage() {
                   href={content.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="inline-flex items-center gap-2 px-4 py-2 bg-cta text-cta-fg font-bold rounded-lg text-sm hover:bg-cta-hover no-underline"
+                  class="btn-primary no-underline"
                 >
                   <span class="material-symbols-outlined text-[20px]">
                     open_in_new

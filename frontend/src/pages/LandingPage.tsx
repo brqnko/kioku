@@ -354,7 +354,7 @@ export default function LandingPage() {
                       </p>
                     </div>
                     <div class="md:col-start-9 md:col-span-2 md:row-start-1 order-1 md:order-2">
-                      <span class="block text-7xl md:text-9xl font-bold text-primary tracking-tighter leading-none select-none">
+                      <span class="block text-6xl sm:text-7xl md:text-9xl font-bold text-primary tracking-tighter leading-none select-none">
                         {num}
                       </span>
                     </div>
@@ -370,7 +370,7 @@ export default function LandingPage() {
                   class="md:grid md:grid-cols-12 md:items-start md:gap-y-8 flex flex-col gap-8"
                 >
                   <div class="md:col-start-1 md:col-span-2 md:row-start-1 order-1">
-                    <span class="block text-7xl md:text-9xl font-bold text-primary tracking-tighter leading-none select-none">
+                    <span class="block text-6xl sm:text-7xl md:text-9xl font-bold text-primary tracking-tighter leading-none select-none">
                       {num}
                     </span>
                   </div>

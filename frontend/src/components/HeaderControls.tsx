@@ -38,7 +38,7 @@ export default function HeaderControls() {
     <div class="flex items-center gap-2">
       <button
         type="button"
-        class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-200/60 dark:bg-white/10 hover:bg-slate-300/60 dark:hover:bg-white/20 cursor-pointer text-slate-600 dark:text-slate-300"
+        class="icon-button"
         onClick={cycleMode}
         title={t(`colorMode.${nextMode}`)}
         aria-label={`${t(`colorMode.${mode}`)} → ${t(`colorMode.${nextMode}`)}`}
@@ -48,7 +48,7 @@ export default function HeaderControls() {
       <div class="relative" ref={langRef}>
         <button
           type="button"
-          class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-200/60 dark:bg-white/10 hover:bg-slate-300/60 dark:hover:bg-white/20 cursor-pointer text-slate-600 dark:text-slate-300"
+          class="icon-button"
           onClick={() => setLangOpen(!langOpen)}
           aria-label={t("language.label")}
           aria-expanded={langOpen}
@@ -59,17 +59,17 @@ export default function HeaderControls() {
         {langOpen && (
           <div
             role="menu"
-            class="absolute right-0 top-full mt-2 py-2 bg-white dark:bg-[#1a1a1a] rounded-xl ring-1 ring-black/5 dark:ring-white/5 border border-slate-200 dark:border-white/10 min-w-[180px] z-50"
+            class="menu-panel absolute right-0 top-full mt-2 py-2 min-w-[180px] z-50"
           >
             {languages.map((lang) => (
               <button
                 role="menuitem"
                 type="button"
                 key={lang.code}
-                class={`w-full flex items-center gap-2 px-4 py-2 text-left text-sm font-medium cursor-pointer ${
+                class={`w-full flex items-center gap-2 px-4 py-2 text-left text-sm font-medium cursor-pointer bg-transparent border-none ${
                   currentLang === lang.code
-                    ? "text-primary"
-                    : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5"
+                    ? "text-accent-blue"
+                    : "text-text-secondary hover:text-text-primary hover:bg-overlay-faint"
                 }`}
                 onClick={() => {
                   void i18n.changeLanguage(lang.code);
@@ -88,7 +88,7 @@ export default function HeaderControls() {
         )}
       </div>
       <a
-        class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-200/60 dark:bg-white/10 hover:bg-slate-300/60 dark:hover:bg-white/20 text-slate-600 dark:text-slate-300"
+        class="icon-button no-underline"
         href="https://github.com/brqnko/kioku"
         target="_blank"
         rel="noopener noreferrer"

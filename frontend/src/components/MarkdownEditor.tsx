@@ -1,17 +1,35 @@
-import { useEffect, useRef } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 import {
   Editor,
   defaultValueCtx,
+  editorViewCtx,
   nodeViewCtx,
   prosePluginsCtx,
   rootCtx,
 } from "@milkdown/core";
-import { commonmark } from "@milkdown/preset-commonmark";
-import { gfm } from "@milkdown/preset-gfm";
+import {
+  commonmark,
+  createCodeBlockCommand,
+  toggleEmphasisCommand,
+  toggleInlineCodeCommand,
+  toggleStrongCommand,
+  turnIntoTextCommand,
+  wrapInBlockquoteCommand,
+  wrapInBulletListCommand,
+  wrapInHeadingCommand,
+  wrapInOrderedListCommand,
+} from "@milkdown/preset-commonmark";
+import { gfm, toggleStrikethroughCommand } from "@milkdown/preset-gfm";
 import { listener, listenerCtx } from "@milkdown/plugin-listener";
-import { nord } from "@milkdown/theme-nord";
 import { Plugin } from "@milkdown/prose/state";
+import type { EditorView } from "@milkdown/prose/view";
+import { callCommand } from "@milkdown/utils";
+import { useTranslation } from "react-i18next";
 import { CodeBlockView } from "./CodeBlockNodeView";
+import {
+  MarkdownEditorToolbar,
+  type ToolbarAction,
+} from "./MarkdownEditorToolbar";
 import { useCompilers, type Compiler } from "../hooks/useCompilers";
 
 interface MarkdownEditorProps {
@@ -25,7 +43,11 @@ export function MarkdownEditor({
   onChange,
   onImagePaste,
 }: MarkdownEditorProps) {
+  const { t } = useTranslation();
   const rootRef = useRef<HTMLDivElement>(null);
+  const editorRef = useRef<Editor | null>(null);
+  const [ready, setReady] = useState(false);
+
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
   const onImagePasteRef = useRef(onImagePaste);
@@ -49,7 +71,6 @@ export function MarkdownEditor({
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
-    let editor: Editor | null = null;
     let cancelled = false;
 
     const trailingParagraphPlugin = new Plugin({
@@ -64,11 +85,37 @@ export function MarkdownEditor({
       },
     });
 
+    const insertImageAt = (
+      view: EditorView,
+      file: File,
+      atPos: number | null,
+    ): Promise<number | null> => {
+      const handler = onImagePasteRef.current;
+      if (!handler) return Promise.resolve(null);
+      return handler(file)
+        .then((url) => {
+          const node = view.state.schema.nodes.image?.create({
+            src: url,
+            alt: "",
+          });
+          if (!node) return null;
+          if (atPos == null) {
+            view.dispatch(view.state.tr.replaceSelectionWith(node));
+            return null;
+          }
+          view.dispatch(view.state.tr.insert(atPos, node));
+          return atPos + node.nodeSize;
+        })
+        .catch((err) => {
+          console.error("image insert failed", err);
+          return atPos;
+        });
+    };
+
     const pastePlugin = new Plugin({
       props: {
         handlePaste(view, event) {
-          const handler = onImagePasteRef.current;
-          if (!handler) return false;
+          if (!onImagePasteRef.current) return false;
           const items = event.clipboardData?.items;
           if (!items) return false;
           for (const item of Array.from(items)) {
@@ -76,21 +123,41 @@ export function MarkdownEditor({
             const file = item.getAsFile();
             if (!file) continue;
             event.preventDefault();
-            handler(file)
-              .then((url) => {
-                const node = view.state.schema.nodes.image?.create({
-                  src: url,
-                  alt: "",
-                });
-                if (!node) return;
-                view.dispatch(view.state.tr.replaceSelectionWith(node));
-              })
-              .catch((err) => {
-                console.error("image paste failed", err);
-              });
+            insertImageAt(view, file, null);
             return true;
           }
           return false;
+        },
+      },
+    });
+
+    const dropPlugin = new Plugin({
+      props: {
+        handleDrop(view, event) {
+          if (!onImagePasteRef.current) return false;
+          const dt = event.dataTransfer;
+          const files = dt
+            ? Array.from(dt.files).filter((f) => f.type.startsWith("image/"))
+            : [];
+          if (files.length === 0) return false;
+          event.preventDefault();
+
+          let pos =
+            view.posAtCoords({ left: event.clientX, top: event.clientY })?.pos ??
+            view.state.selection.from;
+          const $pos = view.state.doc.resolve(pos);
+          if ($pos.parent.type.name === "code_block") {
+            pos = $pos.after($pos.depth);
+          }
+
+          (async () => {
+            let insertPos: number | null = pos;
+            for (const file of files) {
+              insertPos = await insertImageAt(view, file, insertPos);
+              if (insertPos == null) break;
+            }
+          })();
+          return true;
         },
       },
     });
@@ -100,7 +167,7 @@ export function MarkdownEditor({
         ctx.set(rootCtx, root);
         ctx.set(defaultValueCtx, defaultValue);
         ctx.update(prosePluginsCtx, (xs) =>
-          xs.concat(pastePlugin, trailingParagraphPlugin),
+          xs.concat(pastePlugin, dropPlugin, trailingParagraphPlugin),
         );
         ctx.update(nodeViewCtx, (xs) =>
           xs.concat([
@@ -126,7 +193,6 @@ export function MarkdownEditor({
           onChangeRef.current(markdown);
         });
       })
-      .config(nord)
       .use(commonmark)
       .use(gfm)
       .use(listener)
@@ -135,7 +201,8 @@ export function MarkdownEditor({
         if (cancelled) {
           e.destroy();
         } else {
-          editor = e;
+          editorRef.current = e;
+          setReady(true);
         }
       })
       .catch((err) => {
@@ -144,10 +211,109 @@ export function MarkdownEditor({
 
     return () => {
       cancelled = true;
-      editor?.destroy();
+      editorRef.current?.destroy();
+      editorRef.current = null;
+      setReady(false);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return <div ref={rootRef} class="milkdown-host" />;
+  const focusView = () => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    editor.action((ctx) => ctx.get(editorViewCtx).focus());
+  };
+
+  const runAction = (action: ToolbarAction) => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    focusView();
+    switch (action.kind) {
+      case "bold":
+        editor.action(callCommand(toggleStrongCommand.key));
+        break;
+      case "italic":
+        editor.action(callCommand(toggleEmphasisCommand.key));
+        break;
+      case "strikethrough":
+        editor.action(callCommand(toggleStrikethroughCommand.key));
+        break;
+      case "inlineCode":
+        editor.action(callCommand(toggleInlineCodeCommand.key));
+        break;
+      case "heading":
+        editor.action(callCommand(wrapInHeadingCommand.key, action.level));
+        break;
+      case "paragraph":
+        editor.action(callCommand(turnIntoTextCommand.key));
+        break;
+      case "bulletList":
+        editor.action(callCommand(wrapInBulletListCommand.key));
+        break;
+      case "orderedList":
+        editor.action(callCommand(wrapInOrderedListCommand.key));
+        break;
+      case "blockquote":
+        editor.action(callCommand(wrapInBlockquoteCommand.key));
+        break;
+      case "codeBlock":
+        editor.action(callCommand(createCodeBlockCommand.key));
+        break;
+    }
+  };
+
+  const handleInsertLink = () => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    const raw = window.prompt(t("editor.toolbar.linkPrompt"));
+    const href = raw?.trim();
+    if (!href) return;
+    editor.action((ctx) => {
+      const view = ctx.get(editorViewCtx);
+      const { state } = view;
+      const linkMark = state.schema.marks.link;
+      if (!linkMark) return;
+      const mark = linkMark.create({ href });
+      const { from, to, empty } = state.selection;
+      const tr = empty
+        ? state.tr.replaceSelectionWith(state.schema.text(href, [mark]), false)
+        : state.tr.addMark(from, to, mark);
+      view.dispatch(tr);
+      view.focus();
+    });
+  };
+
+  const handlePickImage = (file: File) => {
+    const editor = editorRef.current;
+    const handler = onImagePasteRef.current;
+    if (!editor || !handler) return;
+    handler(file)
+      .then((url) => {
+        editor.action((ctx) => {
+          const view = ctx.get(editorViewCtx);
+          const node = view.state.schema.nodes.image?.create({
+            src: url,
+            alt: "",
+          });
+          if (!node) return;
+          view.dispatch(view.state.tr.replaceSelectionWith(node));
+          view.focus();
+        });
+      })
+      .catch((err) => {
+        console.error("image pick failed", err);
+      });
+  };
+
+  return (
+    <div class="md-editor">
+      <MarkdownEditorToolbar
+        ready={ready}
+        onAction={runAction}
+        onInsertLink={handleInsertLink}
+        onPickImage={handlePickImage}
+      />
+      <div ref={rootRef} class="milkdown-host" />
+    </div>
+  );
 }

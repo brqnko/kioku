@@ -72,7 +72,7 @@ export function CodeBlockToolbar({
         </label>
         <button
           type="button"
-          class="ml-auto text-xs px-3 py-1 rounded bg-accent-blue/90 hover:bg-accent-blue text-white disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          class="ml-auto text-xs px-3 py-1 rounded bg-accent-blue hover:brightness-110 text-white disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer border-none"
           disabled={runDisabled}
           title={!compiler ? "コンパイラを選択してください" : ""}
           onClick={onRun}

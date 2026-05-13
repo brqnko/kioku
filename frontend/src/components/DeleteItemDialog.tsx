@@ -68,11 +68,9 @@ export function DeleteItemDialog({
       ariaLabel={t("deleteItem.title")}
       maxWidth="max-w-[440px]"
     >
-      <div class="p-4 tablet:p-6 flex flex-col gap-4">
-        <h2 class="text-[18px] leading-[1.3] font-bold tracking-tight text-text-primary">
-          {t("deleteItem.title")}
-        </h2>
-        <p class="text-sm text-text-secondary leading-[1.6]">
+      <div class="p-6 flex flex-col gap-4">
+        <h2 class="heading-h2">{t("deleteItem.title")}</h2>
+        <p class="text-body text-text-secondary">
           {t("deleteItem.body", { name })}
         </p>
 
@@ -87,7 +85,7 @@ export function DeleteItemDialog({
             type="button"
             onClick={handleClose}
             disabled={submitting}
-            class="px-4 py-2 rounded-lg text-sm font-bold text-text-muted-dark hover:text-text-primary hover:bg-overlay-faint cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            class="btn-ghost"
           >
             {t("deleteItem.cancel")}
           </button>
@@ -95,7 +93,7 @@ export function DeleteItemDialog({
             type="button"
             onClick={handleDelete}
             disabled={submitting}
-            class="px-4 py-2 rounded-lg text-sm font-bold text-white bg-danger hover:bg-danger/90 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            class="btn-danger"
           >
             {submitting ? t("deleteItem.submitting") : t("deleteItem.submit")}
           </button>

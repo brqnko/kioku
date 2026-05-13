@@ -92,16 +92,16 @@ export function ProjectCard({
 
   return (
     <>
-      <div class="group relative flex flex-col min-h-[160px] rounded-xl border border-border-subtle bg-surface-dark hover:border-text-disabled shadow-[0_2px_8px_rgba(0,0,0,0.2)]">
+      <div class="group relative flex flex-col min-h-[160px] rounded-[12px] border border-border-subtle bg-surface-dark hover:border-text-disabled shadow-[0_1px_3px_rgba(0,0,0,0.1)]">
         {/* Full-card link — sits behind content */}
         <a
           href={href}
-          class="absolute inset-0 rounded-xl"
+          class="absolute inset-0 rounded-[12px]"
           aria-label={project.name}
         />
 
         {/* Card content — pointer-events-none so the link behind catches clicks */}
-        <div class="relative pointer-events-none flex flex-col flex-1 p-4">
+        <div class="relative pointer-events-none flex flex-col flex-1 p-6">
           <h3 class="text-base font-medium text-text-primary mb-1 line-clamp-1 pr-6">
             {project.name}
           </h3>
@@ -137,12 +137,10 @@ export function ProjectCard({
         maxWidth="max-w-[420px]"
       >
         <div class="p-6 flex flex-col gap-5">
-          <h2 class="text-[22px] font-bold leading-tight">
-            {t("renameItem.title")}
-          </h2>
+          <h2 class="heading-h2">{t("renameItem.title")}</h2>
           <div class="flex flex-col gap-4">
             <div class="flex flex-col gap-1.5">
-              <label class="text-sm font-medium text-text-secondary">
+              <label class="text-caption font-medium text-text-secondary">
                 {t("renameItem.label")}
               </label>
               <input
@@ -153,11 +151,11 @@ export function ProjectCard({
                 }
                 onKeyDown={(e) => e.key === "Enter" && handleRenameSubmit()}
                 autofocus
-                class="w-full h-9 bg-surface-dark border border-border-subtle rounded-md px-3 text-sm text-text-primary placeholder:text-text-disabled focus:outline-none focus:border-accent-blue"
+                class="input-field"
               />
             </div>
             <div class="flex flex-col gap-1.5">
-              <label class="text-sm font-medium text-text-secondary">
+              <label class="text-caption font-medium text-text-secondary">
                 {t("renameItem.descriptionLabel")}
               </label>
               <input
@@ -167,7 +165,7 @@ export function ProjectCard({
                   setRenameDesc((e.target as HTMLInputElement).value)
                 }
                 placeholder={t("renameItem.descriptionPlaceholder")}
-                class="w-full h-9 bg-surface-dark border border-border-subtle rounded-md px-3 text-sm text-text-primary placeholder:text-text-disabled focus:outline-none focus:border-accent-blue"
+                class="input-field"
               />
             </div>
           </div>
@@ -175,7 +173,7 @@ export function ProjectCard({
             <button
               type="button"
               onClick={() => setRenameOpen(false)}
-              class="px-4 py-2 text-sm text-text-secondary hover:text-text-primary border border-border-subtle rounded-lg hover:bg-overlay-faint cursor-pointer bg-transparent"
+              class="btn-secondary"
             >
               {t("renameItem.cancel")}
             </button>
@@ -183,7 +181,7 @@ export function ProjectCard({
               type="button"
               onClick={handleRenameSubmit}
               disabled={renameSubmitting || !renameInput.trim()}
-              class="px-4 py-2 text-sm font-bold bg-cta text-cta-fg rounded-lg hover:bg-cta-hover cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              class="btn-primary"
             >
               {renameSubmitting
                 ? t("renameItem.submitting")
@@ -201,17 +199,15 @@ export function ProjectCard({
         maxWidth="max-w-[420px]"
       >
         <div class="p-6 flex flex-col gap-5">
-          <h2 class="text-[22px] font-bold leading-tight">
-            {t("deleteItem.title")}
-          </h2>
-          <p class="text-sm text-text-secondary">
+          <h2 class="heading-h2">{t("deleteItem.title")}</h2>
+          <p class="text-body text-text-secondary">
             {t("deleteItem.body", { name: project.name })}
           </p>
           <div class="flex justify-end gap-3">
             <button
               type="button"
               onClick={() => setDeleteOpen(false)}
-              class="px-4 py-2 text-sm text-text-secondary hover:text-text-primary border border-border-subtle rounded-lg hover:bg-overlay-faint cursor-pointer bg-transparent"
+              class="btn-secondary"
             >
               {t("deleteItem.cancel")}
             </button>
@@ -219,7 +215,7 @@ export function ProjectCard({
               type="button"
               onClick={handleDeleteConfirm}
               disabled={deleteSubmitting}
-              class="px-4 py-2 text-sm font-bold bg-danger/10 text-danger hover:bg-danger/20 rounded-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              class="btn-danger"
             >
               {deleteSubmitting
                 ? t("deleteItem.submitting")

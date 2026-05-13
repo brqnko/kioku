@@ -72,15 +72,13 @@ export default function SecurityTab() {
   return (
     <>
       <div class="flex flex-col gap-2">
-        <h1 class="text-[22px] leading-[1.27] font-bold tracking-tight">
-          {t("profile.security.title")}
-        </h1>
-        <p class="text-base text-text-muted-dark max-w-2xl">
+        <h1 class="heading-h2">{t("profile.security.title")}</h1>
+        <p class="text-body text-text-secondary max-w-2xl">
           {t("profile.security.subtitle")}
         </p>
       </div>
 
-      <div class="bg-surface-dark border border-border-dark rounded-lg overflow-hidden">
+      <div class="bg-surface-dark border border-border-subtle rounded-[12px] overflow-hidden">
         <div class="grid grid-cols-12 gap-4 p-4 border-b border-border-dark bg-surface-container text-text-muted-dark text-sm">
           <div class="col-span-5 md:col-span-4">
             {t("profile.security.columns.device")}
@@ -129,7 +127,7 @@ export default function SecurityTab() {
               type="button"
               onClick={() => setConfirmAll(true)}
               disabled={revokingAll}
-              class="text-sm text-danger hover:text-danger/80 py-2 px-4 rounded border border-danger/30 hover:border-danger cursor-pointer bg-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+              class="btn-danger"
             >
               {t("profile.security.revokeAll")}
             </button>
@@ -146,19 +144,19 @@ export default function SecurityTab() {
         maxWidth="max-w-md"
       >
         <div class="p-6 flex flex-col gap-4">
-          <h3 class="text-lg font-bold">
+          <h3 class="heading-h2">
             {t("profile.security.revokeConfirm.title")}
           </h3>
-          <p class="text-sm text-text-muted-dark leading-relaxed">
+          <p class="text-body text-text-secondary">
             {t("profile.security.revokeConfirm.body")}
           </p>
           {pendingRevoke && (
-            <div class="bg-surface-container-high border border-border-dark rounded-lg p-3 text-sm">
+            <div class="bg-surface-container-high border border-border-subtle rounded-lg p-3 text-sm">
               <div class="text-text-primary truncate" title={pendingRevoke.user_agent}>
                 {pendingRevoke.user_agent ||
                   t("profile.security.unknownAgent")}
               </div>
-              <div class="text-xs text-text-muted-dark mt-1">
+              <div class="text-xs text-text-secondary mt-1">
                 {pendingRevoke.ip_address}
               </div>
             </div>
@@ -168,7 +166,7 @@ export default function SecurityTab() {
               type="button"
               onClick={() => setPendingRevoke(null)}
               disabled={!!revoking}
-              class="px-5 py-2.5 rounded-lg font-bold text-sm text-text-muted-dark hover:bg-overlay-faint cursor-pointer bg-transparent border-none disabled:opacity-50"
+              class="btn-ghost"
             >
               {t("profile.cancel")}
             </button>
@@ -176,7 +174,7 @@ export default function SecurityTab() {
               type="button"
               onClick={revokeOne}
               disabled={!!revoking}
-              class="px-5 py-2.5 bg-danger text-white text-sm font-bold rounded-lg hover:bg-danger/90 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer border-none"
+              class="btn-danger"
             >
               {revoking
                 ? t("profile.security.revoking")
@@ -195,10 +193,10 @@ export default function SecurityTab() {
         maxWidth="max-w-md"
       >
         <div class="p-6 flex flex-col gap-4">
-          <h3 class="text-lg font-bold text-danger">
+          <h3 class="heading-h2 text-danger">
             {t("profile.security.revokeAllConfirm.title")}
           </h3>
-          <p class="text-sm text-text-muted-dark leading-relaxed">
+          <p class="text-body text-text-secondary">
             {t("profile.security.revokeAllConfirm.body")}
           </p>
           <div class="flex justify-end gap-3 mt-2">
@@ -206,7 +204,7 @@ export default function SecurityTab() {
               type="button"
               onClick={() => setConfirmAll(false)}
               disabled={revokingAll}
-              class="px-5 py-2.5 rounded-lg font-bold text-sm text-text-muted-dark hover:bg-overlay-faint cursor-pointer bg-transparent border-none disabled:opacity-50"
+              class="btn-ghost"
             >
               {t("profile.cancel")}
             </button>
@@ -214,7 +212,7 @@ export default function SecurityTab() {
               type="button"
               onClick={revokeAll}
               disabled={revokingAll}
-              class="px-5 py-2.5 bg-danger text-white text-sm font-bold rounded-lg hover:bg-danger/90 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer border-none"
+              class="btn-danger"
             >
               {revokingAll
                 ? t("profile.security.revokingAll")
@@ -273,7 +271,7 @@ function SessionRow({
           type="button"
           onClick={onRevoke}
           disabled={revoking}
-          class="text-sm text-text-primary py-2 px-4 rounded border border-border-dark hover:border-text-muted-dark cursor-pointer bg-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+          class="btn-secondary"
         >
           {revoking ? t("profile.security.revoking") : t("profile.security.revoke")}
         </button>
