@@ -322,7 +322,7 @@ export default function LandingPage() {
                   <PodcastMock t={t} />
                 );
               const mockBlock = (
-                <div class="relative max-w-full overflow-hidden">
+                <div class="relative">
                   <div
                     aria-hidden="true"
                     class="pointer-events-none absolute inset-0 flex items-center justify-center"
@@ -331,8 +331,10 @@ export default function LandingPage() {
                       class={`w-[750px] h-[450px] rounded-[100%] blur-3xl ${blurClass}`}
                     />
                   </div>
-                  <div class="relative origin-top-left scale-[0.45] w-[222%] -mb-[35%] tablet:scale-[0.65] tablet:w-[154%] tablet:-mb-[25%] md:scale-[0.8] md:w-[125%] md:[margin-bottom:-20%]">
-                    {mockNode}
+                  <div class="relative max-w-full overflow-hidden">
+                    <div class="origin-top-left scale-[0.45] w-[222%] -mb-[35%] tablet:scale-[0.65] tablet:w-[154%] tablet:-mb-[25%] md:scale-[0.8] md:w-[125%] md:[margin-bottom:-20%]">
+                      {mockNode}
+                    </div>
                   </div>
                 </div>
               );
