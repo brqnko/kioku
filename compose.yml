@@ -1,0 +1,37 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    expose:
+      - "3000"
+    env_file:
+      - .env
+    secrets:
+      - jwt-private
+      - jwt-public
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./frontend
+    volumes:
+      - frontend-dist:/output
+    restart: "no"
+
+volumes:
+  frontend-dist:
+    external: true
+    name: kioku-frontend-dist
+
+secrets:
+  jwt-private:
+    file: ./secrets/jwt_private.pem
+  jwt-public:
+    file: ./secrets/jwt_public.pem
+
+networks:
+  app-network:
+    external: true
+    name: kioku-network
