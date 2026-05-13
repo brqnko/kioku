@@ -1,4 +1,4 @@
-import { useState, useEffect } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 
 const STORAGE_KEY = "sidebar-collapsed";
 const EXPANDED_WIDTH = "16rem";
@@ -24,36 +24,64 @@ function syncDom(isMobile: boolean, dockedCollapsed: boolean, overlayOpen: boole
   root.style.setProperty("--sidebar-width", width);
 }
 
+type State = {
+  dockedCollapsed: boolean;
+  overlayOpen: boolean;
+  isMobile: boolean;
+};
+
+const state: State = {
+  dockedCollapsed: readStored(),
+  overlayOpen: false,
+  isMobile: readIsMobile(),
+};
+
+const listeners = new Set<() => void>();
+
+function emit() {
+  for (const fn of listeners) fn();
+}
+
+function setState(partial: Partial<State>) {
+  Object.assign(state, partial);
+  syncDom(state.isMobile, state.dockedCollapsed, state.overlayOpen);
+  if ("dockedCollapsed" in partial) {
+    localStorage.setItem(STORAGE_KEY, String(state.dockedCollapsed));
+  }
+  emit();
+}
+
 // Apply attributes/width synchronously on module load to avoid layout flash.
-syncDom(readIsMobile(), readStored(), false);
+syncDom(state.isMobile, state.dockedCollapsed, state.overlayOpen);
+
+if (typeof window !== "undefined") {
+  const mql = window.matchMedia(MOBILE_QUERY);
+  mql.addEventListener("change", (e) => {
+    const partial: Partial<State> = { isMobile: e.matches };
+    if (!e.matches) partial.overlayOpen = false;
+    setState(partial);
+  });
+}
 
 export function useSidebar() {
-  const [dockedCollapsed, setDockedCollapsed] = useState<boolean>(readStored);
-  const [overlayOpen, setOverlayOpen] = useState<boolean>(false);
-  const [isMobile, setIsMobile] = useState<boolean>(readIsMobile);
+  const [, setTick] = useState(0);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const mql = window.matchMedia(MOBILE_QUERY);
-    const handler = (e: MediaQueryListEvent) => {
-      setIsMobile(e.matches);
-      if (!e.matches) setOverlayOpen(false);
+    const fn = () => setTick((t) => t + 1);
+    listeners.add(fn);
+    return () => {
+      listeners.delete(fn);
     };
-    mql.addEventListener("change", handler);
-    return () => mql.removeEventListener("change", handler);
   }, []);
 
-  useEffect(() => {
-    syncDom(isMobile, dockedCollapsed, overlayOpen);
-    localStorage.setItem(STORAGE_KEY, String(dockedCollapsed));
-  }, [isMobile, dockedCollapsed, overlayOpen]);
+  const { isMobile, overlayOpen, dockedCollapsed } = state;
 
   useEffect(() => {
     if (!(isMobile && overlayOpen)) return;
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOverlayOpen(false);
+      if (e.key === "Escape") setState({ overlayOpen: false });
     };
     document.addEventListener("keydown", handleKey);
     return () => {
@@ -63,19 +91,18 @@ export function useSidebar() {
   }, [isMobile, overlayOpen]);
 
   const toggle = () => {
-    if (isMobile) {
-      setOverlayOpen((o) => !o);
+    if (state.isMobile) {
+      setState({ overlayOpen: !state.overlayOpen });
     } else {
-      setDockedCollapsed((c) => !c);
+      setState({ dockedCollapsed: !state.dockedCollapsed });
     }
   };
 
   const close = () => {
-    if (isMobile) setOverlayOpen(false);
+    if (state.isMobile) setState({ overlayOpen: false });
   };
 
   const isOpen = isMobile ? overlayOpen : !dockedCollapsed;
-  // Legacy "collapsed": true when sidebar is visually hidden.
   const collapsed = isMobile ? !overlayOpen : dockedCollapsed;
 
   return { collapsed, toggle, isMobile, isOpen, close } as const;
