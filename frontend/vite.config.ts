@@ -15,15 +15,7 @@ export default defineConfig({
     Icons({ compiler: "raw" }),
     tailwindcss(),
     ViteImageOptimizer(),
-    preact({
-      prerender: {
-        enabled: true,
-        renderTarget: "#app",
-        additionalPrerenderRoutes: ["/404", "/tos", "/privacy"],
-        previewMiddlewareEnabled: false,
-        previewMiddlewareFallback: "/404",
-      },
-    }),
+    preact(),
     VitePWA({
       registerType: "autoUpdate",
       manifest: {
