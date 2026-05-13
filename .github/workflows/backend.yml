@@ -47,7 +47,15 @@ jobs:
         with:
           workspaces: backend
 
+      - name: Cache sqlx-cli binary
+        id: cache-sqlx-cli
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/sqlx
+          key: ${{ runner.os }}-sqlx-cli-0.8.6
+
       - uses: taiki-e/install-action@v2
+        if: steps.cache-sqlx-cli.outputs.cache-hit != 'true'
         with:
           tool: sqlx-cli@0.8.6
 
