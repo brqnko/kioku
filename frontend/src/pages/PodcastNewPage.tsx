@@ -95,7 +95,7 @@ function FolderNode({ folder, selectedIds, onToggleFile }: FolderNodeProps) {
       </button>
 
       {expanded && (
-        <div class="ml-6 border-l border-border-subtle pl-2 space-y-0.5">
+        <div class="ml-3 pl-1 tablet:ml-6 tablet:pl-2 border-l border-border-subtle space-y-0.5">
           {isLoading && items.length === 0 && (
             <p class="p-2 text-xs text-text-disabled">
               {t("podcast.create.loading")}
@@ -213,7 +213,7 @@ export default function PodcastNewPage() {
     <div class="min-h-screen bg-background-dark text-text-primary">
       <SideNavBar />
       <TopAppBar />
-      <main class="ml-[var(--sidebar-width)] p-8 h-[calc(100vh-3.5rem)] overflow-hidden flex flex-col transition-[margin-left] duration-200 ease-in-out">
+      <main class="ml-[var(--sidebar-width)] p-4 tablet:p-8 h-[calc(100vh-3.5rem)] overflow-hidden flex flex-col transition-[margin-left] duration-200 ease-in-out">
         <header class="mb-6 flex flex-col gap-2">
           <nav class="flex items-center gap-2 text-text-secondary text-sm font-medium flex-wrap">
             <a
@@ -254,7 +254,7 @@ export default function PodcastNewPage() {
 
         <form
           onSubmit={handleSubmit}
-          class="flex-1 grid grid-cols-12 gap-6 overflow-hidden min-h-0"
+          class="flex-1 grid grid-cols-12 gap-4 tablet:gap-6 overflow-hidden min-h-0"
         >
           <section class="col-span-12 lg:col-span-7 flex flex-col bg-surface-dark border border-border-subtle rounded-xl overflow-hidden min-h-0">
             <div class="p-4 border-b border-border-subtle flex items-center justify-between">
@@ -265,7 +265,7 @@ export default function PodcastNewPage() {
                 {t("podcast.create.source.count", { count: selected.size })}
               </span>
             </div>
-            <div class="flex-1 overflow-y-auto p-2 space-y-1">
+            <div class="flex-1 overflow-y-auto overflow-x-hidden p-2 space-y-1">
               {childrenError && (
                 <p class="p-2 text-sm text-danger">
                   {t("project.errors.children")}
@@ -313,7 +313,7 @@ export default function PodcastNewPage() {
           </section>
 
           <aside class="col-span-12 lg:col-span-5 flex flex-col gap-6 overflow-y-auto min-h-0">
-            <div class="bg-surface-dark border border-border-subtle rounded-xl p-6 flex flex-col gap-6">
+            <div class="bg-surface-dark border border-border-subtle rounded-xl p-4 tablet:p-6 flex flex-col gap-6">
               <h3 class="text-sm font-bold text-text-primary border-b border-border-subtle pb-4">
                 {t("podcast.create.settings.title")}
               </h3>

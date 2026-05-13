@@ -25,67 +25,109 @@ function MockWindow({ children }: { children: preact.ComponentChildren }) {
   );
 }
 
-function LibraryMock({ t }: { t: (key: string) => string }) {
-  const projects = [
+function ExplorerMock({ t }: { t: (key: string) => string }) {
+  const rows = [
     {
-      name: t("mock.library.project1"),
-      desc: t("mock.library.project1Desc"),
-      time: t("mock.library.project1Time"),
+      kind: "folder" as const,
+      icon: "folder",
+      iconTone: "text-primary",
+      name: t("mock.explorer.folder1"),
+      type: t("mock.explorer.type.folder"),
+      time: t("mock.explorer.folder1Time"),
     },
     {
-      name: t("mock.library.project2"),
-      desc: t("mock.library.project2Desc"),
-      time: t("mock.library.project2Time"),
+      kind: "folder" as const,
+      icon: "folder",
+      iconTone: "text-primary",
+      name: t("mock.explorer.folder2"),
+      type: t("mock.explorer.type.folder"),
+      time: t("mock.explorer.folder2Time"),
     },
     {
-      name: t("mock.library.project3"),
-      desc: t("mock.library.project3Desc"),
-      time: t("mock.library.project3Time"),
+      kind: "file" as const,
+      icon: "picture_as_pdf",
+      iconTone: "text-rose-400",
+      name: t("mock.explorer.file1"),
+      type: t("mock.explorer.type.pdf"),
+      time: t("mock.explorer.file1Time"),
+    },
+    {
+      kind: "file" as const,
+      icon: "description",
+      iconTone: "text-sky-400",
+      name: t("mock.explorer.file2"),
+      type: t("mock.explorer.type.note"),
+      time: t("mock.explorer.file2Time"),
+    },
+    {
+      kind: "file" as const,
+      icon: "article",
+      iconTone: "text-emerald-400",
+      name: t("mock.explorer.file3"),
+      type: t("mock.explorer.type.markdown"),
+      time: t("mock.explorer.file3Time"),
     },
   ];
   return (
     <MockWindow>
       <div class="p-6 md:p-8 bg-background-light dark:bg-background-dark">
-        <div class="flex flex-col gap-1 mb-6">
+        <div class="flex flex-col gap-2 mb-6">
+          <nav class="flex items-center gap-1.5 text-xs text-text-muted-light dark:text-text-muted-dark">
+            <span>{t("mock.explorer.breadcrumb")}</span>
+            <span class="material-symbols-outlined text-[14px]">
+              chevron_right
+            </span>
+            <span class="text-charcoal dark:text-white font-medium">
+              {t("mock.explorer.project")}
+            </span>
+          </nav>
           <h4 class="text-xl md:text-2xl font-bold text-charcoal dark:text-white tracking-tight">
-            {t("library.title")}
+            {t("mock.explorer.project")}
           </h4>
           <p class="text-sm text-text-muted-light dark:text-text-muted-dark">
-            {t("library.subtitle")}
+            {t("mock.explorer.subtitle")}
           </p>
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-          {/* CreateProjectTile */}
-          <div class="flex flex-col items-center justify-center gap-2 min-h-[120px] p-4 rounded-xl border border-dashed border-border-light dark:border-border-dark">
-            <div class="size-9 rounded-full bg-card-light dark:bg-surface-dark flex items-center justify-center">
-              <span class="material-symbols-outlined text-[18px] text-text-muted-light dark:text-text-muted-dark">
-                add
-              </span>
-            </div>
-            <span class="text-xs font-medium text-text-muted-light dark:text-text-muted-dark">
-              {t("library.newProject")}
-            </span>
-          </div>
+        <div class="flex items-center gap-2 mb-3 text-charcoal dark:text-white">
+          <span class="material-symbols-outlined text-text-muted-light dark:text-text-muted-dark text-[18px]">
+            folder_open
+          </span>
+          <span class="text-sm font-bold">{t("mock.explorer.allFiles")}</span>
+        </div>
 
-          {/* Project cards */}
-          {projects.map((p) => (
-            <div
-              key={p.name}
-              class="flex flex-col min-h-[120px] p-4 rounded-xl border border-border-light dark:border-border-dark bg-card-light dark:bg-surface-dark"
-            >
-              <h5 class="text-sm font-medium text-charcoal dark:text-white mb-1 truncate">
-                {p.name}
-              </h5>
-              <p class="text-xs text-text-muted-light dark:text-text-muted-dark line-clamp-2 mb-auto">
-                {p.desc}
-              </p>
-              <div class="mt-3 pt-2 border-t border-border-light dark:border-border-dark flex items-center gap-1.5 text-[11px] text-text-muted-light dark:text-text-muted-dark">
-                <span class="material-symbols-outlined text-[13px]">update</span>
-                <span class="truncate">{p.time}</span>
-              </div>
-            </div>
-          ))}
+        <div class="rounded-xl border border-border-light dark:border-border-dark bg-card-light dark:bg-surface-dark overflow-hidden">
+          <div class="grid grid-cols-[1fr_auto_auto] gap-4 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-text-muted-light dark:text-text-muted-dark border-b border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark/60">
+            <span>{t("mock.explorer.column.name")}</span>
+            <span>{t("mock.explorer.column.type")}</span>
+            <span>{t("mock.explorer.column.modified")}</span>
+          </div>
+          <ul class="divide-y divide-border-light dark:divide-border-dark list-none p-0 m-0">
+            {rows.map((row) => (
+              <li
+                key={row.name}
+                class="grid grid-cols-[1fr_auto_auto] gap-4 items-center px-4 py-2.5"
+              >
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <span
+                    class={`material-symbols-outlined text-[18px] ${row.iconTone}`}
+                    style={{ fontVariationSettings: "'FILL' 1" }}
+                  >
+                    {row.icon}
+                  </span>
+                  <span class="text-sm font-medium text-charcoal dark:text-white truncate">
+                    {row.name}
+                  </span>
+                </div>
+                <span class="text-xs text-text-muted-light dark:text-text-muted-dark whitespace-nowrap">
+                  {row.type}
+                </span>
+                <span class="text-xs text-text-muted-light dark:text-text-muted-dark whitespace-nowrap">
+                  {row.time}
+                </span>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </MockWindow>
@@ -223,7 +265,7 @@ export default function LandingPage() {
         <section class="max-w-7xl mx-auto px-6 md:px-8 mb-14 md:mb-20">
           <div class="grid lg:grid-cols-[1.05fr_1fr] items-center gap-12 lg:gap-20">
             <Reveal class="flex flex-col gap-6 md:gap-8 lg:pl-16 xl:pl-24">
-              <h1 class="text-5xl md:text-6xl xl:text-7xl font-bold text-charcoal dark:text-white leading-[1.05] tracking-tight">
+              <h1 class="text-4xl md:text-6xl xl:text-7xl font-bold text-charcoal dark:text-white leading-[1.05] tracking-tight">
                 {t("hero.title")}
               </h1>
               {isAuthenticated ? (
@@ -273,14 +315,14 @@ export default function LandingPage() {
                     : "bg-primary/20";
               const mockNode =
                 key === "synthesis" ? (
-                  <LibraryMock t={t} />
+                  <ExplorerMock t={t} />
                 ) : key === "library" ? (
                   <ChatMock t={t} />
                 ) : (
                   <PodcastMock t={t} />
                 );
               const mockBlock = (
-                <div class="relative">
+                <div class="relative max-w-full overflow-hidden">
                   <div
                     aria-hidden="true"
                     class="pointer-events-none absolute inset-0 flex items-center justify-center"
@@ -289,7 +331,7 @@ export default function LandingPage() {
                       class={`w-[750px] h-[450px] rounded-[100%] blur-3xl ${blurClass}`}
                     />
                   </div>
-                  <div class="relative md:origin-top-left md:scale-[0.8] md:w-[125%] md:[margin-bottom:-20%]">
+                  <div class="relative origin-top-left scale-[0.45] w-[222%] -mb-[35%] tablet:scale-[0.65] tablet:w-[154%] tablet:-mb-[25%] md:scale-[0.8] md:w-[125%] md:[margin-bottom:-20%]">
                     {mockNode}
                   </div>
                 </div>

@@ -78,13 +78,13 @@ export function CreateFolderDialog({
   return (
     <Dialog open={open} onClose={onClose} ariaLabel={t("createFolder.title")}>
       <form onSubmit={handleSubmit} class="flex flex-col">
-        <div class="p-6 border-b border-border-dark">
+        <div class="p-4 tablet:p-6 border-b border-border-dark">
           <h2 class="text-[22px] leading-[1.27] font-bold tracking-tight text-text-primary">
             {t("createFolder.title")}
           </h2>
         </div>
 
-        <div class="p-6 flex flex-col gap-6">
+        <div class="p-4 tablet:p-6 flex flex-col gap-6">
           <div class="flex flex-col gap-2">
             <label
               for="folder-name"
@@ -131,7 +131,7 @@ export function CreateFolderDialog({
           {error && <p class="text-sm text-danger">{error}</p>}
         </div>
 
-        <div class="p-6 bg-surface-container-low/50 flex items-center justify-end gap-4 border-t border-border-dark">
+        <div class="p-4 tablet:p-6 bg-surface-container-low/50 flex items-center justify-end gap-4 border-t border-border-dark">
           <button
             type="button"
             onClick={onClose}

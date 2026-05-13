@@ -59,7 +59,7 @@ export default function ProjectPodcastsPage() {
     <div class="min-h-screen bg-background-dark text-text-primary">
       <SideNavBar />
       <TopAppBar />
-      <main class="ml-[var(--sidebar-width)] p-8 min-h-[calc(100vh-3.5rem)] overflow-y-auto transition-[margin-left] duration-200 ease-in-out">
+      <main class="ml-[var(--sidebar-width)] p-4 tablet:p-8 min-h-[calc(100vh-3.5rem)] overflow-y-auto transition-[margin-left] duration-200 ease-in-out">
         <div class="max-w-[1200px] mx-auto">
           <nav class="flex items-center gap-2 text-text-secondary text-sm font-medium flex-wrap mb-6">
             <a
@@ -83,7 +83,7 @@ export default function ProjectPodcastsPage() {
             <span class="text-text-primary">{t("podcast.list.crumb")}</span>
           </nav>
 
-          <header class="flex items-end justify-between gap-6 flex-wrap mb-12">
+          <header class="flex items-end justify-between gap-6 flex-wrap mb-8 tablet:mb-12">
             <div class="flex flex-col gap-2 max-w-2xl">
               <h1 class="text-[22px] leading-[1.27] font-bold tracking-tight">
                 {t("podcast.list.title")}
