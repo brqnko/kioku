@@ -132,6 +132,41 @@ body {
   animation: fade-in-up 0.8s ease-out both;
 }
 
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(72px) scale(0.96);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(72px) scale(0.96);
+  filter: blur(6px);
+  will-change: opacity, transform, filter;
+}
+
+.reveal-in {
+  animation: reveal-up 1.1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+  .reveal-in {
+    animation: none;
+  }
+}
+
 .markdown-body {
   word-break: break-word;
   overflow-wrap: break-word;
@@ -605,4 +640,64 @@ body {
 }
 .milkdown-host .ProseMirror ::selection {
   background: rgba(35, 131, 226, 0.3);
+}
+
+/* Shiki syntax highlighting (read-only markdown only — chat / dashboard).
+   The editor now uses CodeMirror, so editor-side decoration rules are gone. */
+.shiki span,
+.shiki code {
+  color: var(--shiki-light);
+}
+[data-theme="dark"] .shiki span,
+[data-theme="dark"] .shiki code {
+  color: var(--shiki-dark);
+}
+.markdown-body .shiki,
+.markdown-doc .shiki {
+  background-color: var(--shiki-light-bg);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 0.75rem 0;
+  font-family: SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 14px;
+  line-height: 1.6;
+}
+[data-theme="dark"] .markdown-body .shiki,
+[data-theme="dark"] .markdown-doc .shiki {
+  background-color: var(--shiki-dark-bg);
+}
+.markdown-body .shiki code,
+.markdown-doc .shiki code {
+  background: transparent;
+  padding: 0;
+  font-size: inherit;
+}
+
+/* Embedded CodeMirror inside the editor's code_block NodeView */
+.code-block-cm {
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 8px;
+  overflow: hidden;
+  font-family: SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 14px;
+}
+.code-block-cm .cm-editor {
+  outline: none;
+  background: var(--color-surface-container-low);
+}
+.code-block-cm .cm-editor.cm-focused {
+  outline: none;
+}
+.code-block-cm .cm-scroller {
+  font-family: inherit;
+  line-height: 1.5;
+}
+.code-block-cm .cm-gutters {
+  user-select: none;
+  background: var(--color-overlay-faint);
+  border-right: 1px solid var(--color-border-subtle);
+}
+.code-block-cm .cm-content {
+  padding: 0.5rem 0;
 }

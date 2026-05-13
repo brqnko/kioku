@@ -30,6 +30,8 @@ pub struct ChatMessage {
 }
 
 pub const MAX_MESSAGE_CONTENT_BYTES: usize = 8 * 1024;
+pub const MAX_CHATS_PER_PROJECT: usize = 50;
+pub const MAX_MESSAGES_PER_CHAT: usize = 200;
 
 pub struct Chat {
     pub id: uuid::Uuid,
@@ -84,6 +86,16 @@ impl Chat {
         role: ChatMessageRole,
         content: String,
     ) -> Result<(), crate::domain::DomainError> {
+        if self.messages.len() >= MAX_MESSAGES_PER_CHAT {
+            return Err(crate::domain::DomainError::new(
+                "chat_messages_per_chat_quota_exceeded",
+                format!(
+                    "chat can have at most {} messages",
+                    MAX_MESSAGES_PER_CHAT
+                ),
+                crate::domain::DomainErrorKind::BadInput,
+            ));
+        }
         if content.len() > MAX_MESSAGE_CONTENT_BYTES {
             return Err(crate::domain::DomainError::new(
                 "invalid_message_content",

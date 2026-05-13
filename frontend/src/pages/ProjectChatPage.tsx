@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from "preact/hooks";
 import { useRoute } from "preact-iso";
 import { useTranslation } from "react-i18next";
-import { marked } from "marked";
 import SideNavBar from "../components/SideNavBar";
 import TopAppBar from "../components/TopAppBar";
 import { Dialog } from "../components/Dialog";
 import { RowActionMenu } from "../components/RowActionMenu";
+import { MarkdownView } from "../components/MarkdownView";
 import { useProject } from "../hooks/useProject";
 import { useChats } from "../hooks/useChat";
 import { kyInstance } from "../api/mutator";
@@ -14,8 +14,6 @@ import type {
   CreateChat200,
   SendMessage200,
 } from "../api/generated/backend.schemas";
-
-marked.use({ breaks: true });
 
 type LocalMessage = {
   role: "user" | "assistant";
@@ -105,7 +103,6 @@ function MessageBubble({
     );
   }
 
-  const html = marked.parse(msg.content) as string;
   return (
     <div class="flex gap-3 max-w-3xl mx-auto w-full">
       <div class="w-7 h-7 rounded-full bg-surface-dark border border-border-subtle flex items-center justify-center shrink-0 mt-0.5">
@@ -117,9 +114,9 @@ function MessageBubble({
         </span>
       </div>
       <div class="flex flex-col gap-2 flex-1 min-w-0 pt-0.5">
-        <div
-          class="text-sm text-text-primary markdown-body leading-relaxed"
-          dangerouslySetInnerHTML={{ __html: html }}
+        <MarkdownView
+          source={msg.content}
+          className="text-sm text-text-primary markdown-body leading-relaxed"
         />
         <div class="flex items-center gap-1 -ml-1">
           <button

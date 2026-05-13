@@ -1,3 +1,4 @@
+pub mod ad_lock;
 pub mod code_runner;
 pub mod dialect;
 pub mod embedding;

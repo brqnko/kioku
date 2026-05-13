@@ -31,6 +31,7 @@ pub trait QueryService: Send + Sync {
         cursor: Option<ListChatsByProjectCursor>,
         limit: u32,
     ) -> Result<Vec<ListChatsByProjectView>, anyhow::Error>;
+    async fn count_by_project(&self, project_id: uuid::Uuid) -> Result<u64, anyhow::Error>;
 }
 
 pub struct QueryServiceImpl {
@@ -138,5 +139,20 @@ impl QueryService for QueryServiceImpl {
             .collect::<Result<Vec<ListChatsByProjectView>, anyhow::Error>>()?,
         };
         Ok(rows)
+    }
+
+    async fn count_by_project(&self, project_id: uuid::Uuid) -> Result<u64, anyhow::Error> {
+        let row = sqlx::query!(
+            r#"
+            SELECT COUNT(*) AS count
+            FROM chat
+            WHERE project_id = ?
+            "#,
+            project_id.as_bytes().as_slice(),
+        )
+        .fetch_one(&self.pool)
+        .await?;
+
+        Ok(row.count as u64)
     }
 }

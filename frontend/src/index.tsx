@@ -2,6 +2,7 @@ import { LocationProvider, Router, Route, lazy, hydrate, prerender as ssr } from
 import { SWRConfig } from "swr";
 import "./i18n";
 import "./style.css";
+import { NotificationBanner } from "./components/NotificationBanner";
 
 const LandingPage = lazy(() => import("./pages/LandingPage.jsx"));
 const TOSPage = lazy(() => import("./pages/TOSPage.jsx"));
@@ -33,6 +34,7 @@ export function App() {
           errorRetryCount: 1,
         }}
       >
+        <NotificationBanner />
         <Router>
           <Route path="/" component={LandingPage} />
           <Route path="/tos" component={TOSPage} />

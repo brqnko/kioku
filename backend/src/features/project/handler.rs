@@ -11,7 +11,7 @@ pub struct CreateProjectBody {
 #[utoipa::path(
     post,
     path = "/projects",
-    security(("Bearer" = [])),
+    security(("cookieAuth" = [], "csrfToken" = [])),
     request_body = inline(CreateProjectBody),
     responses(
         (status = 200, body = inline(ProjectResponse)),
@@ -106,7 +106,7 @@ pub struct ListProjectsResponse {
 #[utoipa::path(
     get,
     path = "/projects",
-    security(("Bearer" = [])),
+    security(("cookieAuth" = [], "csrfToken" = [])),
     params(ListProjectsQuery),
     responses(
         (status = 200, body = inline(ListProjectsResponse)),
@@ -188,7 +188,7 @@ pub struct ProjectResponse {
 #[utoipa::path(
     get,
     path = "/projects/{project_id}",
-    security(("Bearer" = [])),
+    security(("cookieAuth" = [], "csrfToken" = [])),
     params(
         ("project_id" = uuid::Uuid, Path, description = "Project ID"),
     ),
@@ -240,7 +240,7 @@ pub struct UpdateProjectBody {
 #[utoipa::path(
     patch,
     path = "/projects/{project_id}",
-    security(("Bearer" = [])),
+    security(("cookieAuth" = [], "csrfToken" = [])),
     params(
         ("project_id" = uuid::Uuid, Path, description = "Project ID"),
     ),
@@ -288,7 +288,7 @@ pub async fn update_project(
 #[utoipa::path(
     delete,
     path = "/projects/{project_id}",
-    security(("Bearer" = [])),
+    security(("cookieAuth" = [], "csrfToken" = [])),
     params(
         ("project_id" = uuid::Uuid, Path, description = "Project ID"),
     ),

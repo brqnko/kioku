@@ -1,3 +1,5 @@
+pub const MAX_PROJECTS_PER_USER: usize = 50;
+
 pub struct ProjectName(pub String);
 
 impl ProjectName {

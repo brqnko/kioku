@@ -12,8 +12,29 @@ mod docs {
     use crate::features::user::handler::*;
     use crate::server::schema::*;
 
+    pub struct SecurityAddon;
+
+    impl utoipa::Modify for SecurityAddon {
+        fn modify(&self, openapi: &mut utoipa::openapi::OpenApi) {
+            use utoipa::openapi::security::{ApiKey, ApiKeyValue, SecurityScheme};
+
+            let components = openapi
+                .components
+                .get_or_insert_with(utoipa::openapi::Components::new);
+            components.add_security_scheme(
+                "cookieAuth",
+                SecurityScheme::ApiKey(ApiKey::Cookie(ApiKeyValue::new("access_token"))),
+            );
+            components.add_security_scheme(
+                "csrfToken",
+                SecurityScheme::ApiKey(ApiKey::Header(ApiKeyValue::new("x-csrf-token"))),
+            );
+        }
+    }
+
     #[derive(utoipa::OpenApi)]
     #[openapi(
+        modifiers(&SecurityAddon),
         paths(
             handler::health,
             oidc_start,
@@ -35,6 +56,7 @@ mod docs {
             request_upload_url,
             create_file,
             get_file_content,
+            get_file_raw,
             update_file,
             update_file_text,
             remove_file,
@@ -47,6 +69,7 @@ mod docs {
             list_project_children,
             list_folder_children,
             run_code,
+            list_compilers,
             create_podcast,
             list_podcasts,
             get_podcast,
@@ -93,7 +116,7 @@ fn make_otel_span<B>(req: &axum::http::Request<B>) -> tracing::Span {
     let parent = opentelemetry::global::get_text_map_propagator(|propagator| {
         propagator.extract(&HeaderExtractor(req.headers()))
     });
-    span.set_parent(parent);
+    let _ = span.set_parent(parent);
     span
 }
 
@@ -151,9 +174,10 @@ pub fn router(app: std::sync::Arc<crate::app::App>) -> axum::Router {
         .merge(protected)
         .split_for_parts();
 
-    let router = router
+    router
         .merge(<utoipa_redoc::Redoc<_> as utoipa_redoc::Servable<_>>::with_url("/redoc", api))
         .with_state(app)
+        .layer(axum::extract::DefaultBodyLimit::max(32 * 1024 * 1024))
         .layer(axum::middleware::from_fn(metrics_mw))
         .layer(
             tower_http::trace::TraceLayer::new_for_http()
@@ -165,7 +189,5 @@ pub fn router(app: std::sync::Arc<crate::app::App>) -> axum::Router {
         .layer(tower_http::request_id::PropagateRequestIdLayer::x_request_id())
         .layer(tower_http::request_id::SetRequestIdLayer::x_request_id(
             tower_http::request_id::MakeRequestUuid,
-        ));
-
-    router
+        ))
 }

@@ -40,16 +40,28 @@ impl std::fmt::Display for CodeRunnerError {
 
 impl std::error::Error for CodeRunnerError {}
 
+#[derive(Clone)]
+pub struct CompilerSummary {
+    pub name: String,
+    pub language: String,
+    pub display_name: String,
+    pub version: String,
+}
+
 #[async_trait::async_trait]
 pub trait CodeRunnerClient: Send + Sync {
     async fn run(&self, request: RunRequest) -> Result<RunResponse, CodeRunnerError>;
+    async fn list_compilers(&self) -> Result<Vec<CompilerSummary>, CodeRunnerError>;
 }
 
 const WANDBOX_URL: &str = "https://wandbox.org/api/compile.json";
-const REQUEST_TIMEOUT_SECS: u64 = 60;
+const WANDBOX_LIST_URL: &str = "https://wandbox.org/api/list.json";
+const REQUEST_TIMEOUT_SECS: u64 = 600;
+const COMPILER_LIST_TTL_SECS: u64 = 24 * 60 * 60;
 
 pub struct WandboxClient {
     http_client: reqwest::Client,
+    compiler_cache: tokio::sync::RwLock<Option<(std::time::Instant, Vec<CompilerSummary>)>>,
 }
 
 impl WandboxClient {
@@ -57,8 +69,46 @@ impl WandboxClient {
         let http_client = reqwest::Client::builder()
             .timeout(std::time::Duration::from_secs(REQUEST_TIMEOUT_SECS))
             .build()?;
-        Ok(Self { http_client })
+        Ok(Self {
+            http_client,
+            compiler_cache: tokio::sync::RwLock::new(None),
+        })
     }
+
+    async fn fetch_compilers(&self) -> Result<Vec<CompilerSummary>, anyhow::Error> {
+        let resp = self
+            .http_client
+            .get(WANDBOX_LIST_URL)
+            .header(reqwest::header::ACCEPT, "application/json")
+            .send()
+            .await?;
+
+        let status = resp.status();
+        if !status.is_success() {
+            return Err(anyhow::anyhow!("wandbox list responded with {status}"));
+        }
+
+        let raw: Vec<WandboxCompiler> = resp.json().await?;
+        Ok(raw
+            .into_iter()
+            .map(|c| CompilerSummary {
+                name: c.name,
+                language: c.language,
+                display_name: c.display_name,
+                version: c.version,
+            })
+            .collect())
+    }
+}
+
+#[derive(serde::Deserialize)]
+struct WandboxCompiler {
+    name: String,
+    language: String,
+    #[serde(rename = "display-name", default)]
+    display_name: String,
+    #[serde(default)]
+    version: String,
 }
 
 #[derive(serde::Serialize)]
@@ -177,5 +227,41 @@ impl CodeRunnerClient for WandboxClient {
             program_error: parsed.program_error,
             program_message: parsed.program_message,
         })
+    }
+
+    async fn list_compilers(&self) -> Result<Vec<CompilerSummary>, CodeRunnerError> {
+        {
+            let cache = self.compiler_cache.read().await;
+            if let Some((fetched_at, list)) = cache.as_ref()
+                && fetched_at.elapsed().as_secs() < COMPILER_LIST_TTL_SECS
+            {
+                return Ok(list.clone());
+            }
+        }
+
+        let mut cache = self.compiler_cache.write().await;
+        if let Some((fetched_at, list)) = cache.as_ref()
+            && fetched_at.elapsed().as_secs() < COMPILER_LIST_TTL_SECS
+        {
+            return Ok(list.clone());
+        }
+
+        match self.fetch_compilers().await {
+            Ok(list) => {
+                *cache = Some((std::time::Instant::now(), list.clone()));
+                Ok(list)
+            }
+            Err(err) => {
+                tracing::warn!(
+                    target: "code_runner",
+                    error = %err,
+                    "wandbox list refresh failed"
+                );
+                if let Some((_, stale)) = cache.as_ref() {
+                    return Ok(stale.clone());
+                }
+                Err(CodeRunnerError::Upstream(err))
+            }
+        }
     }
 }

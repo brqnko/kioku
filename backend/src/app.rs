@@ -50,6 +50,7 @@ pub struct App {
     pub podcast_request_service:
         std::sync::Arc<dyn crate::util::podcast_request::PodcastRequestService>,
     pub code_runner_client: std::sync::Arc<dyn crate::util::code_runner::CodeRunnerClient>,
+    pub locker: std::sync::Arc<dyn crate::util::ad_lock::Locker>,
 }
 
 pub struct AppArgs {
@@ -133,6 +134,7 @@ impl App {
             chat_query_service: Arc::new(
                 crate::features::chatbot::query_service::QueryServiceImpl::new(pool.clone()),
             ),
+            locker: Arc::new(crate::util::ad_lock::MySqlLocker::new()),
             pool,
             oidc_client,
             jwt_service,

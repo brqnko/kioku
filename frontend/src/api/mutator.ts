@@ -1,4 +1,6 @@
 import ky from "ky";
+import i18n from "../i18n";
+import { pushNotification } from "../notifications/store";
 
 interface RequestConfig {
   url: string;
@@ -61,6 +63,29 @@ export const kyInstance = ky.create({
       },
     ],
     afterResponse: [
+      async (_request, _options, response) => {
+        if (response.status !== 429) return;
+        let code: string | undefined;
+        try {
+          const body = (await response.clone().json()) as
+            | { code?: unknown }
+            | null;
+          if (body && typeof body.code === "string") code = body.code;
+        } catch {
+          // ignore body parse errors
+        }
+        const isRateLimitCode =
+          code !== undefined && code.toUpperCase().startsWith("RATE_LIMIT");
+        const message = isRateLimitCode
+          ? i18n.t("notification.rateLimit.specific")
+          : i18n.t("notification.rateLimit.generic");
+        pushNotification({
+          kind: "warning",
+          message,
+          dedupeKey: "rate-limit",
+          durationMs: 6000,
+        });
+      },
       async (request, _options, response) => {
         if (response.status !== 401) return;
         if (request.url.includes("/auth/refresh")) return;

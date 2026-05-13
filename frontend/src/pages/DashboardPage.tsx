@@ -1,8 +1,7 @@
-import { useMemo } from "preact/hooks";
 import { useTranslation } from "react-i18next";
-import { marked } from "marked";
 import SideNavBar from "../components/SideNavBar";
 import TopAppBar from "../components/TopAppBar";
+import { MarkdownView } from "../components/MarkdownView";
 import { useDashboard } from "../hooks/useDashboard";
 import type { GetDashboard200RecentSeenFilesItem } from "../api/generated/backend.schemas";
 
@@ -41,11 +40,6 @@ function formatRelative(iso: string, locale: string) {
 export default function DashboardPage() {
   const { t, i18n } = useTranslation();
   const { data, error, isLoading } = useDashboard();
-
-  const summaryHtml = useMemo(() => {
-    if (!data?.ai_learning_summary) return "";
-    return marked.parse(data.ai_learning_summary, { async: false }) as string;
-  }, [data?.ai_learning_summary]);
 
   return (
     <div class="min-h-screen bg-background-dark text-text-primary">
@@ -87,10 +81,10 @@ export default function DashboardPage() {
               {data && !data.ai_learning_summary && (
                 <p class="text-sm text-text-muted-dark">{t("dashboard.summary.empty")}</p>
               )}
-              {summaryHtml && (
-                <div
-                  class="markdown-body text-sm text-text-muted-dark leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: summaryHtml }}
+              {data?.ai_learning_summary && (
+                <MarkdownView
+                  source={data.ai_learning_summary}
+                  className="markdown-body text-sm text-text-muted-dark leading-relaxed"
                 />
               )}
             </div>

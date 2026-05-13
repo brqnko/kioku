@@ -17,7 +17,7 @@ pub struct CreatePodcastResponse {
 #[utoipa::path(
     post,
     path = "/projects/{project_id}/podcasts",
-    security(("Bearer" = [])),
+    security(("cookieAuth" = [], "csrfToken" = [])),
     params(
         ("project_id" = uuid::Uuid, Path, description = "Project ID"),
     ),
@@ -95,7 +95,7 @@ pub struct GetPodcastResponse {
 #[utoipa::path(
     get,
     path = "/projects/{project_id}/podcasts/{podcast_id}",
-    security(("Bearer" = [])),
+    security(("cookieAuth" = [], "csrfToken" = [])),
     params(
         ("project_id" = uuid::Uuid, Path, description = "Project ID"),
         ("podcast_id" = uuid::Uuid, Path, description = "Podcast ID"),
@@ -207,7 +207,7 @@ pub struct ListPodcastsResponse {
 #[utoipa::path(
     get,
     path = "/projects/{project_id}/podcasts",
-    security(("Bearer" = [])),
+    security(("cookieAuth" = [], "csrfToken" = [])),
     params(
         ("project_id" = uuid::Uuid, Path, description = "Project ID"),
         ListPodcastsQuery,
@@ -279,7 +279,7 @@ pub async fn list_podcasts(
 #[utoipa::path(
     delete,
     path = "/projects/{project_id}/podcasts/{podcast_id}",
-    security(("Bearer" = [])),
+    security(("cookieAuth" = [], "csrfToken" = [])),
     params(
         ("project_id" = uuid::Uuid, Path, description = "Project ID"),
         ("podcast_id" = uuid::Uuid, Path, description = "Podcast ID"),
@@ -323,7 +323,7 @@ pub struct UpdatePodcastBody {
 #[utoipa::path(
     patch,
     path = "/projects/{project_id}/podcasts/{podcast_id}",
-    security(("Bearer" = [])),
+    security(("cookieAuth" = [], "csrfToken" = [])),
     params(
         ("project_id" = uuid::Uuid, Path, description = "Project ID"),
         ("podcast_id" = uuid::Uuid, Path, description = "Podcast ID"),

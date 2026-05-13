@@ -36,14 +36,41 @@ pub async fn create_chat(
         Err(err) => return Ok(Err(err)),
     };
 
+    let lock_name = format!("chat_quota:project:{}", input.project_id.as_simple());
     let mut tx = app.pool.begin().await?;
-    match app.chat_repository.save(&mut tx, &chat).await? {
-        Ok(()) => {}
-        Err(err) => return Ok(Err(err)),
-    }
-    tx.commit().await?;
+    app.locker.acquire(&mut tx, &lock_name, 10).await?;
 
-    Ok(Ok(CreateChatOutput { chat }))
+    let work: Result<Result<(), crate::domain::DomainError>, anyhow::Error> = async {
+        let existing = app
+            .chat_query_service
+            .count_by_project(input.project_id)
+            .await?;
+        if existing as usize >= super::domain::MAX_CHATS_PER_PROJECT {
+            return Ok(Err(crate::domain::DomainError::new(
+                "chat_per_project_quota_exceeded",
+                format!(
+                    "project can have at most {} chats",
+                    super::domain::MAX_CHATS_PER_PROJECT
+                ),
+                crate::domain::DomainErrorKind::BadInput,
+            )));
+        }
+        match app.chat_repository.save(&mut tx, &chat).await? {
+            Ok(()) => Ok(Ok(())),
+            Err(err) => Ok(Err(err)),
+        }
+    }
+    .await;
+
+    app.locker.release(&mut tx, &lock_name).await?;
+
+    match work? {
+        Ok(()) => {
+            tx.commit().await?;
+            Ok(Ok(CreateChatOutput { chat }))
+        }
+        Err(err) => Ok(Err(err)),
+    }
 }
 
 // list chats
@@ -187,6 +214,17 @@ pub async fn send_message(
             "forbidden",
             "chat does not belong to the user".to_string(),
             crate::domain::DomainErrorKind::Forbidden,
+        )));
+    }
+
+    if chat.messages.len() + 2 > super::domain::MAX_MESSAGES_PER_CHAT {
+        return Ok(Err(crate::domain::DomainError::new(
+            "chat_messages_per_chat_quota_exceeded",
+            format!(
+                "chat can have at most {} messages",
+                super::domain::MAX_MESSAGES_PER_CHAT
+            ),
+            crate::domain::DomainErrorKind::BadInput,
         )));
     }
 

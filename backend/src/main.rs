@@ -180,6 +180,8 @@ async fn main() -> anyhow::Result<()> {
         .with_graceful_shutdown(shutdown_signal())
         .await?;
 
+    tracing::info!("graceful shutdown complete");
+
     otel_guard.shutdown();
 
     Ok(())

@@ -9,6 +9,7 @@ import { useFileContent, fileContentKeyFor } from "../hooks/useFile";
 import { invalidateAfterMutation } from "../utils/swrCache";
 import { fetchFileAncestors, type BreadcrumbAncestor } from "../hooks/useFolder";
 import { kyInstance } from "../api/mutator";
+import { uploadFile } from "../api/upload";
 import { formatSize } from "../utils/file";
 import type {
   GetFileContent200,
@@ -403,12 +404,25 @@ export default function FilePage() {
             </header>
           )}
 
-          {isText && draft !== null && (
+          {isText && draft !== null && file && (
             <div class="rounded-lg border border-border-subtle bg-surface-container-low p-6">
               <MarkdownEditor
                 key={fileId}
                 defaultValue={draft}
                 onChange={setDraft}
+                onImagePaste={async (pasted) => {
+                  const ext = pasted.type.split("/")[1] || "png";
+                  const id = crypto.randomUUID().replace(/-/g, "");
+                  const named = new File([pasted], `image-${id}.${ext}`, {
+                    type: pasted.type,
+                  });
+                  const result = await uploadFile({
+                    file: named,
+                    parentId: file.parent_id,
+                    parentKind: file.parent_kind,
+                  });
+                  return `/api/files/${result.id}/raw`;
+                }}
               />
             </div>
           )}
