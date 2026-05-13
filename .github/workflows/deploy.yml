@@ -33,6 +33,7 @@ jobs:
           script: |
             set -euo pipefail
             cd ~/kioku
-            git pull origin main
+            git fetch origin main
+            git reset --hard origin/main
             docker compose up -d --build
-            docker wait kioku-frontend-1
+            docker wait kioku-frontend
