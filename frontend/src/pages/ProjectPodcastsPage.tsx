@@ -85,16 +85,14 @@ export default function ProjectPodcastsPage() {
 
           <header class="flex items-end justify-between gap-6 flex-wrap mb-8 tablet:mb-12">
             <div class="flex flex-col gap-2 max-w-2xl">
-              <h1 class="text-[22px] leading-[1.27] font-bold tracking-tight">
-                {t("podcast.list.title")}
-              </h1>
-              <p class="text-base text-text-secondary">
+              <h1 class="heading-h2">{t("podcast.list.title")}</h1>
+              <p class="text-body text-text-secondary">
                 {t("podcast.list.subtitle")}
               </p>
             </div>
             <a
               href={`/projects/${projectId}/podcasts/new`}
-              class="flex items-center gap-2 bg-cta text-cta-fg px-6 py-2 rounded-lg font-bold shadow-[0_2px_8px_rgba(0,0,0,0.2)] hover:bg-cta-hover no-underline"
+              class="btn-primary no-underline"
             >
               <span class="material-symbols-outlined text-[20px]">
                 add_circle
@@ -136,7 +134,7 @@ export default function ProjectPodcastsPage() {
               {items.map((podcast) => (
                 <div
                   key={podcast.id}
-                  class="relative group rounded-xl bg-surface-dark border border-border-subtle hover:border-overlay-medium"
+                  class="relative group rounded-[12px] bg-surface-dark border border-border-subtle hover:border-overlay-medium shadow-[0_1px_3px_rgba(0,0,0,0.1)]"
                 >
                   <a
                     href={detailHref(podcast.id)}
@@ -185,7 +183,7 @@ export default function ProjectPodcastsPage() {
                 type="button"
                 onClick={loadMore}
                 disabled={loadingMore}
-                class="px-6 py-2 border border-border-subtle rounded-full text-text-secondary hover:text-text-primary hover:bg-overlay-faint text-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                class="btn-secondary"
               >
                 <span class="material-symbols-outlined text-[18px]">
                   expand_more

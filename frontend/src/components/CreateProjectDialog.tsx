@@ -62,17 +62,15 @@ export function CreateProjectDialog({ open, onClose }: CreateProjectDialogProps)
   return (
     <Dialog open={open} onClose={onClose} ariaLabel={t("createProject.title")}>
       <form onSubmit={handleSubmit} class="flex flex-col">
-        <div class="p-4 tablet:p-6 border-b border-border-dark">
-          <h2 class="text-[22px] leading-[1.27] font-bold tracking-tight text-text-primary">
-            {t("createProject.title")}
-          </h2>
+        <div class="p-6 border-b border-border-dark">
+          <h2 class="heading-h2">{t("createProject.title")}</h2>
         </div>
 
-        <div class="p-4 tablet:p-6 flex flex-col gap-6">
+        <div class="p-6 flex flex-col gap-6">
           <div class="flex flex-col gap-2">
             <label
               for="project-name"
-              class="text-sm font-bold text-text-muted-dark"
+              class="text-caption font-bold text-text-secondary"
             >
               {t("createProject.fields.name")}
             </label>
@@ -85,14 +83,14 @@ export function CreateProjectDialog({ open, onClose }: CreateProjectDialogProps)
               placeholder={t("createProject.placeholders.name")}
               maxLength={256}
               required
-              class="w-full bg-surface-container-high border border-border-dark rounded-lg px-4 py-2.5 text-base text-text-primary placeholder:text-text-disabled focus:outline-none focus:ring-1 focus:ring-accent-blue/50 focus:border-accent-blue/50"
+              class="input-field"
             />
           </div>
 
           <div class="flex flex-col gap-2">
             <label
               for="project-description"
-              class="text-sm font-bold text-text-muted-dark"
+              class="text-caption font-bold text-text-secondary"
             >
               {t("createProject.fields.description")}{" "}
               <span class="text-text-disabled font-normal">
@@ -108,27 +106,23 @@ export function CreateProjectDialog({ open, onClose }: CreateProjectDialogProps)
               placeholder={t("createProject.placeholders.description")}
               rows={3}
               maxLength={512}
-              class="w-full bg-surface-container-high border border-border-dark rounded-lg px-4 py-2.5 text-base text-text-primary placeholder:text-text-disabled focus:outline-none focus:ring-1 focus:ring-accent-blue/50 focus:border-accent-blue/50 resize-none"
+              class="textarea-field"
             />
           </div>
 
           {error && <p class="text-sm text-danger">{error}</p>}
         </div>
 
-        <div class="p-4 tablet:p-6 bg-surface-container-low/50 flex items-center justify-end gap-4 border-t border-border-dark">
+        <div class="p-6 bg-surface-container-low/50 flex items-center justify-end gap-3 border-t border-border-dark">
           <button
             type="button"
             onClick={onClose}
             disabled={submitting}
-            class="px-6 py-2.5 rounded-lg text-sm font-bold text-text-muted-dark hover:text-text-primary hover:bg-overlay-faint cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            class="btn-ghost"
           >
             {t("createProject.cancel")}
           </button>
-          <button
-            type="submit"
-            disabled={submitting}
-            class="px-6 py-2.5 bg-cta text-cta-fg rounded-lg text-sm font-bold hover:bg-cta-hover shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-          >
+          <button type="submit" disabled={submitting} class="btn-primary">
             {submitting ? t("createProject.submitting") : t("createProject.submit")}
           </button>
         </div>

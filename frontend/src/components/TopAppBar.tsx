@@ -18,7 +18,7 @@ export default function TopAppBar() {
           aria-label={toggleLabel}
           aria-expanded={isMobile ? isOpen : !collapsed}
           title={toggleLabel}
-          class="w-11 h-11 tablet:w-9 tablet:h-9 rounded-md hover:bg-overlay-soft text-text-secondary hover:text-text-primary cursor-pointer flex items-center justify-center bg-transparent border-none"
+          class="icon-button"
         >
           <span class="material-symbols-outlined text-[24px]">menu</span>
         </button>
@@ -31,7 +31,7 @@ export default function TopAppBar() {
       <a
         href="/profile"
         aria-label={t("topbar.settings")}
-        class="w-11 h-11 tablet:w-9 tablet:h-9 text-text-secondary hover:text-text-primary hover:bg-overlay-soft rounded-md cursor-pointer flex items-center justify-center"
+        class="icon-button no-underline"
       >
         <span class="material-symbols-outlined text-[20px]">settings</span>
       </a>

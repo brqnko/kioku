@@ -65,7 +65,7 @@ export default function SideNavBar() {
               type="button"
               onClick={close}
               aria-label={t("nav.closeMenu")}
-              class="w-11 h-11 flex items-center justify-center rounded-md hover:bg-overlay-soft text-text-secondary hover:text-text-primary cursor-pointer bg-transparent border-none"
+              class="icon-button"
             >
               <span class="material-symbols-outlined text-[20px]">close</span>
             </button>
@@ -170,7 +170,7 @@ export default function SideNavBar() {
           <button
             type="button"
             onClick={() => setDialogOpen(true)}
-            class="w-full bg-cta text-cta-fg hover:bg-cta-hover font-bold rounded-lg py-3 tablet:py-2 flex items-center justify-center gap-2 cursor-pointer"
+            class="btn-primary w-full"
           >
             <span class="material-symbols-outlined text-[18px]">add</span>
             <span class="text-sm">{t("nav.newProject")}</span>

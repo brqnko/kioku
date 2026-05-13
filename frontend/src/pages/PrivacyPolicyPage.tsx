@@ -89,7 +89,7 @@ export default function PrivacyPolicyPage() {
               {aiCards.map((card, i) => (
                 <div
                   key={i}
-                  class="border-l-4 border-primary bg-primary/5 dark:bg-primary/10 rounded-r-lg p-5"
+                  class="border-l-4 border-primary bg-primary/5 dark:bg-primary/10 rounded-r-lg p-6"
                 >
                   <strong class="block text-charcoal dark:text-white font-bold mb-2">
                     {card.title}
@@ -158,7 +158,7 @@ export default function PrivacyPolicyPage() {
       </div>
 
       <div class="max-w-4xl mx-auto">
-        <div class="bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark rounded-2xl overflow-hidden mb-12 shadow-[0_2px_8px_rgba(0,0,0,0.2)]">
+        <div class="bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark rounded-[12px] overflow-hidden mb-12 shadow-[0_1px_3px_rgba(0,0,0,0.1)]">
           <div class="p-10 md:p-16 text-lg text-taupe dark:text-text-muted-dark leading-8 tracking-[0.01em]">
             {introParagraphs.length > 0 && (
               <section class="mb-12 pb-12 border-b border-border-light dark:border-border-dark space-y-4">

@@ -48,7 +48,7 @@ export function Dialog({
     >
       <div
         ref={dialogRef}
-        class={`w-full ${maxWidth} bg-surface-container border border-border-dark rounded-xl shadow-2xl flex flex-col overflow-hidden`}
+        class={`w-full ${maxWidth} dialog-panel flex flex-col`}
       >
         {children}
       </div>

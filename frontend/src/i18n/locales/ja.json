@@ -496,6 +496,26 @@
       "text2": "需要曲線のシフトと均衡価格の関係から見ていきましょう。"
     }
   },
+  "editor": {
+    "toolbar": {
+      "label": "書式設定",
+      "bold": "太字",
+      "italic": "斜体",
+      "strikethrough": "取り消し線",
+      "inlineCode": "インラインコード",
+      "h1": "見出し1",
+      "h2": "見出し2",
+      "h3": "見出し3",
+      "paragraph": "段落",
+      "bulletList": "箇条書き",
+      "orderedList": "番号付きリスト",
+      "blockquote": "引用",
+      "codeBlock": "コードブロック",
+      "link": "リンク",
+      "image": "画像",
+      "linkPrompt": "URLを入力"
+    }
+  },
   "tos": {
     "title": "利用規約",
     "sections": {

@@ -100,15 +100,13 @@ export function RenameItemDialog({
       ariaLabel={t("renameItem.title")}
       maxWidth="max-w-[480px]"
     >
-      <form onSubmit={handleSubmit} class="p-4 tablet:p-6 flex flex-col gap-4">
-        <h2 class="text-[18px] leading-[1.3] font-bold tracking-tight text-text-primary">
-          {t("renameItem.title")}
-        </h2>
+      <form onSubmit={handleSubmit} class="p-6 flex flex-col gap-4">
+        <h2 class="heading-h2">{t("renameItem.title")}</h2>
 
         <div class="flex flex-col gap-2">
           <label
             for="rename-item-name"
-            class="text-sm font-bold text-text-muted-dark"
+            class="text-caption font-bold text-text-secondary"
           >
             {t("renameItem.label")}
           </label>
@@ -121,14 +119,14 @@ export function RenameItemDialog({
             maxLength={256}
             required
             disabled={submitting}
-            class="w-full bg-surface-container-high border border-border-dark rounded-lg px-4 py-2.5 text-base text-text-primary placeholder:text-text-disabled focus:outline-none focus:ring-1 focus:ring-accent-blue/50 focus:border-accent-blue/50 disabled:opacity-50"
+            class="input-field"
           />
         </div>
 
         <div class="flex flex-col gap-2">
           <label
             for="rename-item-description"
-            class="text-sm font-bold text-text-muted-dark"
+            class="text-caption font-bold text-text-secondary"
           >
             {t("renameItem.descriptionLabel")}
           </label>
@@ -142,7 +140,7 @@ export function RenameItemDialog({
             maxLength={1024}
             rows={3}
             disabled={submitting}
-            class="w-full bg-surface-container-high border border-border-dark rounded-lg px-4 py-2.5 text-base text-text-primary placeholder:text-text-disabled focus:outline-none focus:ring-1 focus:ring-accent-blue/50 focus:border-accent-blue/50 disabled:opacity-50 resize-y leading-[1.5]"
+            class="textarea-field"
           />
         </div>
 
@@ -157,15 +155,11 @@ export function RenameItemDialog({
             type="button"
             onClick={handleClose}
             disabled={submitting}
-            class="px-4 py-2 rounded-lg text-sm font-bold text-text-muted-dark hover:text-text-primary hover:bg-overlay-faint cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            class="btn-ghost"
           >
             {t("renameItem.cancel")}
           </button>
-          <button
-            type="submit"
-            disabled={submitting}
-            class="px-4 py-2 bg-cta text-cta-fg rounded-lg text-sm font-bold hover:bg-cta-hover cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-          >
+          <button type="submit" disabled={submitting} class="btn-primary">
             {submitting ? t("renameItem.submitting") : t("renameItem.submit")}
           </button>
         </div>

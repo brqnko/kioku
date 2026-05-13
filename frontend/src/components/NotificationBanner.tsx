@@ -27,7 +27,7 @@ function NotificationItem({ notification, dismissLabel }: ItemProps) {
     <div
       role="status"
       aria-live="polite"
-      class="flex items-start gap-3 bg-surface-dark border border-border-dark rounded-xl px-4 py-3 shadow-[0_4px_12px_rgba(0,0,0,0.15)] animate-fade-in-up"
+      class="flex items-start gap-3 bg-surface-dark border border-border-subtle rounded-[12px] px-4 py-3 shadow-[0_4px_12px_rgba(0,0,0,0.15)] animate-fade-in-up"
     >
       <Icon name={icon} class={`shrink-0 mt-0.5 ${accent}`} />
       <p class="flex-1 text-sm leading-6 text-text-primary">

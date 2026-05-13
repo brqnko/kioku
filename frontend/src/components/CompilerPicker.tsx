@@ -131,7 +131,7 @@ export function CompilerPicker({
             onInput={(e) => setQuery((e.target as HTMLInputElement).value)}
             onKeyDown={handleKeyDown}
             placeholder="言語名やコンパイラ名で検索…"
-            class="w-full h-10 bg-surface-dark border border-border-subtle rounded-md px-3 text-sm text-text-primary placeholder:text-text-disabled focus:outline-none focus:border-accent-blue"
+            class="input-field"
           />
           {preferredLanguage && (
             <p class="text-[11px] text-text-disabled mt-2">

@@ -115,11 +115,11 @@ export default function FolderPage() {
                 {folder?.name ?? (folderError ? "—" : "...")}
               </span>
             </nav>
-            <h1 class="text-[22px] leading-[1.27] font-bold tracking-tight">
+            <h1 class="heading-h2">
               {folder?.name ?? t("project.loading")}
             </h1>
             {folder?.description && (
-              <p class="text-base text-text-secondary max-w-2xl">
+              <p class="text-body text-text-secondary max-w-2xl">
                 {folder.description}
               </p>
             )}
@@ -129,7 +129,7 @@ export default function FolderPage() {
               type="button"
               onClick={() => setEditFolderOpen(true)}
               disabled={!folder}
-              class="px-4 py-2 border border-border-dark text-text-primary font-semibold rounded-lg text-sm hover:bg-overlay-faint flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              class="btn-secondary"
             >
               <span class="material-symbols-outlined text-[20px]">edit</span>
               {t("folder.editFolder")}
@@ -137,7 +137,7 @@ export default function FolderPage() {
             <button
               type="button"
               onClick={() => setFolderDialogOpen(true)}
-              class="px-4 py-2 border border-border-dark text-text-primary font-semibold rounded-lg text-sm hover:bg-overlay-faint flex items-center gap-2 cursor-pointer"
+              class="btn-secondary"
             >
               <span class="material-symbols-outlined text-[20px]">
                 create_new_folder
@@ -147,7 +147,7 @@ export default function FolderPage() {
             <button
               type="button"
               onClick={() => setUploadDialogOpen(true)}
-              class="px-4 py-2 border border-border-dark text-text-primary font-semibold rounded-lg text-sm hover:bg-overlay-faint flex items-center gap-2 cursor-pointer"
+              class="btn-secondary"
             >
               <span class="material-symbols-outlined text-[20px]">note_add</span>
               {t("project.upload.label")}
@@ -174,10 +174,10 @@ export default function FolderPage() {
             </p>
           )}
 
-          <div class="bg-surface-dark/20 border border-border-subtle rounded-xl overflow-hidden">
+          <div class="bg-surface-dark border border-border-subtle rounded-[12px] overflow-hidden">
             <table class="w-full text-left border-collapse">
               <thead>
-                <tr class="bg-surface-dark/40 text-text-secondary text-sm border-b border-border-subtle">
+                <tr class="bg-surface-container text-text-secondary text-sm border-b border-border-subtle">
                   <th class="px-3 py-3 tablet:px-6 font-semibold">
                     {t("project.table.name")}
                   </th>
@@ -347,7 +347,7 @@ export default function FolderPage() {
                 type="button"
                 onClick={loadMore}
                 disabled={loadingMore}
-                class="px-4 py-2 border border-overlay-medium text-text-primary text-sm font-semibold rounded-lg hover:bg-overlay-faint cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                class="btn-secondary"
               >
                 {loadingMore ? t("project.loading") : t("library.loadMore")}
               </button>

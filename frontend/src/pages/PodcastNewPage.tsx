@@ -247,16 +247,14 @@ export default function PodcastNewPage() {
               {t("podcast.create.crumb")}
             </span>
           </nav>
-          <h1 class="text-[22px] leading-[1.27] font-bold tracking-tight">
-            {t("podcast.create.title")}
-          </h1>
+          <h1 class="heading-h2">{t("podcast.create.title")}</h1>
         </header>
 
         <form
           onSubmit={handleSubmit}
           class="flex-1 grid grid-cols-12 gap-4 tablet:gap-6 overflow-hidden min-h-0"
         >
-          <section class="col-span-12 lg:col-span-7 flex flex-col bg-surface-dark border border-border-subtle rounded-xl overflow-hidden min-h-0">
+          <section class="col-span-12 lg:col-span-7 flex flex-col bg-surface-dark border border-border-subtle rounded-[12px] overflow-hidden min-h-0">
             <div class="p-4 border-b border-border-subtle flex items-center justify-between">
               <h3 class="text-sm font-bold text-text-primary">
                 {t("podcast.create.source.title")}
@@ -313,7 +311,7 @@ export default function PodcastNewPage() {
           </section>
 
           <aside class="col-span-12 lg:col-span-5 flex flex-col gap-6 overflow-y-auto min-h-0">
-            <div class="bg-surface-dark border border-border-subtle rounded-xl p-4 tablet:p-6 flex flex-col gap-6">
+            <div class="bg-surface-dark border border-border-subtle rounded-[12px] p-6 flex flex-col gap-6">
               <h3 class="text-sm font-bold text-text-primary border-b border-border-subtle pb-4">
                 {t("podcast.create.settings.title")}
               </h3>
@@ -334,7 +332,7 @@ export default function PodcastNewPage() {
                   }
                   placeholder={t("podcast.create.placeholders.name")}
                   maxLength={256}
-                  class="w-full bg-surface-container-high border border-border-dark rounded-lg px-4 py-2.5 text-base text-text-primary placeholder:text-text-disabled focus:outline-none focus:ring-1 focus:ring-accent-blue/50 focus:border-accent-blue/50"
+                  class="input-field"
                 />
               </div>
 
@@ -357,7 +355,7 @@ export default function PodcastNewPage() {
                   placeholder={t("podcast.create.placeholders.description")}
                   rows={4}
                   maxLength={1024}
-                  class="w-full bg-surface-container-high border border-border-dark rounded-lg px-4 py-2.5 text-base text-text-primary placeholder:text-text-disabled focus:outline-none focus:ring-1 focus:ring-accent-blue/50 focus:border-accent-blue/50 resize-none"
+                  class="textarea-field"
                 />
               </div>
             </div>
@@ -369,7 +367,7 @@ export default function PodcastNewPage() {
               <button
                 type="submit"
                 disabled={!canSubmit}
-                class="w-full bg-cta text-cta-fg font-bold py-4 rounded-lg flex items-center justify-center gap-3 hover:bg-cta-hover shadow-[0_8px_24px_rgba(0,0,0,0.2)] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                class="btn-primary w-full py-3 text-base shadow-[0_8px_24px_rgba(0,0,0,0.2)]"
               >
                 <span
                   class="material-symbols-outlined"

@@ -19,10 +19,8 @@ export default function LibraryPage() {
       <TopAppBar />
       <main class="ml-[var(--sidebar-width)] p-4 tablet:p-8 min-h-[calc(100vh-3.5rem)] overflow-y-auto transition-[margin-left] duration-200 ease-in-out">
         <header class="flex flex-col gap-2 mb-6">
-          <h1 class="text-[22px] leading-[1.27] font-bold tracking-tight">
-            {t("library.title")}
-          </h1>
-          <p class="text-base text-text-secondary">{t("library.subtitle")}</p>
+          <h1 class="heading-h2">{t("library.title")}</h1>
+          <p class="text-body text-text-secondary">{t("library.subtitle")}</p>
         </header>
 
         {error && (
@@ -62,7 +60,7 @@ export default function LibraryPage() {
               type="button"
               onClick={loadMore}
               disabled={loadingMore}
-              class="px-4 py-2 border border-overlay-medium text-text-primary text-sm font-semibold rounded-lg hover:bg-overlay-faint cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              class="btn-secondary"
             >
               {loadingMore ? t("library.loading") : t("library.loadMore")}
             </button>

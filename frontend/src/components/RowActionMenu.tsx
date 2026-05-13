@@ -85,7 +85,7 @@ export function RowActionMenu({
               top: menuPos.top,
               right: menuPos.right,
             }}
-            class="z-[200] min-w-[160px] bg-surface-container border border-border-dark rounded-lg shadow-lg p-1"
+            class="menu-panel z-[200] min-w-[160px] p-1"
             onClick={(e) => e.stopPropagation()}
           >
             <button

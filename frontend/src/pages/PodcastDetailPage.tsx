@@ -174,17 +174,15 @@ export default function PodcastDetailPage() {
           {podcast && (
             <>
               <header class="flex flex-col gap-4 items-center text-center">
-                <h1 class="text-[40px] sm:text-[54px] leading-[1.04] font-bold tracking-tight max-w-[600px]">
-                  {podcast.name}
-                </h1>
+                <h1 class="heading-h1 max-w-[600px]">{podcast.name}</h1>
                 {podcast.description && (
-                  <p class="text-base text-text-secondary max-w-[500px]">
+                  <p class="text-body text-text-secondary max-w-[500px]">
                     {podcast.description}
                   </p>
                 )}
               </header>
 
-              <section class="bg-surface-dark border border-border-subtle rounded-xl p-6 flex flex-col gap-6 shadow-[0_4px_24px_rgba(0,0,0,0.2)]">
+              <section class="bg-surface-dark border border-border-subtle rounded-[12px] p-6 flex flex-col gap-6 shadow-[0_4px_12px_rgba(0,0,0,0.15)]">
                 <audio
                   ref={audioRef}
                   src={podcast.audio_url}
@@ -242,7 +240,7 @@ export default function PodcastDetailPage() {
                         ? t("podcast.detail.unmute")
                         : t("podcast.detail.mute")
                     }
-                    class="p-2 rounded hover:bg-overlay-faint text-text-secondary hover:text-text-primary flex items-center justify-center cursor-pointer"
+                    class="icon-button"
                   >
                     <span class="material-symbols-outlined">
                       {muted ? "volume_off" : "volume_up"}
@@ -255,7 +253,7 @@ export default function PodcastDetailPage() {
                       onClick={() => skip(-10)}
                       aria-label={t("podcast.detail.replay10")}
                       title={t("podcast.detail.replay10")}
-                      class="p-2 rounded hover:bg-overlay-faint text-text-secondary hover:text-text-primary flex items-center justify-center cursor-pointer"
+                      class="icon-button"
                     >
                       <span class="material-symbols-outlined text-[28px]">
                         replay_10
@@ -284,7 +282,7 @@ export default function PodcastDetailPage() {
                       onClick={() => skip(10)}
                       aria-label={t("podcast.detail.forward10")}
                       title={t("podcast.detail.forward10")}
-                      class="p-2 rounded hover:bg-overlay-faint text-text-secondary hover:text-text-primary flex items-center justify-center cursor-pointer"
+                      class="icon-button"
                     >
                       <span class="material-symbols-outlined text-[28px]">
                         forward_10
@@ -297,7 +295,7 @@ export default function PodcastDetailPage() {
                     onClick={cycleRate}
                     aria-label={t("podcast.detail.speed")}
                     title={t("podcast.detail.speed")}
-                    class="px-3 py-1.5 rounded border border-border-subtle hover:bg-overlay-faint text-text-secondary hover:text-text-primary text-xs font-medium cursor-pointer min-w-[3rem]"
+                    class="btn-secondary text-xs px-3 min-w-[3rem]"
                   >
                     {playbackRate}x
                   </button>
@@ -314,7 +312,7 @@ export default function PodcastDetailPage() {
                 <section class="flex flex-col gap-4">
                   <div class="flex items-center gap-2 text-text-secondary border-b border-border-subtle pb-2">
                     <span class="material-symbols-outlined">subject</span>
-                    <h2 class="text-[18px] font-bold text-text-primary">
+                    <h2 class="heading-h2">
                       {t("podcast.detail.transcript")}
                     </h2>
                   </div>

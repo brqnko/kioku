@@ -17,7 +17,7 @@ export function CreateProjectTile({
       <button
         type="button"
         onClick={() => setDialogOpen(true)}
-        class="group flex flex-col items-center justify-center gap-2 min-h-[160px] p-6 rounded-xl border border-dashed border-border-subtle bg-transparent hover:bg-overlay-faint hover:border-text-disabled cursor-pointer text-center"
+        class="group flex flex-col items-center justify-center gap-2 min-h-[160px] p-6 rounded-[12px] border border-dashed border-border-subtle bg-transparent hover:bg-overlay-faint hover:border-text-disabled cursor-pointer text-center"
       >
         <div class="w-10 h-10 rounded-full bg-surface-dark flex items-center justify-center">
           <span class="material-symbols-outlined text-text-secondary group-hover:text-text-primary text-[20px]">

@@ -47,18 +47,18 @@ export default function DashboardPage() {
       <TopAppBar />
       <main class="ml-[var(--sidebar-width)] p-4 tablet:p-8 min-h-[calc(100vh-3.5rem)] flex flex-col gap-8 transition-[margin-left] duration-200 ease-in-out">
         <header class="flex flex-col gap-1">
-          <h1 class="text-[22px] leading-[1.27] font-bold tracking-tight">
-            {t("dashboard.title")}
-          </h1>
-          <p class="text-sm text-text-muted-dark">{t("dashboard.subtitle")}</p>
+          <h1 class="heading-h2">{t("dashboard.title")}</h1>
+          <p class="text-caption text-text-secondary">
+            {t("dashboard.subtitle")}
+          </p>
         </header>
 
         <div class="grid grid-cols-12 gap-4 auto-rows-min">
-          <section class="col-span-12 bg-surface-dark rounded-xl border border-border-dark p-6">
+          <section class="col-span-12 bg-surface-dark rounded-[12px] border border-border-subtle p-6">
             <div>
               <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-2">
-                  <div class="w-8 h-8 rounded-lg bg-overlay-faint border border-overlay-soft flex items-center justify-center">
+                  <div class="w-8 h-8 rounded-lg bg-overlay-faint border border-border-subtle flex items-center justify-center">
                     <span class="material-symbols-outlined text-text-primary text-[18px]">
                       auto_awesome
                     </span>
@@ -128,7 +128,7 @@ export default function DashboardPage() {
                   <a
                     key={file.id}
                     href={`/files/${file.id}`}
-                    class="bg-surface-dark border border-border-dark rounded-xl p-4 flex flex-col gap-4 hover:bg-overlay-faint hover:border-overlay-medium group no-underline text-inherit"
+                    class="bg-surface-dark border border-border-subtle rounded-[12px] p-4 flex flex-col gap-4 hover:bg-overlay-faint hover:border-overlay-medium group no-underline text-inherit"
                   >
                     <div class="flex items-start">
                       <div class={`w-10 h-10 rounded-lg flex items-center justify-center ${toneClass[tone]}`}>
