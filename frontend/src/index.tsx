@@ -1,4 +1,4 @@
-import { LocationProvider, Router, Route, lazy, hydrate, prerender as ssr } from "preact-iso";
+import { LocationProvider, Router, Route, lazy, hydrate } from "preact-iso";
 import { SWRConfig } from "swr";
 import "./i18n";
 import "./style.css";
@@ -70,8 +70,4 @@ export function App() {
 if (typeof window !== "undefined") {
   const el = document.getElementById("app");
   if (el) hydrate(<App />, el);
-}
-
-export async function prerender(data: Record<string, unknown>) {
-  return await ssr(<App {...data} />);
 }
