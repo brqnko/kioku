@@ -453,16 +453,32 @@
     "button": "無料ではじめる"
   },
   "mock": {
-    "library": {
-      "project1": "経済学 講義ノート",
-      "project1Desc": "マクロ経済学の講義スライドと自分のメモ",
-      "project1Time": "3日前に更新",
-      "project2": "修士論文 リサーチ",
-      "project2Desc": "関連論文と参考文献のまとめ",
-      "project2Time": "昨日更新",
-      "project3": "読書メモ",
-      "project3Desc": "今期に読んだ本のハイライト",
-      "project3Time": "1週間前に更新"
+    "explorer": {
+      "breadcrumb": "ライブラリ",
+      "project": "経済学 講義ノート",
+      "subtitle": "マクロ経済学の講義スライドと自分のメモ",
+      "allFiles": "すべてのファイル",
+      "column": {
+        "name": "名前",
+        "type": "種類",
+        "modified": "更新"
+      },
+      "type": {
+        "folder": "フォルダ",
+        "pdf": "PDF",
+        "note": "ノート",
+        "markdown": "Markdown"
+      },
+      "folder1": "第4章 需要と供給",
+      "folder1Time": "3日前",
+      "folder2": "参考論文",
+      "folder2Time": "1週間前",
+      "file1": "第4章スライド.pdf",
+      "file1Time": "3日前",
+      "file2": "講義メモ.note",
+      "file2Time": "昨日",
+      "file3": "要点まとめ.md",
+      "file3Time": "今日"
     },
     "chat": {
       "title": "AIチャット",

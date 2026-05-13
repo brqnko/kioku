@@ -453,16 +453,32 @@
     "button": "Get Started for Free"
   },
   "mock": {
-    "library": {
-      "project1": "Economics — Lecture Notes",
-      "project1Desc": "Macroeconomics slides and personal notes",
-      "project1Time": "updated 3 days ago",
-      "project2": "Thesis Research",
-      "project2Desc": "Related papers and reference summaries",
-      "project2Time": "updated yesterday",
-      "project3": "Reading Notes",
-      "project3Desc": "Highlights from this term's reading list",
-      "project3Time": "updated 1 week ago"
+    "explorer": {
+      "breadcrumb": "Library",
+      "project": "Economics — Lecture Notes",
+      "subtitle": "Macroeconomics slides and personal notes",
+      "allFiles": "All files",
+      "column": {
+        "name": "Name",
+        "type": "Type",
+        "modified": "Modified"
+      },
+      "type": {
+        "folder": "Folder",
+        "pdf": "PDF",
+        "note": "Note",
+        "markdown": "Markdown"
+      },
+      "folder1": "Chapter 4 — Supply & Demand",
+      "folder1Time": "3 days ago",
+      "folder2": "Reference Papers",
+      "folder2Time": "1 week ago",
+      "file1": "Chapter 4 Slides.pdf",
+      "file1Time": "3 days ago",
+      "file2": "Lecture Notes.note",
+      "file2Time": "Yesterday",
+      "file3": "Summary.md",
+      "file3Time": "Today"
     },
     "chat": {
       "title": "AI Chat",
