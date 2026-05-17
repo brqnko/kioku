@@ -15,9 +15,16 @@ export default defineConfig({
     Icons({ compiler: "raw" }),
     tailwindcss(),
     ViteImageOptimizer(),
-    preact(),
+    preact({
+      prerender: {
+        enabled: true,
+        renderTarget: "#app",
+        additionalPrerenderRoutes: ["/tos", "/privacy", "/404"],
+      },
+    }),
     VitePWA({
       registerType: "autoUpdate",
+      injectRegister: "inline",
       manifest: {
         name: "kioku",
         short_name: "kioku",

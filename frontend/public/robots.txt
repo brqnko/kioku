@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /$
+Allow: /tos
+Allow: /privacy
+Disallow: /dashboard
+Disallow: /library
+Disallow: /projects/
+Disallow: /folders/
+Disallow: /files/
+Disallow: /podcast
+Disallow: /chat
+Disallow: /profile
+
+Sitemap: https://kioku.brqnko.rs/sitemap.xml

@@ -6,6 +6,7 @@ import SideNavBar from "../components/SideNavBar";
 import TopAppBar from "../components/TopAppBar";
 import { MarkdownEditor } from "../components/MarkdownEditor";
 import { useFileContent, fileContentKeyFor } from "../hooks/useFile";
+import { useDocumentHead } from "../hooks/useDocumentHead";
 import { invalidateAfterMutation } from "../utils/swrCache";
 import { fetchFileAncestors, type BreadcrumbAncestor } from "../hooks/useFolder";
 import { kyInstance } from "../api/mutator";
@@ -31,6 +32,7 @@ function formatDate(iso: string, locale: string): string {
 
 export default function FilePage() {
   const { t, i18n } = useTranslation();
+  useDocumentHead({ title: "File — kioku", robots: "noindex,nofollow" });
   const route = useRoute();
   const { mutate } = useSWRConfig();
   const fileId = route.params.fileId;

@@ -4,11 +4,13 @@ import SideNavBar from "../components/SideNavBar";
 import TopAppBar from "../components/TopAppBar";
 import AccountTab from "./profile/AccountTab";
 import SecurityTab from "./profile/SecurityTab";
+import { useDocumentHead } from "../hooks/useDocumentHead";
 
 type Tab = "account" | "security";
 
 export default function ProfilePage() {
   const { t } = useTranslation();
+  useDocumentHead({ title: "Profile — kioku", robots: "noindex,nofollow" });
   const [tab, setTab] = useState<Tab>("account");
 
   return (

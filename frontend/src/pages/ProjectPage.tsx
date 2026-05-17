@@ -9,11 +9,13 @@ import { DeleteItemDialog } from "../components/DeleteItemDialog";
 import { RenameItemDialog } from "../components/RenameItemDialog";
 import { RowActionMenu } from "../components/RowActionMenu";
 import { useProject, useProjectChildren } from "../hooks/useProject";
+import { useDocumentHead } from "../hooks/useDocumentHead";
 import { fileMeta, folderTone, formatDate, formatSize } from "../utils/file";
 import type { ListProjectChildren200ItemsItem } from "../api/generated/backend.schemas";
 
 export default function ProjectPage() {
   const { t, i18n } = useTranslation();
+  useDocumentHead({ title: "Project — kioku", robots: "noindex,nofollow" });
   const route = useRoute();
   const projectId = route.params.projectId;
 
