@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import type { ComponentChildren } from "preact";
 import { LegalLayout } from "../components/LegalLayout";
+import { useDocumentHead } from "../hooks/useDocumentHead";
 
 interface DefinitionItem {
   term: string;
@@ -39,6 +40,17 @@ function Section({
 
 export default function TOSPage() {
   const { t } = useTranslation();
+  useDocumentHead({
+    title: "Terms of Service — kioku",
+    description:
+      "Terms of service for kioku, the folder-organized companion for NotebookLM-style knowledge bases.",
+    canonical: "/tos",
+    robots: "index,follow",
+    ogTitle: "Terms of Service — kioku",
+    ogDescription:
+      "Terms of service for kioku, the folder-organized companion for NotebookLM-style knowledge bases.",
+    ogUrl: "/tos",
+  });
 
   const introParagraphs = t("tos.sections.intro.paragraphs", {
     returnObjects: true,

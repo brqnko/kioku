@@ -4,6 +4,7 @@ import GoogleSignInButton from "../components/GoogleSignInButton";
 import HeaderControls from "../components/HeaderControls";
 import { Reveal } from "../components/Reveal";
 import { useAuth } from "../hooks/useAuth";
+import { useDocumentHead } from "../hooks/useDocumentHead";
 
 const principles = ["synthesis", "library", "research"] as const;
 
@@ -249,6 +250,17 @@ function PodcastMock({ t }: { t: (key: string) => string }) {
 export default function LandingPage() {
   const { t } = useTranslation();
   const { isAuthenticated } = useAuth();
+  useDocumentHead({
+    title: "kioku — Folder structure for NotebookLM",
+    description:
+      "kioku adds folders, projects, and a tidy library to NotebookLM-style knowledge bases. Organize research, chat with your files, and learn through AI podcasts.",
+    canonical: "/",
+    robots: "index,follow",
+    ogTitle: "kioku — Folder structure for NotebookLM",
+    ogDescription:
+      "kioku adds folders, projects, and a tidy library to NotebookLM-style knowledge bases. Organize research, chat with your files, and learn through AI podcasts.",
+    ogUrl: "/",
+  });
 
   return (
     <div class="min-h-dvh bg-background-light dark:bg-background-dark text-charcoal dark:text-white/95">

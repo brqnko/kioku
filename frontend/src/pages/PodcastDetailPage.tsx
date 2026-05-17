@@ -6,6 +6,7 @@ import SideNavBar from "../components/SideNavBar";
 import TopAppBar from "../components/TopAppBar";
 import { useProject } from "../hooks/useProject";
 import { usePodcast } from "../hooks/usePodcasts";
+import { useDocumentHead } from "../hooks/useDocumentHead";
 
 const PLAYBACK_RATES = [1, 1.25, 1.5, 1.75, 2] as const;
 
@@ -19,6 +20,7 @@ function formatTime(seconds: number): string {
 
 export default function PodcastDetailPage() {
   const { t } = useTranslation();
+  useDocumentHead({ title: "Podcast — kioku", robots: "noindex,nofollow" });
   const route = useRoute();
   const projectId = route.params.projectId;
   const podcastId = route.params.podcastId;

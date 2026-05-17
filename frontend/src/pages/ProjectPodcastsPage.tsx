@@ -8,6 +8,7 @@ import { EditPodcastDialog } from "../components/EditPodcastDialog";
 import { DeleteItemDialog } from "../components/DeleteItemDialog";
 import { useProject } from "../hooks/useProject";
 import { usePodcasts } from "../hooks/usePodcasts";
+import { useDocumentHead } from "../hooks/useDocumentHead";
 import type { ListPodcasts200ItemsItem } from "../api/generated/backend.schemas";
 import { ListPodcasts200ItemsItemStatus } from "../api/generated/backend.schemas";
 
@@ -23,6 +24,7 @@ function formatPodcastDate(iso: string, locale: string): string {
 
 export default function ProjectPodcastsPage() {
   const { t, i18n } = useTranslation();
+  useDocumentHead({ title: "Project podcasts — kioku", robots: "noindex,nofollow" });
   const route = useRoute();
   const projectId = route.params.projectId;
 

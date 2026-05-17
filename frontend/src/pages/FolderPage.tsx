@@ -14,11 +14,13 @@ import {
   useFolderChildren,
   type BreadcrumbAncestor,
 } from "../hooks/useFolder";
+import { useDocumentHead } from "../hooks/useDocumentHead";
 import { fileMeta, folderTone, formatDate, formatSize } from "../utils/file";
 import type { ListFolderChildren200ItemsItem } from "../api/generated/backend.schemas";
 
 export default function FolderPage() {
   const { t, i18n } = useTranslation();
+  useDocumentHead({ title: "Folder — kioku", robots: "noindex,nofollow" });
   const route = useRoute();
   const folderId = route.params.folderId;
 

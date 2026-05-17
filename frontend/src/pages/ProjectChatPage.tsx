@@ -8,6 +8,7 @@ import { RowActionMenu } from "../components/RowActionMenu";
 import { MarkdownView } from "../components/MarkdownView";
 import { useProject } from "../hooks/useProject";
 import { useChats } from "../hooks/useChat";
+import { useDocumentHead } from "../hooks/useDocumentHead";
 import { kyInstance } from "../api/mutator";
 import type {
   GetChat200,
@@ -142,6 +143,7 @@ function MessageBubble({
 
 export default function ProjectChatPage() {
   const { t, i18n } = useTranslation();
+  useDocumentHead({ title: "Project chat — kioku", robots: "noindex,nofollow" });
   const route = useRoute();
   const projectId = route.params.projectId as string;
 

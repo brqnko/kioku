@@ -3,6 +3,7 @@ import SideNavBar from "../components/SideNavBar";
 import TopAppBar from "../components/TopAppBar";
 import { CreateProjectTile } from "../components/CreateProjectTile";
 import { useLibrary } from "../hooks/useLibrary";
+import { useDocumentHead } from "../hooks/useDocumentHead";
 import type { ListProjects200ItemsItem } from "../api/generated/backend.schemas";
 
 const RELATIVE_THRESHOLDS: [Intl.RelativeTimeFormatUnit, number][] = [
@@ -28,6 +29,7 @@ function formatRelative(iso: string, locale: string) {
 
 export default function PodcastPage() {
   const { t, i18n } = useTranslation();
+  useDocumentHead({ title: "Podcast — kioku", robots: "noindex,nofollow" });
   const { items, error, isLoading, hasMore, loadingMore, loadMore } =
     useLibrary();
 

@@ -4,10 +4,12 @@ import TopAppBar from "../components/TopAppBar";
 import { CreateProjectTile } from "../components/CreateProjectTile";
 import { ProjectCard } from "../components/ProjectCard";
 import { useLibrary } from "../hooks/useLibrary";
+import { useDocumentHead } from "../hooks/useDocumentHead";
 import type { ListProjects200ItemsItem } from "../api/generated/backend.schemas";
 
 export default function ChatPage() {
   const { t } = useTranslation();
+  useDocumentHead({ title: "Chat — kioku", robots: "noindex,nofollow" });
   const { items, error, isLoading, hasMore, loadingMore, loadMore, mutate } =
     useLibrary();
 

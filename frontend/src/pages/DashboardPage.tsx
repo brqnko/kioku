@@ -3,6 +3,7 @@ import SideNavBar from "../components/SideNavBar";
 import TopAppBar from "../components/TopAppBar";
 import { MarkdownView } from "../components/MarkdownView";
 import { useDashboard } from "../hooks/useDashboard";
+import { useDocumentHead } from "../hooks/useDocumentHead";
 import type { GetDashboard200RecentSeenFilesItem } from "../api/generated/backend.schemas";
 
 function fileIcon(name: string): { icon: string; tone: "danger" | "info" } {
@@ -39,6 +40,7 @@ function formatRelative(iso: string, locale: string) {
 
 export default function DashboardPage() {
   const { t, i18n } = useTranslation();
+  useDocumentHead({ title: "Dashboard — kioku", robots: "noindex,nofollow" });
   const { data, error, isLoading } = useDashboard();
 
   return (

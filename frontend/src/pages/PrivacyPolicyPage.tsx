@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import type { ComponentChildren } from "preact";
 import { LegalLayout } from "../components/LegalLayout";
+import { useDocumentHead } from "../hooks/useDocumentHead";
 
 interface CollectedItem {
   term: string;
@@ -43,6 +44,17 @@ function Section({
 
 export default function PrivacyPolicyPage() {
   const { t } = useTranslation();
+  useDocumentHead({
+    title: "Privacy Policy — kioku",
+    description:
+      "How kioku handles your account data and uploaded materials.",
+    canonical: "/privacy",
+    robots: "index,follow",
+    ogTitle: "Privacy Policy — kioku",
+    ogDescription:
+      "How kioku handles your account data and uploaded materials.",
+    ogUrl: "/privacy",
+  });
 
   const introParagraphs = t("privacy.sections.intro.paragraphs", {
     returnObjects: true,

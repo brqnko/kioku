@@ -6,6 +6,7 @@ import TopAppBar from "../components/TopAppBar";
 import { kyInstance } from "../api/mutator";
 import { useProject, useProjectChildren } from "../hooks/useProject";
 import { useFolderChildren } from "../hooks/useFolder";
+import { useDocumentHead } from "../hooks/useDocumentHead";
 import { fileMeta, folderTone } from "../utils/file";
 import type {
   CreatePodcast200,
@@ -147,6 +148,7 @@ function FolderNode({ folder, selectedIds, onToggleFile }: FolderNodeProps) {
 
 export default function PodcastNewPage() {
   const { t } = useTranslation();
+  useDocumentHead({ title: "New podcast — kioku", robots: "noindex,nofollow" });
   const route = useRoute();
   const projectId = route.params.projectId;
 
