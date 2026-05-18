@@ -16,8 +16,11 @@ struct Config {
     redis_url: String,
     gemini_api_key: String,
     github_token: String,
+    #[allow(dead_code)]
     azure_openai_endpoint: String,
+    #[allow(dead_code)]
     azure_openai_deployment: String,
+    #[allow(dead_code)]
     azure_openai_api_key: String,
 }
 

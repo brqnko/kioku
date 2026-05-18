@@ -24,7 +24,6 @@ export default defineConfig({
     }),
     VitePWA({
       registerType: "autoUpdate",
-      injectRegister: "inline",
       manifest: {
         name: "kioku",
         short_name: "kioku",
