@@ -14,7 +14,7 @@ interface UploadOptions {
   description?: string;
 }
 
-const MAX_UPLOAD_BYTES = 16 * 1024 * 1024;
+const MAX_UPLOAD_BYTES = 32 * 1024 * 1024;
 
 export async function uploadFile(opts: UploadOptions): Promise<CreateFile200> {
   const { file, parentId, parentKind, description = "" } = opts;
@@ -67,7 +67,7 @@ interface CreateTextFileOptions {
   description?: string;
 }
 
-const MAX_TEXT_BYTES = 16 * 1024 * 1024;
+const MAX_TEXT_BYTES = 32 * 1024 * 1024;
 
 export async function createTextFile(
   opts: CreateTextFileOptions,

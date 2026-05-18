@@ -54,7 +54,9 @@ pub struct CopilotImpl {
 
 impl CopilotImpl {
     pub const MODEL_GEMINI_3_1_PRO: &'static str = "gemini-3.1-pro-preview";
+    pub const MODEL_GPT_5: &'static str = "gpt-5.2";
     pub const MODEL_GPT_5_MINI: &'static str = "gpt-5-mini";
+    pub const MODEL_GPT_5_4_MINI: &'static str = "gpt-5.4-mini";
 
     pub fn new(github_token: String) -> Result<Self, anyhow::Error> {
         Ok(Self {
@@ -82,14 +84,8 @@ impl CopilotImpl {
         }
 
         let mut h = reqwest::header::HeaderMap::new();
-        h.insert(
-            reqwest::header::USER_AGENT,
-            reqwest::header::HeaderValue::from_static("kioku"),
-        );
-        h.insert(
-            reqwest::header::ACCEPT,
-            reqwest::header::HeaderValue::from_static("application/json"),
-        );
+        h.insert(reqwest::header::USER_AGENT, reqwest::header::HeaderValue::from_static("kioku"));
+        h.insert(reqwest::header::ACCEPT, reqwest::header::HeaderValue::from_static("application/json"));
         h.insert(
             reqwest::header::AUTHORIZATION,
             reqwest::header::HeaderValue::from_str(&format!("Token {}", self.github_token))?,
@@ -110,10 +106,7 @@ impl CopilotImpl {
 
         {
             let mut cache = self.cached_token.lock().unwrap();
-            *cache = Some(CachedCopilotToken {
-                token: resp.token.clone(),
-                expires_at,
-            });
+            *cache = Some(CachedCopilotToken { token: resp.token.clone(), expires_at });
         }
 
         Ok(resp.token)
@@ -122,30 +115,12 @@ impl CopilotImpl {
     async fn build_headers(&self) -> Result<reqwest::header::HeaderMap, anyhow::Error> {
         let token = self.copilot_token().await?;
         let mut h = reqwest::header::HeaderMap::new();
-        h.insert(
-            reqwest::header::AUTHORIZATION,
-            reqwest::header::HeaderValue::from_str(&format!("Bearer {token}"))?,
-        );
-        h.insert(
-            "Editor-Version",
-            reqwest::header::HeaderValue::from_str(&self.editor_version)?,
-        );
-        h.insert(
-            "Editor-Plugin-Version",
-            reqwest::header::HeaderValue::from_static("kioku/*"),
-        );
-        h.insert(
-            "Copilot-Integration-Id",
-            reqwest::header::HeaderValue::from_static("vscode-chat"),
-        );
-        h.insert(
-            reqwest::header::USER_AGENT,
-            reqwest::header::HeaderValue::from_static("kioku"),
-        );
-        h.insert(
-            reqwest::header::ACCEPT,
-            reqwest::header::HeaderValue::from_static("application/json"),
-        );
+        h.insert(reqwest::header::AUTHORIZATION, reqwest::header::HeaderValue::from_str(&format!("Bearer {token}"))?);
+        h.insert("Editor-Version", reqwest::header::HeaderValue::from_str(&self.editor_version)?);
+        h.insert("Editor-Plugin-Version", reqwest::header::HeaderValue::from_static("kioku/*"));
+        h.insert("Copilot-Integration-Id", reqwest::header::HeaderValue::from_static("vscode-chat"));
+        h.insert(reqwest::header::USER_AGENT, reqwest::header::HeaderValue::from_static("kioku"));
+        h.insert(reqwest::header::ACCEPT, reqwest::header::HeaderValue::from_static("application/json"));
         Ok(h)
     }
 }
@@ -158,6 +133,83 @@ impl LLMClient for CopilotImpl {
         input: CompletionInput,
     ) -> Result<CompletionOutput, anyhow::Error> {
         #[derive(serde::Serialize)]
+        struct MessageBody<'a> { role: &'a str, content: &'a str }
+        #[derive(serde::Serialize)]
+        struct ChatRequest<'a> { model: &'a str, messages: Vec<MessageBody<'a>>, n: u32, stream: bool }
+        #[derive(serde::Deserialize)]
+        struct ChatResponse { choices: Vec<ChatChoice> }
+        #[derive(serde::Deserialize)]
+        struct ChatChoice { message: ChatMessage }
+        #[derive(serde::Deserialize)]
+        struct ChatMessage { content: String }
+
+        let messages = input.messages.iter().map(|m| MessageBody { role: m.role.as_str(), content: &m.content }).collect::<Vec<_>>();
+        let req = ChatRequest { model, messages, n: 1, stream: false };
+
+        let headers = self.build_headers().await?;
+        let raw = self
+            .http_client
+            .post("https://api.githubcopilot.com/chat/completions")
+            .headers(headers)
+            .header(reqwest::header::CONTENT_TYPE, "application/json")
+            .json(&req)
+            .send()
+            .await?;
+
+        if let Err(e) = raw.error_for_status_ref() {
+            let retry_after = raw.headers().get("retry-after")
+                .or_else(|| raw.headers().get("x-ratelimit-reset-requests"))
+                .and_then(|v| v.to_str().ok())
+                .map(|s| format!(", retry after: {s}"))
+                .unwrap_or_default();
+            return Err(anyhow::anyhow!("{e}{retry_after}"));
+        }
+
+        let content = raw.json::<ChatResponse>().await?
+            .choices.into_iter().next()
+            .ok_or_else(|| anyhow::anyhow!("no choices in copilot response"))?
+            .message.content;
+
+        Ok(CompletionOutput { content })
+    }
+}
+
+// Azure OpenAI implementation
+
+pub struct AzureOpenAIImpl {
+    http_client: reqwest::Client,
+    endpoint: String,
+    deployment: String,
+    api_key: String,
+}
+
+impl AzureOpenAIImpl {
+    const API_VERSION: &'static str = "2025-01-01-preview";
+    pub const MODEL_GPT_5: &'static str = "gpt-5.2";
+    pub const MODEL_GPT_5_MINI: &'static str = "gpt-5-mini";
+
+    pub fn new(
+        endpoint: impl Into<String>,
+        deployment: impl Into<String>,
+        api_key: impl Into<String>,
+    ) -> Result<Self, anyhow::Error> {
+        Ok(Self {
+            http_client: reqwest::Client::builder().build()?,
+            endpoint: endpoint.into(),
+            deployment: deployment.into(),
+            api_key: api_key.into(),
+        })
+    }
+}
+
+#[async_trait::async_trait]
+impl LLMClient for AzureOpenAIImpl {
+    async fn complete(
+        &self,
+        _model: &'static str,
+        input: CompletionInput,
+    ) -> Result<CompletionOutput, anyhow::Error> {
+        #[derive(serde::Serialize)]
         struct MessageBody<'a> {
             role: &'a str,
             content: &'a str,
@@ -165,10 +217,7 @@ impl LLMClient for CopilotImpl {
 
         #[derive(serde::Serialize)]
         struct ChatRequest<'a> {
-            model: &'a str,
             messages: Vec<MessageBody<'a>>,
-            n: u32,
-            stream: bool,
         }
 
         #[derive(serde::Deserialize)]
@@ -193,36 +242,45 @@ impl LLMClient for CopilotImpl {
                 role: m.role.as_str(),
                 content: &m.content,
             })
-            .collect::<Vec<MessageBody>>();
+            .collect::<Vec<_>>();
 
-        let req = ChatRequest {
-            model,
-            messages,
-            n: 1,
-            stream: false,
-        };
+        let url = format!(
+            "{}/openai/deployments/{}/chat/completions?api-version={}",
+            self.endpoint.trim_end_matches('/'),
+            self.deployment,
+            Self::API_VERSION,
+        );
 
-        let headers = self.build_headers().await?;
-        let resp = self
+        let raw = self
             .http_client
-            .post("https://api.githubcopilot.com/chat/completions")
-            .headers(headers)
+            .post(url)
+            .header("api-key", &self.api_key)
             .header(reqwest::header::CONTENT_TYPE, "application/json")
-            .json(&req)
+            .json(&ChatRequest { messages })
             .send()
-            .await?
-            .error_for_status()?
-            .json::<ChatResponse>()
             .await?;
 
-        let content = resp
+        if let Err(e) = raw.error_for_status_ref() {
+            let retry_after = raw
+                .headers()
+                .get("retry-after")
+                .and_then(|v| v.to_str().ok())
+                .map(|s| format!(", retry after: {s}"))
+                .unwrap_or_default();
+            return Err(anyhow::anyhow!("{e}{retry_after}"));
+        }
+
+        let content = raw
+            .json::<ChatResponse>()
+            .await?
             .choices
             .into_iter()
             .next()
-            .ok_or_else(|| anyhow::anyhow!("no choices in copilot response"))?
+            .ok_or_else(|| anyhow::anyhow!("no choices in azure openai response"))?
             .message
             .content;
 
         Ok(CompletionOutput { content })
     }
 }
+

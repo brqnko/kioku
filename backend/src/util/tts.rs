@@ -3,15 +3,10 @@ pub struct SynthesizedAudio {
     pub audio: Vec<u8>,
 }
 
-#[derive(Clone)]
-pub struct SpeakerVoice {
-    pub speaker: String,
-    pub voice: String,
-}
-
 pub struct SynthesizeDialogueInput {
     pub script: String,
-    pub speakers: Vec<SpeakerVoice>,
+    pub voice: String,
+    pub audio_profile: String,
 }
 
 #[async_trait::async_trait]
@@ -27,7 +22,8 @@ pub trait TTSClient: Send + Sync {
 pub struct GeminiTtsImpl {
     http_client: reqwest::Client,
     api_key: String,
-    model: String,
+    primary_model: String,
+    fallback_model: String,
 }
 
 impl GeminiTtsImpl {
@@ -35,7 +31,8 @@ impl GeminiTtsImpl {
         Ok(Self {
             http_client: reqwest::Client::builder().build()?,
             api_key,
-            model: "gemini-2.5-flash-preview-tts".to_string(),
+            primary_model: "gemini-3.1-flash-tts-preview".to_string(),
+            fallback_model: "gemini-2.5-flash-preview-tts".to_string(),
         })
     }
 }
@@ -55,6 +52,7 @@ impl TTSClient for GeminiTtsImpl {
 
         #[derive(serde::Serialize)]
         struct Content<'a> {
+            role: &'static str,
             parts: Vec<Part<'a>>,
         }
 
@@ -67,38 +65,22 @@ impl TTSClient for GeminiTtsImpl {
         struct GenerationConfig<'a> {
             #[serde(rename = "responseModalities")]
             response_modalities: Vec<&'static str>,
-            #[serde(rename = "speechConfig")]
+            temperature: f32,
             speech_config: SpeechConfig<'a>,
         }
 
         #[derive(serde::Serialize)]
         struct SpeechConfig<'a> {
-            #[serde(rename = "multiSpeakerVoiceConfig")]
-            multi_speaker_voice_config: MultiSpeakerVoiceConfig<'a>,
-        }
-
-        #[derive(serde::Serialize)]
-        struct MultiSpeakerVoiceConfig<'a> {
-            #[serde(rename = "speakerVoiceConfigs")]
-            speaker_voice_configs: Vec<SpeakerVoiceConfig<'a>>,
-        }
-
-        #[derive(serde::Serialize)]
-        struct SpeakerVoiceConfig<'a> {
-            speaker: &'a str,
-            #[serde(rename = "voiceConfig")]
             voice_config: VoiceConfig<'a>,
         }
 
         #[derive(serde::Serialize)]
         struct VoiceConfig<'a> {
-            #[serde(rename = "prebuiltVoiceConfig")]
             prebuilt_voice_config: PrebuiltVoiceConfig<'a>,
         }
 
         #[derive(serde::Serialize)]
         struct PrebuiltVoiceConfig<'a> {
-            #[serde(rename = "voiceName")]
             voice_name: &'a str,
         }
 
@@ -130,70 +112,109 @@ impl TTSClient for GeminiTtsImpl {
             data: String,
         }
 
-        let speaker_voice_configs = input
-            .speakers
-            .iter()
-            .map(|s| SpeakerVoiceConfig {
-                speaker: &s.speaker,
-                voice_config: VoiceConfig {
-                    prebuilt_voice_config: PrebuiltVoiceConfig {
-                        voice_name: &s.voice,
-                    },
-                },
-            })
-            .collect::<Vec<_>>();
+        let prompt = format!(
+            "Read the following transcript based on the audio profile and director's note.\n\
+            \n\
+            # Audio Profile\n\
+            {audio_profile}\n\
+            \n\
+            # Director's note\n\
+            Style: Conversational podcast. Pace: Varied. Accent: Natural.\n\
+            \n\
+            ## Scene:\n\
+            Two podcast hosts in a cozy recording studio, speaking directly into microphones.\n\
+            \n\
+            ## Sample Context:\n\
+            Two co-hosts having a genuine, engaging conversation. Natural back-and-forth with \
+            moments of discovery, laughter, and intellectual curiosity. Tone is warm, accessible, \
+            and authentic. Hosts feed off each other's energy naturally.\n\
+            \n\
+            ## Transcript:\n\
+            {script}",
+            audio_profile = input.audio_profile,
+            script = input.script,
+        );
 
         let req = Request {
             contents: vec![Content {
-                parts: vec![Part {
-                    text: &input.script,
-                }],
+                role: "user",
+                parts: vec![Part { text: &prompt }],
             }],
             generation_config: GenerationConfig {
-                response_modalities: vec!["AUDIO"],
+                response_modalities: vec!["audio"],
+                temperature: 1.0,
                 speech_config: SpeechConfig {
-                    multi_speaker_voice_config: MultiSpeakerVoiceConfig {
-                        speaker_voice_configs,
+                    voice_config: VoiceConfig {
+                        prebuilt_voice_config: PrebuiltVoiceConfig {
+                            voice_name: &input.voice,
+                        },
                     },
                 },
             },
         };
 
-        let url = format!(
-            "https://generativelanguage.googleapis.com/v1beta/models/{}:generateContent",
-            self.model
-        );
-
-        let resp = self
-            .http_client
-            .post(url)
-            .header("x-goog-api-key", &self.api_key)
-            .header(reqwest::header::CONTENT_TYPE, "application/json")
-            .json(&req)
-            .send()
-            .await?
-            .error_for_status()?
-            .json::<Response>()
-            .await?;
-
-        let inline = resp
-            .candidates
-            .into_iter()
-            .next()
-            .ok_or_else(|| anyhow::anyhow!("no candidates in gemini tts response"))?
-            .content
-            .parts
-            .into_iter()
-            .find_map(|p| p.inline_data)
-            .ok_or_else(|| anyhow::anyhow!("no inline_data in gemini tts response"))?;
-
         use base64::Engine as _;
-        let audio = base64::engine::general_purpose::STANDARD.decode(inline.data.as_bytes())?;
-
-        Ok(SynthesizedAudio {
-            content_type: inline.mime_type,
-            audio,
-        })
+        let models = [self.primary_model.as_str(), self.fallback_model.as_str()];
+        let mut last_err: Option<anyhow::Error> = None;
+        for model in models {
+            let url = format!(
+                "https://generativelanguage.googleapis.com/v1beta/models/{model}:streamGenerateContent",
+            );
+            let result = self
+                .http_client
+                .post(&url)
+                .header("x-goog-api-key", &self.api_key)
+                .header(reqwest::header::CONTENT_TYPE, "application/json")
+                .json(&req)
+                .send()
+                .await
+                .and_then(|r| r.error_for_status());
+            let resp_bytes = match result {
+                Ok(r) => r.bytes().await?,
+                Err(e) => {
+                    tracing::warn!(model, error = %e, "tts model failed, trying fallback");
+                    last_err = Some(e.into());
+                    continue;
+                }
+            };
+            let responses = match serde_json::from_slice::<Vec<Response>>(&resp_bytes) {
+                Ok(r) => r,
+                Err(e) => {
+                    tracing::warn!(model, error = %e, "tts model response parse failed, trying fallback");
+                    last_err = Some(e.into());
+                    continue;
+                }
+            };
+            let mut mime_type = String::new();
+            let mut audio = Vec::<u8>::new();
+            for response in responses {
+                for part in response
+                    .candidates
+                    .into_iter()
+                    .flat_map(|c| c.content.parts)
+                {
+                    if let Some(inline) = part.inline_data {
+                        if mime_type.is_empty() {
+                            mime_type = inline.mime_type;
+                        }
+                        let chunk = base64::engine::general_purpose::STANDARD
+                            .decode(inline.data.as_bytes())?;
+                        audio.extend(chunk);
+                    }
+                }
+            }
+            if mime_type.is_empty() {
+                let e = anyhow::anyhow!("no audio data in tts response from {model}");
+                tracing::warn!(model, "{e}");
+                last_err = Some(e);
+                continue;
+            }
+            return Ok(SynthesizedAudio {
+                content_type: mime_type,
+                audio,
+            });
+        }
+        Err(last_err.unwrap_or_else(|| anyhow::anyhow!("all tts models failed")))
     }
 }
 

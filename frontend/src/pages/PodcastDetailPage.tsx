@@ -35,6 +35,7 @@ export default function PodcastDetailPage() {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [muted, setMuted] = useState(false);
+  const [volume, setVolume] = useState(1);
   const [rateIndex, setRateIndex] = useState(0);
   const [audioError, setAudioError] = useState(false);
 
@@ -81,6 +82,20 @@ export default function PodcastDetailPage() {
     if (!audio) return;
     audio.muted = !audio.muted;
     setMuted(audio.muted);
+  };
+
+  const changeVolume = (v: number) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.volume = v;
+    setVolume(v);
+    if (v === 0) {
+      audio.muted = true;
+      setMuted(true);
+    } else if (audio.muted) {
+      audio.muted = false;
+      setMuted(false);
+    }
   };
 
   const seekFromEvent = (e: MouseEvent) => {
@@ -229,25 +244,48 @@ export default function PodcastDetailPage() {
                 </div>
 
                 <div class="flex items-center justify-between">
-                  <button
-                    type="button"
-                    onClick={toggleMute}
-                    aria-label={
-                      muted
-                        ? t("podcast.detail.unmute")
-                        : t("podcast.detail.mute")
-                    }
-                    title={
-                      muted
-                        ? t("podcast.detail.unmute")
-                        : t("podcast.detail.mute")
-                    }
-                    class="icon-button"
-                  >
-                    <span class="material-symbols-outlined">
-                      {muted ? "volume_off" : "volume_up"}
-                    </span>
-                  </button>
+                  <div class="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={toggleMute}
+                      aria-label={
+                        muted
+                          ? t("podcast.detail.unmute")
+                          : t("podcast.detail.mute")
+                      }
+                      title={
+                        muted
+                          ? t("podcast.detail.unmute")
+                          : t("podcast.detail.mute")
+                      }
+                      class="icon-button"
+                    >
+                      <span class="material-symbols-outlined">
+                        {muted || volume === 0
+                          ? "volume_off"
+                          : volume < 0.5
+                            ? "volume_down"
+                            : "volume_up"}
+                      </span>
+                    </button>
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.01"
+                      value={muted ? 0 : volume}
+                      onInput={(e) =>
+                        changeVolume(
+                          parseFloat(
+                            (e.currentTarget as HTMLInputElement).value,
+                          ),
+                        )
+                      }
+                      aria-label={t("podcast.detail.volume")}
+                      class="w-20 h-1 cursor-pointer"
+                      style={{ accentColor: "#2383e2" }}
+                    />
+                  </div>
 
                   <div class="flex items-center gap-4">
                     <button
