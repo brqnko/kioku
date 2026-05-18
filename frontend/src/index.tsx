@@ -69,7 +69,17 @@ export function App() {
 
 if (typeof window !== "undefined") {
   const el = document.getElementById("app");
-  if (el) hydrate(<App />, el);
+  if (el) {
+    // nginx serves the prerendered LandingPage HTML (/index.html) for SPA routes
+    // that aren't prerendered. Hydrating that DOM against a different route's
+    // VNodes leaves stale nodes from the LandingPage. Drop the prerendered
+    // markup on non-prerendered routes so preact renders fresh.
+    const PRERENDERED = new Set(["/", "/tos", "/privacy", "/404"]);
+    if (!PRERENDERED.has(window.location.pathname)) {
+      el.innerHTML = "";
+    }
+    hydrate(<App />, el);
+  }
 }
 
 // --- Prerender ---------------------------------------------------------------
