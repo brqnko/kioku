@@ -125,6 +125,11 @@ const ROUTE_META: Record<string, RouteHead> = {
     description: "The page you requested does not exist.",
     robots: "noindex,follow",
   },
+  "/_shell": {
+    title: "kioku",
+    description: "Knowledge and learning management system",
+    robots: "noindex,nofollow",
+  },
 };
 
 function buildHeadFor(url: string): {
@@ -175,6 +180,14 @@ function buildHeadFor(url: string): {
 }
 
 export async function prerender(data: { url: string }) {
+  // /_shell is an empty SPA shell. nginx serves it as the fallback for routes
+  // that aren't prerendered (auth-only pages and dynamic routes like
+  // /projects/:id). Returning empty html avoids the hydration mismatch that
+  // would otherwise occur when the LandingPage prerender was served for a
+  // different route.
+  if (data.url === "/_shell") {
+    return { html: "", head: buildHeadFor(data.url) };
+  }
   const { default: ssr } = await import("preact-iso/prerender");
   const { html, links } = await ssr(<App />);
   return {
