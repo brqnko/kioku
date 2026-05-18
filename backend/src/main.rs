@@ -16,6 +16,12 @@ struct Config {
     redis_url: String,
     gemini_api_key: String,
     github_token: String,
+    #[allow(dead_code)]
+    azure_openai_endpoint: String,
+    #[allow(dead_code)]
+    azure_openai_deployment: String,
+    #[allow(dead_code)]
+    azure_openai_api_key: String,
 }
 
 impl Config {
@@ -47,6 +53,9 @@ impl Config {
             redis_url: require("REDIS_URL")?,
             gemini_api_key: require("GEMINI_API_KEY")?,
             github_token: require("GITHUB_TOKEN")?,
+            azure_openai_endpoint: require("AZURE_OPENAI_ENDPOINT")?,
+            azure_openai_deployment: require("AZURE_OPENAI_DEPLOYMENT")?,
+            azure_openai_api_key: require("AZURE_OPENAI_API_KEY")?,
         })
     }
 }
@@ -139,9 +148,8 @@ async fn main() -> anyhow::Result<()> {
     let llm_client: Arc<dyn backend::util::llm::LLMClient> =
         Arc::new(backend::util::llm::CopilotImpl::new(config.github_token)?);
 
-    let tts_client: Arc<dyn backend::util::tts::TTSClient> = Arc::new(
-        backend::util::tts::GeminiTtsImpl::new(config.gemini_api_key)?,
-    );
+    let tts_client: Arc<dyn backend::util::tts::TTSClient> =
+        Arc::new(backend::util::tts::GeminiTtsImpl::new(config.gemini_api_key)?);
 
     let pdf2md_service: Arc<dyn backend::util::pdf2md::Pdf2MdService> =
         Arc::new(backend::util::pdf2md::Pdf2MdServiceImpl::new());

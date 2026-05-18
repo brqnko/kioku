@@ -407,6 +407,7 @@
       "forward10": "Forward 10 seconds",
       "mute": "Mute",
       "unmute": "Unmute",
+      "volume": "Volume",
       "speed": "Playback speed",
       "progress": "Playback position",
       "audioError": "Failed to load the audio. Please try again later.",

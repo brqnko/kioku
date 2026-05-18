@@ -231,7 +231,7 @@ paths:
                   type:
                   - string
                   - 'null'
-                  maxLength: 16777216
+                  maxLength: 33554432
         required: true
       responses:
         '200':
@@ -425,7 +425,7 @@ paths:
                 content_length:
                   type: integer
                   format: int64
-                  maximum: 16777216
+                  maximum: 33554432
                   minimum: 1
                 content_type:
                   type: string
@@ -906,7 +906,7 @@ paths:
               properties:
                 text:
                   type: string
-                  maxLength: 16777216
+                  maxLength: 33554432
         required: true
       responses:
         '200':

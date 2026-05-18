@@ -1,18 +1,13 @@
 import type { ScopedMutator } from "swr";
+import { unstable_serialize } from "swr/infinite";
+import { LIBRARY_CACHE_KEY } from "../hooks/useLibrary";
 
-const INFINITE_PREFIX = "$inf$";
 const DASHBOARD_KEY = "users/me/dashboard";
 
-function invalidateInfiniteByMarker(
-  mutate: ScopedMutator,
+function makeInfiniteKey(
   marker: string,
-): Promise<unknown> {
-  return mutate(
-    (key) =>
-      typeof key === "string" &&
-      key.startsWith(INFINITE_PREFIX) &&
-      key.includes(`"${marker}"`),
-  );
+): string {
+  return unstable_serialize(() => [marker, null] as const);
 }
 
 export interface MutationInvalidation {
@@ -27,11 +22,11 @@ export function invalidateAfterMutation(
 ): Promise<unknown> {
   const tasks: Promise<unknown>[] = [];
   if (flags.childListings) {
-    tasks.push(invalidateInfiniteByMarker(mutate, "project-children"));
-    tasks.push(invalidateInfiniteByMarker(mutate, "folder-children"));
+    tasks.push(mutate(makeInfiniteKey("project-children")));
+    tasks.push(mutate(makeInfiniteKey("folder-children")));
   }
   if (flags.library) {
-    tasks.push(invalidateInfiniteByMarker(mutate, "library:page"));
+    tasks.push(mutate(LIBRARY_CACHE_KEY));
   }
   if (flags.dashboard) {
     tasks.push(mutate(DASHBOARD_KEY));

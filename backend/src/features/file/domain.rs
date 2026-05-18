@@ -185,8 +185,8 @@ impl FileEmbedding {
 pub struct Text(pub String);
 
 impl Text {
-    // 16 MiB
-    pub const MAX_BYTES: usize = 16 * 1024 * 1024;
+    // 32 MiB
+    pub const MAX_BYTES: usize = 32 * 1024 * 1024;
 
     pub fn new(string: String) -> Result<Self, crate::domain::DomainError> {
         let len = string.len();
@@ -205,8 +205,8 @@ impl Text {
 pub struct ContentLength(pub i64);
 
 impl ContentLength {
-    // 16 MiB
-    pub const MAX: i64 = 16 * 1024 * 1024;
+    // 32 MiB
+    pub const MAX: i64 = 32 * 1024 * 1024;
 
     pub fn new(value: i64) -> Result<Self, crate::domain::DomainError> {
         if value <= 0 {

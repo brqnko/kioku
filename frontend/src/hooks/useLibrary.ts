@@ -1,4 +1,4 @@
-import useSWRInfinite from "swr/infinite";
+import useSWRInfinite, { unstable_serialize } from "swr/infinite";
 import { kyInstance } from "../api/mutator";
 import {
   ListProjectsOrder,
@@ -17,6 +17,8 @@ function getKey(
   if (pageIndex === 0) return ["library:page", null] as const;
   return ["library:page", prevPageData!.next_cursor!] as const;
 }
+
+export const LIBRARY_CACHE_KEY = unstable_serialize(getKey);
 
 const fetcher = async ([, cursor]: readonly [string, Cursor | null]) => {
   const searchParams: Record<string, string | number> = {

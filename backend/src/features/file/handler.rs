@@ -27,7 +27,7 @@ impl ParentKind {
 #[derive(serde::Deserialize, utoipa::ToSchema)]
 pub struct RequestUploadUrlBody {
     content_type: String,
-    #[schema(minimum = 1, maximum = 16777216)]
+    #[schema(minimum = 1, maximum = 33554432)]
     content_length: i64,
 }
 
@@ -90,7 +90,7 @@ pub struct CreateFileBody {
     #[schema(max_length = 1024)]
     description: String,
     storage_id: Option<uuid::Uuid>,
-    #[schema(max_length = 16777216)]
+    #[schema(max_length = 33554432)]
     text: Option<String>,
     parent_id: uuid::Uuid,
     #[schema(inline)]
@@ -326,7 +326,7 @@ pub async fn update_file(
 
 #[derive(serde::Deserialize, utoipa::ToSchema)]
 pub struct UpdateFileTextBody {
-    #[schema(max_length = 16777216)]
+    #[schema(max_length = 33554432)]
     text: String,
 }
 

@@ -343,7 +343,7 @@ export default function LandingPage() {
                       class={`w-[750px] h-[450px] rounded-[100%] blur-3xl ${blurClass}`}
                     />
                   </div>
-                  <div class="relative w-full">
+                  <div class="relative w-full overflow-x-clip">
                     <div class="w-[178%] [zoom:0.56] tablet:w-[133%] tablet:[zoom:0.75] md:w-[111%] md:[zoom:0.9]">
                       {mockNode}
                     </div>
@@ -429,7 +429,6 @@ export default function LandingPage() {
 
         <footer class="border-t border-border-light dark:border-border-dark">
           <div class="max-w-7xl mx-auto px-6 md:px-8 py-6 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-taupe dark:text-text-muted-dark">
-            <span class="text-xl font-bold text-charcoal dark:text-white">kioku</span>
             <div class="flex items-center gap-6">
               <a
                 href="/privacy"
