@@ -47,7 +47,7 @@ export type CreateFileBody = {
   /** @nullable */
   storage_id?: string | null;
   /**
-     * @maxLength 16777216
+     * @maxLength 33554432
      * @nullable
      */
   text?: string | null;
@@ -126,7 +126,7 @@ export type RunCode200 = {
 export type RequestUploadUrlBody = {
   /**
      * @minimum 1
-     * @maximum 16777216
+     * @maximum 33554432
      */
   content_length: number;
   content_type: string;
@@ -234,7 +234,7 @@ export type GetFileContent200 = {
 };
 
 export type UpdateFileTextBody = {
-  /** @maxLength 16777216 */
+  /** @maxLength 33554432 */
   text: string;
 };
 
