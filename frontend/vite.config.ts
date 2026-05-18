@@ -19,7 +19,7 @@ export default defineConfig({
       prerender: {
         enabled: true,
         renderTarget: "#app",
-        additionalPrerenderRoutes: ["/tos", "/privacy", "/404"],
+        additionalPrerenderRoutes: ["/tos", "/privacy", "/404", "/_shell"],
       },
     }),
     VitePWA({
