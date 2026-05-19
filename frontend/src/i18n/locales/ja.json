@@ -44,6 +44,7 @@
     "sidebar": "サイドバー",
     "report": "問題を報告",
     "recentFiles": "最近みたファイル",
+    "projects": "プロジェクト",
     "openMenu": "メニューを開く",
     "closeMenu": "メニューを閉じる"
   },
@@ -208,8 +209,11 @@
       "text": "テキスト"
     },
     "file": {
-      "cta": "クリックしてファイルを選択",
-      "hint": "最大 16MB"
+      "cta": "クリックまたはドロップでファイルを選択",
+      "ctaAdd": "ファイルを追加",
+      "dropHere": "ここにドロップ",
+      "hint": "最大 32MB",
+      "remove": "削除"
     },
     "text": {
       "name": "ファイル名",
@@ -217,13 +221,25 @@
       "body": "本文",
       "bodyPlaceholder": "ここに内容を入力..."
     },
+    "status": {
+      "pending": "待機中",
+      "uploading": "アップロード中",
+      "done": "完了",
+      "failed": "失敗"
+    },
+    "summary": {
+      "allOk": "{{count}}件のファイルをアップロードしました。",
+      "partial": "{{ok}}件成功 / {{ng}}件失敗",
+      "allFailed": "{{count}}件すべて失敗しました。"
+    },
     "cancel": "キャンセル",
     "submit": "保存",
+    "submitMultiple": "{{count}}件をアップロード",
     "submitting": "保存中...",
     "errors": {
       "fileRequired": "ファイルを選択してください。",
       "nameRequired": "ファイル名を入力してください。",
-      "tooLarge": "サイズが大きすぎます（最大 16MB）。",
+      "tooLarge": "サイズが大きすぎます（最大 32MB）。",
       "failed": "保存に失敗しました。"
     }
   },

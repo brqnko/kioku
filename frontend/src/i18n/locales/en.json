@@ -44,6 +44,7 @@
     "sidebar": "Sidebar",
     "report": "Report a problem",
     "recentFiles": "Recent Files",
+    "projects": "Projects",
     "openMenu": "Open menu",
     "closeMenu": "Close menu"
   },
@@ -208,8 +209,11 @@
       "text": "Text"
     },
     "file": {
-      "cta": "Click to choose a file",
-      "hint": "Up to 16MB"
+      "cta": "Click or drop files to upload",
+      "ctaAdd": "Add more files",
+      "dropHere": "Drop here",
+      "hint": "Up to 32MB",
+      "remove": "Remove"
     },
     "text": {
       "name": "File name",
@@ -217,13 +221,25 @@
       "body": "Body",
       "bodyPlaceholder": "Type your content here..."
     },
+    "status": {
+      "pending": "Pending",
+      "uploading": "Uploading",
+      "done": "Done",
+      "failed": "Failed"
+    },
+    "summary": {
+      "allOk": "Uploaded {{count}} file(s).",
+      "partial": "{{ok}} succeeded, {{ng}} failed",
+      "allFailed": "All {{count}} uploads failed."
+    },
     "cancel": "Cancel",
     "submit": "Save",
+    "submitMultiple": "Upload {{count}} file(s)",
     "submitting": "Saving...",
     "errors": {
       "fileRequired": "Please choose a file.",
       "nameRequired": "Please enter a file name.",
-      "tooLarge": "Too large (max 16MB).",
+      "tooLarge": "Too large (max 32MB).",
       "failed": "Failed to save."
     }
   },

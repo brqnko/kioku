@@ -192,7 +192,7 @@ export default function FilePage() {
     <div class="min-h-screen bg-background-dark text-text-primary">
       <SideNavBar />
       <TopAppBar />
-      <main class="ml-[var(--sidebar-width)] min-h-[calc(100vh-3.5rem)] overflow-y-auto transition-[margin-left] duration-200 ease-in-out">
+      <main class="ml-[var(--sidebar-width)] h-[calc(100vh-3.5rem)] overflow-y-auto transition-[margin-left] duration-200 ease-in-out">
         <div class="w-full max-w-4xl mx-auto px-4 py-8 tablet:px-12 tablet:py-16">
           {error && (
             <p class="text-sm text-danger mb-4">{t("file.errors.load")}</p>

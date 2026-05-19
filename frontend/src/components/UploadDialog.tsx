@@ -4,6 +4,7 @@ import { useSWRConfig } from "swr";
 import { Dialog } from "./Dialog";
 import { createTextFile, uploadFile } from "../api/upload";
 import { invalidateAfterMutation } from "../utils/swrCache";
+import { pushNotification } from "../notifications/store";
 
 interface UploadDialogProps {
   open: boolean;
@@ -15,6 +16,53 @@ interface UploadDialogProps {
 
 type Mode = "file" | "text";
 
+type UploadStatus = "pending" | "uploading" | "done" | "failed";
+
+interface UploadItem {
+  id: string;
+  file: File;
+  status: UploadStatus;
+  errorKey?: "tooLarge" | "failed";
+}
+
+const CONCURRENCY = 3;
+
+function makeItemId(): string {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return crypto.randomUUID();
+  }
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function filesToItems(files: FileList | File[] | null | undefined): UploadItem[] {
+  if (!files) return [];
+  const arr = Array.from(files);
+  return arr.map((file) => ({ id: makeItemId(), file, status: "pending" }));
+}
+
+async function runWithConcurrency(
+  tasks: Array<() => Promise<void>>,
+  limit: number,
+): Promise<void> {
+  let idx = 0;
+  const workers = Array.from(
+    { length: Math.min(limit, tasks.length) },
+    async () => {
+      while (idx < tasks.length) {
+        const i = idx++;
+        await tasks[i]();
+      }
+    },
+  );
+  await Promise.all(workers);
+}
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 export function UploadDialog({
   open,
   onClose,
@@ -25,7 +73,8 @@ export function UploadDialog({
   const { t } = useTranslation();
   const { mutate } = useSWRConfig();
   const [mode, setMode] = useState<Mode>("file");
-  const [file, setFile] = useState<File | null>(null);
+  const [items, setItems] = useState<UploadItem[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
   const [name, setName] = useState("");
   const [text, setText] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -35,7 +84,8 @@ export function UploadDialog({
   useEffect(() => {
     if (open) {
       setMode("file");
-      setFile(null);
+      setItems([]);
+      setIsDragging(false);
       setName("");
       setText("");
       setError(null);
@@ -43,16 +93,113 @@ export function UploadDialog({
     }
   }, [open]);
 
-  const handleFileChange = (e: Event) => {
-    const input = e.target as HTMLInputElement;
-    setFile(input.files?.[0] ?? null);
+  const errorKeyFor = (err: unknown): "tooLarge" | "failed" =>
+    err instanceof Error && err.message === "file_too_large"
+      ? "tooLarge"
+      : "failed";
+
+  const translateTopError = (err: unknown): string =>
+    err instanceof Error && err.message === "file_too_large"
+      ? t("upload.errors.tooLarge")
+      : t("upload.errors.failed");
+
+  const addFiles = (files: FileList | File[] | null | undefined) => {
+    const next = filesToItems(files);
+    if (next.length === 0) return;
+    setItems((prev) => [...prev, ...next]);
   };
 
-  const translateError = (err: unknown): string => {
-    if (err instanceof Error && err.message === "file_too_large") {
-      return t("upload.errors.tooLarge");
+  const handleFileChange = (e: Event) => {
+    const input = e.target as HTMLInputElement;
+    addFiles(input.files);
+    input.value = "";
+  };
+
+  const handleRemove = (id: string) => {
+    setItems((prev) =>
+      prev.filter((it) => !(it.id === id && it.status === "pending")),
+    );
+  };
+
+  const handleDragOver = (e: DragEvent) => {
+    e.preventDefault();
+    if (!isDragging) setIsDragging(true);
+  };
+  const handleDragLeave = (e: DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+  const handleDrop = (e: DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (submitting) return;
+    addFiles(e.dataTransfer?.files);
+  };
+
+  const handleFileSubmit = async () => {
+    const targets = items.filter((it) => it.status === "pending");
+    if (targets.length === 0) {
+      setError(t("upload.errors.fileRequired"));
+      return;
     }
-    return t("upload.errors.failed");
+    setError(null);
+    setSubmitting(true);
+
+    const updateItem = (id: string, patch: Partial<UploadItem>) => {
+      setItems((prev) =>
+        prev.map((it) => (it.id === id ? { ...it, ...patch } : it)),
+      );
+    };
+
+    const results = new Map<string, "done" | "failed">();
+    const tasks: Array<() => Promise<void>> = targets.map((item) => async () => {
+      updateItem(item.id, { status: "uploading", errorKey: undefined });
+      try {
+        await uploadFile({ file: item.file, parentId, parentKind });
+        results.set(item.id, "done");
+        updateItem(item.id, { status: "done" });
+      } catch (err) {
+        results.set(item.id, "failed");
+        updateItem(item.id, { status: "failed", errorKey: errorKeyFor(err) });
+      }
+    });
+
+    await runWithConcurrency(tasks, CONCURRENCY);
+
+    setSubmitting(false);
+
+    const total = targets.length;
+    let ok = 0;
+    let ng = 0;
+    for (const v of results.values()) {
+      if (v === "done") ok++;
+      else ng++;
+    }
+
+    if (ok > 0) {
+      await Promise.all([
+        onSuccess(),
+        invalidateAfterMutation(mutate, { library: true, dashboard: true }),
+      ]);
+    }
+
+    if (ng === 0) {
+      pushNotification({
+        kind: "success",
+        message: t("upload.summary.allOk", { count: ok }),
+      });
+      onClose();
+    } else if (ok === 0) {
+      pushNotification({
+        kind: "error",
+        message: t("upload.summary.allFailed", { count: total }),
+      });
+    } else {
+      pushNotification({
+        kind: "warning",
+        message: t("upload.summary.partial", { ok, ng }),
+      });
+    }
   };
 
   const handleSubmit = async (e: Event) => {
@@ -60,23 +207,7 @@ export function UploadDialog({
     setError(null);
 
     if (mode === "file") {
-      if (!file) {
-        setError(t("upload.errors.fileRequired"));
-        return;
-      }
-      setSubmitting(true);
-      try {
-        await uploadFile({ file, parentId, parentKind });
-        await Promise.all([
-          onSuccess(),
-          invalidateAfterMutation(mutate, { library: true, dashboard: true }),
-        ]);
-        onClose();
-      } catch (err) {
-        setError(translateError(err));
-      } finally {
-        setSubmitting(false);
-      }
+      await handleFileSubmit();
       return;
     }
 
@@ -99,11 +230,21 @@ export function UploadDialog({
       ]);
       onClose();
     } catch (err) {
-      setError(translateError(err));
+      setError(translateTopError(err));
     } finally {
       setSubmitting(false);
     }
   };
+
+  const pendingCount = items.filter((it) => it.status === "pending").length;
+  const hasItems = items.length > 0;
+  const submitLabel = submitting
+    ? t("upload.submitting")
+    : mode === "file" && hasItems
+      ? t("upload.submitMultiple", { count: pendingCount || items.length })
+      : t("upload.submit");
+  const submitDisabled =
+    submitting || (mode === "file" && pendingCount === 0);
 
   return (
     <Dialog open={open} onClose={onClose} ariaLabel={t("upload.title")}>
@@ -141,32 +282,75 @@ export function UploadDialog({
 
         <div class="p-6 flex flex-col gap-4">
           {mode === "file" && (
-            <div class="flex flex-col gap-2">
-              <button
-                type="button"
+            <div class="flex flex-col gap-3">
+              <div
                 onClick={() => fileInputRef.current?.click()}
-                class="w-full border border-dashed border-border-dark rounded-lg px-4 py-8 text-center hover:border-overlay-strong hover:bg-overlay-faint cursor-pointer flex flex-col items-center gap-2 bg-transparent text-text-primary"
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                class={`w-full border border-dashed rounded-lg px-4 py-6 text-center cursor-pointer flex flex-col items-center gap-2 ${
+                  isDragging
+                    ? "border-overlay-strong bg-overlay-faint"
+                    : "border-border-dark hover:border-overlay-strong hover:bg-overlay-faint"
+                }`}
               >
                 <span class="material-symbols-outlined text-text-secondary text-[28px]">
                   upload_file
                 </span>
-                {file ? (
-                  <span class="text-sm text-text-primary">{file.name}</span>
-                ) : (
-                  <span class="text-sm text-text-secondary">
-                    {t("upload.file.cta")}
-                  </span>
-                )}
+                <span class="text-sm text-text-secondary">
+                  {isDragging
+                    ? t("upload.file.dropHere")
+                    : hasItems
+                      ? t("upload.file.ctaAdd")
+                      : t("upload.file.cta")}
+                </span>
                 <span class="text-xs text-text-disabled">
                   {t("upload.file.hint")}
                 </span>
-              </button>
+              </div>
               <input
                 ref={fileInputRef}
                 type="file"
+                multiple
                 class="hidden"
                 onChange={handleFileChange}
               />
+
+              {hasItems && (
+                <ul class="flex flex-col gap-1 max-h-64 overflow-y-auto">
+                  {items.map((it) => (
+                    <li
+                      key={it.id}
+                      class="flex items-center gap-3 px-3 py-2 rounded-md bg-surface-container-low/60"
+                    >
+                      <span class="material-symbols-outlined text-text-secondary text-[20px]">
+                        description
+                      </span>
+                      <div class="flex-1 min-w-0">
+                        <div class="text-sm text-text-primary truncate">
+                          {it.file.name}
+                        </div>
+                        <div class="text-xs text-text-disabled">
+                          {formatBytes(it.file.size)}
+                        </div>
+                      </div>
+                      <StatusChip item={it} />
+                      {it.status === "pending" && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemove(it.id)}
+                          aria-label={t("upload.file.remove")}
+                          class="bg-transparent border-none text-text-secondary hover:text-text-primary cursor-pointer p-1"
+                        >
+                          <span class="material-symbols-outlined text-[18px]">
+                            close
+                          </span>
+                        </button>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           )}
 
@@ -225,11 +409,48 @@ export function UploadDialog({
           >
             {t("upload.cancel")}
           </button>
-          <button type="submit" disabled={submitting} class="btn-primary">
-            {submitting ? t("upload.submitting") : t("upload.submit")}
+          <button type="submit" disabled={submitDisabled} class="btn-primary">
+            {submitLabel}
           </button>
         </div>
       </form>
     </Dialog>
+  );
+}
+
+function StatusChip({ item }: { item: UploadItem }) {
+  const { t } = useTranslation();
+  const base =
+    "text-xs px-2 py-0.5 rounded-full flex items-center gap-1 whitespace-nowrap";
+  if (item.status === "pending") {
+    return (
+      <span class={`${base} bg-surface-container-high text-text-secondary`}>
+        {t("upload.status.pending")}
+      </span>
+    );
+  }
+  if (item.status === "uploading") {
+    return (
+      <span class={`${base} bg-surface-container-high text-text-primary`}>
+        <span class="material-symbols-outlined text-[14px] animate-spin">
+          progress_activity
+        </span>
+        {t("upload.status.uploading")}
+      </span>
+    );
+  }
+  if (item.status === "done") {
+    return (
+      <span class={`${base} bg-success/15 text-success`}>
+        <span class="material-symbols-outlined text-[14px]">check</span>
+        {t("upload.status.done")}
+      </span>
+    );
+  }
+  return (
+    <span class={`${base} bg-danger/15 text-danger`}>
+      <span class="material-symbols-outlined text-[14px]">error</span>
+      {t(`upload.errors.${item.errorKey ?? "failed"}`)}
+    </span>
   );
 }

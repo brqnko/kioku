@@ -47,7 +47,7 @@ export default function DashboardPage() {
     <div class="min-h-screen bg-background-dark text-text-primary">
       <SideNavBar />
       <TopAppBar />
-      <main class="ml-[var(--sidebar-width)] p-4 tablet:p-8 min-h-[calc(100vh-3.5rem)] flex flex-col gap-8 transition-[margin-left] duration-200 ease-in-out">
+      <main class="ml-[var(--sidebar-width)] p-4 tablet:p-8 h-[calc(100vh-3.5rem)] overflow-y-auto flex flex-col gap-8 transition-[margin-left] duration-200 ease-in-out">
         <header class="flex flex-col gap-1">
           <h1 class="heading-h2">{t("dashboard.title")}</h1>
           <p class="text-caption text-text-secondary">
