@@ -1,13 +1,12 @@
 import useSWR from "swr";
 import { kyInstance } from "../api/mutator";
+import { COMPILERS_KEY } from "../api/keys";
 import type {
   ListCompilers200,
   ListCompilers200CompilersItem,
 } from "../api/generated/backend.schemas";
 
 export type Compiler = ListCompilers200CompilersItem;
-
-const COMPILERS_KEY = "code/compilers";
 
 export function useCompilers() {
   return useSWR<Compiler[]>(

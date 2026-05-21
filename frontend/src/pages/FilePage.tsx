@@ -91,7 +91,7 @@ export default function FilePage() {
     if (!file) return setEditingName(false);
     const trimmed = nameDraft.trim();
     setEditingName(false);
-    if (!trimmed || trimmed === file.name) return;
+    if (!trimmed || trimmed === file.name.trim()) return;
     try {
       await patchMeta({ name: trimmed });
     } catch {
@@ -437,6 +437,8 @@ export default function FilePage() {
                 <iframe
                   src={content.url}
                   title={file?.name ?? "PDF"}
+                  sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+                  referrerpolicy="no-referrer"
                   class="w-full h-[calc(100vh-12rem)] block"
                 />
               </div>

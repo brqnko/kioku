@@ -728,6 +728,8 @@ export type CreatePodcastBody = {
   /** @maxLength 256 */
   name: string;
   used_file_ids: string[];
+  /** One of: F1, F2, F3, F4, F5, M1, M2, M3, M4, M5 */
+  voice_style: string;
 };
 
 export type CreatePodcast200 = {

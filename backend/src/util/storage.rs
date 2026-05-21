@@ -80,6 +80,12 @@ impl StorageServiceImpl {
             .region(aws_sdk_s3::config::Region::new(region))
             .force_path_style(true)
             .behavior_version(aws_sdk_s3::config::BehaviorVersion::latest())
+            .request_checksum_calculation(
+                aws_sdk_s3::config::RequestChecksumCalculation::WhenRequired,
+            )
+            .response_checksum_validation(
+                aws_sdk_s3::config::ResponseChecksumValidation::WhenRequired,
+            )
             .build();
 
         let client = aws_sdk_s3::Client::from_conf(config);
@@ -251,7 +257,8 @@ impl StorageService for StorageServiceImpl {
     ) -> Result<HeadObject, anyhow::Error> {
         let content_length = body.len() as i64;
 
-        self.client
+        let result = self
+            .client
             .put_object()
             .bucket(&self.bucket)
             .key(storage_id.to_string())
@@ -259,7 +266,34 @@ impl StorageService for StorageServiceImpl {
             .content_length(content_length)
             .body(body.into())
             .send()
-            .await?;
+            .await;
+
+        if let Err(e) = &result {
+            let kind = match e {
+                aws_sdk_s3::error::SdkError::ConstructionFailure(_) => "construction",
+                aws_sdk_s3::error::SdkError::TimeoutError(_) => "timeout",
+                aws_sdk_s3::error::SdkError::DispatchFailure(_) => "dispatch",
+                aws_sdk_s3::error::SdkError::ResponseError(_) => "response_parse",
+                aws_sdk_s3::error::SdkError::ServiceError(_) => "service",
+                _ => "unknown",
+            };
+            let mut chain: Vec<String> = Vec::new();
+            let mut src: Option<&dyn std::error::Error> = Some(e);
+            while let Some(s) = src {
+                chain.push(s.to_string());
+                src = s.source();
+            }
+            tracing::error!(
+                kind,
+                debug = ?e,
+                chain = ?chain,
+                content_length,
+                content_type,
+                bucket = %self.bucket,
+                "s3 put_object failed"
+            );
+        }
+        result?;
 
         Ok(HeadObject { content_length })
     }

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
+import { useTranslation } from "react-i18next";
 import type { Compiler } from "../hooks/useCompilers";
 import { Dialog } from "./Dialog";
 
@@ -70,6 +71,7 @@ export function CompilerPicker({
   preferredLanguage,
   onSelect,
 }: Props) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const groups = useMemo(
@@ -119,7 +121,7 @@ export function CompilerPicker({
     <Dialog
       open={open}
       onClose={onClose}
-      ariaLabel="コンパイラを選択"
+      ariaLabel={t("codeBlock.picker.title")}
       maxWidth="max-w-[560px]"
     >
       <div class="flex flex-col max-h-[70vh]">
@@ -130,12 +132,13 @@ export function CompilerPicker({
             value={query}
             onInput={(e) => setQuery((e.target as HTMLInputElement).value)}
             onKeyDown={handleKeyDown}
-            placeholder="言語名やコンパイラ名で検索…"
+            placeholder={t("codeBlock.picker.search")}
             class="input-field"
           />
           {preferredLanguage && (
             <p class="text-[11px] text-text-disabled mt-2">
-              現在の言語タグ: <span class="font-mono">{preferredLanguage}</span>
+              {t("codeBlock.picker.currentLanguage")}{" "}
+              <span class="font-mono">{preferredLanguage}</span>
             </p>
           )}
         </div>
@@ -143,8 +146,8 @@ export function CompilerPicker({
           {total === 0 ? (
             <p class="text-sm text-text-disabled text-center py-8 px-4">
               {compilers.length === 0
-                ? "コンパイラ一覧を読み込み中…"
-                : "一致するコンパイラがありません"}
+                ? t("codeBlock.picker.loading")
+                : t("codeBlock.picker.empty")}
             </p>
           ) : (
             (() => {
@@ -196,8 +199,8 @@ export function CompilerPicker({
           )}
         </div>
         <div class="px-4 py-2 border-t border-border-subtle text-[11px] text-text-disabled shrink-0 flex items-center justify-between">
-          <span>{total} 件</span>
-          <span>↑↓ で移動 / Enter で選択 / Esc で閉じる</span>
+          <span>{t("codeBlock.picker.countLabel", { count: total })}</span>
+          <span>{t("codeBlock.picker.hint")}</span>
         </div>
       </div>
     </Dialog>

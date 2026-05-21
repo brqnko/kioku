@@ -3,11 +3,16 @@ import { useTranslation } from "react-i18next";
 import { Icon } from "./Icon";
 import { GithubIcon } from "./GithubIcon";
 import { useColorMode } from "../hooks/useColorMode";
+import { useAuth } from "../hooks/useAuth";
+import { kyInstance } from "../api/mutator";
+import { PROFILE_KEY } from "../api/keys";
 import { modeIcons, modeOrder, languages } from "../constants";
+import type { UpdateUserProfileBody } from "../api/generated/backend.schemas";
 
 export default function HeaderControls() {
   const { t, i18n } = useTranslation();
   const { mode, setMode } = useColorMode();
+  const { isAuthenticated } = useAuth();
 
   const nextMode = modeOrder[(modeOrder.indexOf(mode) + 1) % modeOrder.length];
   const cycleMode = () => setMode(nextMode);
@@ -74,6 +79,16 @@ export default function HeaderControls() {
                 onClick={() => {
                   void i18n.changeLanguage(lang.code);
                   localStorage.setItem("lang", lang.code);
+                  if (isAuthenticated) {
+                    const body: UpdateUserProfileBody = {
+                      language_code: lang.code,
+                    };
+                    void kyInstance
+                      .patch(PROFILE_KEY, { json: body })
+                      .catch(() => {
+                        // ignore — local preference still applied
+                      });
+                  }
                   setLangOpen(false);
                 }}
               >

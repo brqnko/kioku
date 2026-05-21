@@ -79,111 +79,12 @@ pub async fn generate_podcast(
 
     let is_japanese = user_lang.starts_with("ja");
 
-    let outline_system = if is_japanese {
-        format!(
-            "あなたはポッドキャストプロデューサーです。\
-            「{name}」（{description}）というエピソードの詳細な構成を作成してください。\
-            各セグメントに以下を含めること：タイトル、①日常的な導入フック、②聴衆の素朴な直感、\
-            ③専門家による意外な転換、④わかりやすい具体的な例え、⑤聴衆のahaモーメント、\
-            ⑥発展的なトピック、プッシュバックポイント1つ。\
-            日本語で書くこと。",
-            name = podcast_intermediate.name.0,
-            description = podcast_intermediate.description.0,
-        )
-    } else {
-        format!(
-            "You are a podcast producer. \
-            Create a detailed episode outline for a podcast titled \"{name}\" ({description}). \
-            For each segment provide: title, (1) everyday hook, (2) naive intuition, \
-            (3) expert subversion, (4) one vivid concrete example, (5) listener's aha moment, \
-            (6) extension topic, and one planned pushback moment. \
-            Write in BCP-47 \"{lang}\".",
-            name = podcast_intermediate.name.0,
-            description = podcast_intermediate.description.0,
-            lang = user_lang,
-        )
-    };
-
-    let _outline = app
-        .llm_client
-        .complete(
-            crate::util::llm::CopilotImpl::MODEL_GPT_5,
-            crate::util::llm::CompletionInput {
-                messages: vec![
-                    crate::util::llm::Message {
-                        role: crate::util::llm::Role::System,
-                        content: outline_system,
-                    },
-                    crate::util::llm::Message {
-                        role: crate::util::llm::Role::User,
-                        content: source,
-                    },
-                ],
-            },
-        )
-        .await?
-        .content;
-
-    let script_system = if is_japanese {
-        format!(
-            "あなたはポッドキャストのナレーターです。「{name}」というエピソードの完全なナレーションスクリプトを書いてください。\n\
-            \n\
-            ## 形式\n\
-            - 一人のナレーターによるモノローグ形式\n\
-            - 段落ごとに書き、段落間は空行で区切る\n\
-            - 各段落または文の先頭に英語の伝達タグを入れる（使いすぎない）\n\
-            \n\
-            ## 伝達タグの例\n\
-            [informative] 今日のテーマは…\n\
-            [explanation] つまりこういうことで…\n\
-            [building anticipation] ここからが本題で…\n\
-            [questioning] では、なぜそうなるのか。\n\
-            [insight] ここが重要なポイントで…\n\
-            [reminder] 覚えておいてほしいのは…\n\
-            \n\
-            ## ルール\n\
-            - 冒頭で今回のテーマを初見の聴衆にもわかるように簡潔に紹介してから本題に入ること\n\
-            - アウトラインの全セグメントを網羅すること\n\
-            - 自然で流れるような話し言葉で書くこと\n\
-            - コード・数式・技術的な記号は含めないこと\n\
-            - すべて日本語で書くこと\n\
-            \n\
-            ## アウトライン\n\
-            {outline}",
-            name = podcast_intermediate.name.0,
-            outline = _outline,
-        )
-    } else {
-        format!(
-            "You are a podcast narrator. Write a complete narration script for an episode titled \"{name}\".\n\
-            \n\
-            ## Format\n\
-            - Single narrator monologue\n\
-            - Write in paragraphs separated by blank lines\n\
-            - Place English delivery tags at the start of sentences or paragraphs (use sparingly)\n\
-            \n\
-            ## Delivery tag examples\n\
-            [informative] Today's topic is...\n\
-            [explanation] In other words...\n\
-            [building anticipation] Here's where it gets interesting —\n\
-            [questioning] So why does this happen?\n\
-            [insight] The key insight here is...\n\
-            [reminder] What's important to remember is...\n\
-            \n\
-            ## Rules\n\
-            - Open with a brief intro that newcomers can follow\n\
-            - Cover all outline segments\n\
-            - Write in natural, flowing spoken language\n\
-            - Never include code, formulas, or raw technical syntax\n\
-            - Write entirely in BCP-47 \"{lang}\"\n\
-            \n\
-            ## Outline\n\
-            {outline}",
-            name = podcast_intermediate.name.0,
-            lang = user_lang,
-            outline = _outline,
-        )
-    };
+    let (system, user_msg) = build_script_prompt(
+        &podcast_intermediate.name.0,
+        &podcast_intermediate.description.0,
+        &user_lang,
+        &source,
+    );
 
     let script_raw = app
         .llm_client
@@ -193,15 +94,11 @@ pub async fn generate_podcast(
                 messages: vec![
                     crate::util::llm::Message {
                         role: crate::util::llm::Role::System,
-                        content: script_system,
+                        content: system,
                     },
                     crate::util::llm::Message {
                         role: crate::util::llm::Role::User,
-                        content: if is_japanese {
-                            "完全なナレーションスクリプトを生成してください。".to_string()
-                        } else {
-                            "Generate the complete narration script now.".to_string()
-                        },
+                        content: user_msg,
                     },
                 ],
             },
@@ -211,60 +108,25 @@ pub async fn generate_podcast(
 
     let podcast_script = parse_script(&script_raw);
 
-    const TTS_CHUNK_CHARS: usize = 2_500;
-    const TTS_VOICE: &str = "Iapetus";
-    const TTS_AUDIO_PROFILE: &str =
-        "A warm and engaging podcast host with natural conversational energy. \
-         Shifts tone fluidly between explaining complex ideas with clarity and \
-         reacting with genuine curiosity and humour.";
-    const TTS_MAX_ATTEMPTS: u32 = 3;
-    let mut audio_content_type = String::new();
-    let mut audio = Vec::<u8>::new();
-    for chunk in split_script_chunks(&script_raw, TTS_CHUNK_CHARS) {
-        let mut last_err: Option<anyhow::Error> = None;
-        let mut part: Option<crate::util::tts::SynthesizedAudio> = None;
-        for attempt in 0..TTS_MAX_ATTEMPTS {
-            match app
-                .tts_client
-                .synthesize_dialogue(crate::util::tts::SynthesizeDialogueInput {
-                    script: chunk.clone(),
-                    voice: TTS_VOICE.to_string(),
-                    audio_profile: TTS_AUDIO_PROFILE.to_string(),
-                })
-                .await
-            {
-                Ok(ok) => {
-                    part = Some(ok);
-                    break;
-                }
-                Err(e) => {
-                    tracing::warn!(attempt, error = %e, "tts chunk attempt failed");
-                    last_err = Some(e);
-                    if attempt + 1 < TTS_MAX_ATTEMPTS {
-                        let backoff_ms = 1000u64 << attempt;
-                        tokio::time::sleep(std::time::Duration::from_millis(backoff_ms)).await;
-                    }
-                }
-            }
-        }
-        let part = match part {
-            Some(p) => p,
-            None => {
-                return Err(last_err
-                    .unwrap_or_else(|| anyhow::anyhow!("tts failed without producing an error")));
-            }
-        };
-        if audio_content_type.is_empty() {
-            audio_content_type = part.content_type;
-        }
-        audio.extend(part.audio);
-    }
+    let tts_script = if is_japanese {
+        japanize_english_terms(app, &script_raw).await?
+    } else {
+        script_raw.clone()
+    };
 
-    let sample_rate = crate::util::tts::parse_pcm_sample_rate(&audio_content_type);
-    let wav = crate::util::tts::wrap_pcm_as_wav(&audio, sample_rate);
-
+    let lang_prefix = if is_japanese { "ja" } else { "en" };
+    let tts_voice = format!("{}:{}", lang_prefix, request.voice_style);
+    let tts_result = app
+        .tts_client
+        .synthesize_dialogue(crate::util::tts::SynthesizeDialogueInput {
+            script: tts_script,
+            voice: tts_voice,
+        })
+        .await?;
+    let wav = crate::util::tts::wrap_pcm_as_wav(&tts_result.audio, tts_result.sample_rate);
+    let opus = crate::util::audio::wav_to_opus(wav, 32).await?;
     app.storage_service
-        .put_object(audio_storage_id, "audio/wav", wav)
+        .put_object(audio_storage_id, "audio/ogg", opus)
         .await?;
 
     let podcast = match crate::features::podcast::domain::Podcast::new(
@@ -294,6 +156,84 @@ pub async fn generate_podcast(
     app.podcast_request_service.remove(podcast_id).await?;
 
     Ok(Ok(GeneratePodcastOutput {}))
+}
+
+async fn japanize_english_terms(
+    app: &crate::app::App,
+    script: &str,
+) -> Result<String, anyhow::Error> {
+    use crate::util::llm::{Message, Role};
+
+    let system = "あなたは日本語ポッドキャストの発音調整係です。\n\
+        渡されたスクリプト内の英単語・英略語を、日本語話者が自然に発音できるカタカナに置き換えてください。\n\
+        同時に、明らかな日本語の文法ミス・てにをはの誤り・脱字・不自然な語順があれば直してください。\n\
+        \n\
+        ## ルール\n\
+        - 段落区切り・句読点の位置は基本的に保つこと\n\
+        - 文意・話の流れは絶対に変えないこと\n\
+        - 英語以外で問題ない箇所（自然な日本語、数字、記号）は変更しないこと\n\
+        - 置き換えはすべてカタカナで行うこと（ひらがなは使わない）\n\
+        - タグや説明文を追加しないこと\n\
+        - 出力はスクリプト全文のみ";
+
+    let mut messages = vec![Message {
+        role: Role::System,
+        content: system.to_string(),
+    }];
+
+    let examples: &[(&str, &str)] = &[
+        (
+            "今日はJavaの話をします。AWSのLambdaを使った例です。",
+            "今日はジャバの話をします。エーダブリューエスのラムダを使った例です。",
+        ),
+        (
+            "GitHubのCopilotはGPTベースです。",
+            "ギットハブのコパイロットはジーピーティーベースです。",
+        ),
+        (
+            "APIキーをsetTimeoutで設定する。",
+            "エーピーアイキーをセットタイムアウトで設定する。",
+        ),
+        (
+            "TypeScriptとReactでフロントエンドを書く。",
+            "タイプスクリプトとリアクトでフロントエンドを書く。",
+        ),
+        (
+            "私がDockerを使うときに、コンテナをを起動するとき。",
+            "私がドッカーを使うときに、コンテナを起動します。",
+        ),
+        (
+            "Kubernetesがあるのは、コンテナをオーケストレーションできて便利のためです。",
+            "クバネティスがあるのは、コンテナをオーケストレーションできて便利だからです。",
+        ),
+    ];
+
+    for (input, output) in examples {
+        messages.push(Message {
+            role: Role::User,
+            content: (*input).to_string(),
+        });
+        messages.push(Message {
+            role: Role::Assistant,
+            content: (*output).to_string(),
+        });
+    }
+
+    messages.push(Message {
+        role: Role::User,
+        content: script.to_string(),
+    });
+
+    let result = app
+        .llm_client
+        .complete(
+            crate::util::llm::CopilotImpl::MODEL_GPT_5_MINI,
+            crate::util::llm::CompletionInput { messages },
+        )
+        .await?
+        .content;
+
+    Ok(result)
 }
 
 fn parse_script(script: &str) -> Vec<crate::features::podcast::domain::PodcastScriptEntry> {
@@ -335,24 +275,29 @@ fn strip_audio_tags(text: &str) -> String {
     out.trim().to_string()
 }
 
-fn split_script_chunks(script: &str, max_chars: usize) -> Vec<String> {
-    let mut chunks = Vec::new();
-    let mut current = String::new();
-    for line in script.lines() {
-        let line = line.trim();
-        if line.is_empty() {
-            continue;
-        }
-        if !current.is_empty() && current.len() + 1 + line.len() > max_chars {
-            chunks.push(std::mem::take(&mut current));
-        }
-        if !current.is_empty() {
-            current.push('\n');
-        }
-        current.push_str(line);
-    }
-    if !current.is_empty() {
-        chunks.push(current);
-    }
-    chunks
+pub fn build_script_prompt(
+    name: &str,
+    description: &str,
+    lang: &str,
+    source: &str,
+) -> (String, String) {
+    let system = if lang.starts_with("ja") {
+        format!(
+            "あなたはポッドキャストのナレーターです。\
+            「{name}」（{description}）の完全なナレーションスクリプトを書いてください。\
+            一人のナレーターによるモノローグ形式で段落ごとに書き、段落間は空行で区切ること。\
+            自然な話し言葉で書き、タグや記号は含めないこと。すべて日本語で書くこと。\
+            内容を端折らず、必要な分だけ長さを惜しまずに書くこと。",
+        )
+    } else {
+        format!(
+            "You are a podcast narrator. \
+            Write a complete narration script for \"{name}\" ({description}). \
+            Single narrator monologue, paragraphs separated by blank lines. \
+            Natural spoken language only, no tags or non-speech symbols. \
+            Write entirely in BCP-47 \"{lang}\". \
+            Do not cut corners — write as much length as the material warrants.",
+        )
+    };
+    (system, source.to_string())
 }

@@ -1,5 +1,5 @@
 import { useState } from "preact/hooks";
-import { useRoute } from "preact-iso";
+import { useLocation, useRoute } from "preact-iso";
 import { useTranslation } from "react-i18next";
 import SideNavBar from "../components/SideNavBar";
 import TopAppBar from "../components/TopAppBar";
@@ -17,6 +17,7 @@ export default function ProjectPage() {
   const { t, i18n } = useTranslation();
   useDocumentHead({ title: "Project — kioku", robots: "noindex,nofollow" });
   const route = useRoute();
+  const { route: navigate } = useLocation();
   const projectId = route.params.projectId;
 
   const {
@@ -183,9 +184,7 @@ export default function ProjectPage() {
                   <tr
                     key={folder.id}
                     class="hover:bg-overlay-faint group cursor-pointer"
-                    onClick={() => {
-                      window.location.href = `/folders/${folder.id}`;
-                    }}
+                    onClick={() => navigate(`/folders/${folder.id}`)}
                   >
                     <td class="px-3 py-3 tablet:px-6">
                       <div class="flex items-center gap-3 min-w-0">
@@ -243,9 +242,7 @@ export default function ProjectPage() {
                     <tr
                       key={file.id}
                       class="hover:bg-overlay-faint group cursor-pointer"
-                      onClick={() => {
-                        window.location.href = `/files/${file.id}`;
-                      }}
+                      onClick={() => navigate(`/files/${file.id}`)}
                     >
                       <td class="px-3 py-3 tablet:px-6">
                         <div class="flex items-center gap-3 min-w-0">

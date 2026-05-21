@@ -51,17 +51,19 @@ export function EditPodcastDialog({
     e.preventDefault();
     const trimmedName = name.trim();
     const trimmedDesc = description.trim();
+    const baselineName = initialName.trim();
+    const baselineDesc = initialDescription.trim();
     if (!trimmedName) {
       setError(t("renameItem.errors.nameRequired"));
       return;
     }
-    if (trimmedName === initialName && trimmedDesc === initialDescription.trim()) {
+    if (trimmedName === baselineName && trimmedDesc === baselineDesc) {
       onClose();
       return;
     }
     const body: UpdatePodcastBody = {};
-    if (trimmedName !== initialName) body.name = trimmedName;
-    if (trimmedDesc !== initialDescription.trim()) body.description = trimmedDesc;
+    if (trimmedName !== baselineName) body.name = trimmedName;
+    if (trimmedDesc !== baselineDesc) body.description = trimmedDesc;
 
     setSubmitting(true);
     setError(null);

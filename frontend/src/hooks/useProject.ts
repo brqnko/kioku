@@ -1,13 +1,13 @@
 import useSWR from "swr";
 import useSWRInfinite from "swr/infinite";
 import { kyInstance } from "../api/mutator";
+import { projectKey } from "../api/keys";
 import type {
   GetProject200,
   ListProjectChildren200,
 } from "../api/generated/backend.schemas";
 
 const PAGE_SIZE = 32;
-const projectKey = (id: string) => `projects/${id}`;
 
 type ChildCursor = NonNullable<ListProjectChildren200["next_cursor"]>;
 

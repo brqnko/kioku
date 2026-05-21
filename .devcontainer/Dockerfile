@@ -9,7 +9,7 @@ RUN apt-get update && \
     curl -fsSL https://deb.nodesource.com/setup_24.x | bash - && \
     apt-get install -y --no-install-recommends \
         sudo wget bash unzip jq build-essential nginx openssl \
-        git openssh-client pkg-config libssl-dev \
+        git openssh-client pkg-config libssl-dev ffmpeg \
         nodejs && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
@@ -28,6 +28,20 @@ RUN MOLD_VERSION=2.41.0 && \
 # configure cargo to use mold
 RUN mkdir -p /root/.cargo && \
     printf '[build]\nrustflags = ["-C", "link-arg=-fuse-ld=mold"]\n' > /root/.cargo/config.toml
+
+# install ONNX Runtime
+RUN ORT_VERSION=1.20.1 && \
+    ARCH=$(uname -m) && \
+    ORT_ARCH=$([ "$ARCH" = "aarch64" ] && echo "aarch64" || echo "x64") && \
+    curl -fsSL "https://github.com/microsoft/onnxruntime/releases/download/v${ORT_VERSION}/onnxruntime-linux-${ORT_ARCH}-${ORT_VERSION}.tgz" | \
+    tar -xz -C /opt/ && \
+    mv /opt/onnxruntime-linux-${ORT_ARCH}-${ORT_VERSION} /opt/onnxruntime
+
+ENV ORT_DYLIB_PATH=/opt/onnxruntime/lib/libonnxruntime.so
+ENV LD_LIBRARY_PATH=/opt/onnxruntime/lib
+
+# model cache directory
+RUN mkdir -p /opt/huggingface
 
 # install sqlx-cli
 RUN cargo install sqlx-cli --locked --no-default-features --features mysql,rustls

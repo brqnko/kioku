@@ -14,14 +14,7 @@ struct Config {
     s3_bucket: String,
     s3_temporary_bucket: String,
     redis_url: String,
-    gemini_api_key: String,
     github_token: String,
-    #[allow(dead_code)]
-    azure_openai_endpoint: String,
-    #[allow(dead_code)]
-    azure_openai_deployment: String,
-    #[allow(dead_code)]
-    azure_openai_api_key: String,
 }
 
 impl Config {
@@ -51,11 +44,7 @@ impl Config {
             s3_bucket: require("S3_BUCKET")?,
             s3_temporary_bucket: require("S3_TEMPORARY_BUCKET")?,
             redis_url: require("REDIS_URL")?,
-            gemini_api_key: require("GEMINI_API_KEY")?,
             github_token: require("GITHUB_TOKEN")?,
-            azure_openai_endpoint: require("AZURE_OPENAI_ENDPOINT")?,
-            azure_openai_deployment: require("AZURE_OPENAI_DEPLOYMENT")?,
-            azure_openai_api_key: require("AZURE_OPENAI_API_KEY")?,
         })
     }
 }
@@ -64,7 +53,7 @@ impl Config {
 async fn main() -> anyhow::Result<()> {
     use std::sync::Arc;
 
-    let otel_guard = backend::util::otel::init("kioku-backend")?;
+    let _otel_guard = backend::util::otel::init("kioku-backend")?;
 
     {
         use tracing_subscriber::layer::SubscriberExt as _;
@@ -149,7 +138,7 @@ async fn main() -> anyhow::Result<()> {
         Arc::new(backend::util::llm::CopilotImpl::new(config.github_token)?);
 
     let tts_client: Arc<dyn backend::util::tts::TTSClient> =
-        Arc::new(backend::util::tts::GeminiTtsImpl::new(config.gemini_api_key)?);
+        Arc::new(backend::util::tts::SupertonicTtsImpl::new()?);
 
     let pdf2md_service: Arc<dyn backend::util::pdf2md::Pdf2MdService> =
         Arc::new(backend::util::pdf2md::Pdf2MdServiceImpl::new());
@@ -190,9 +179,10 @@ async fn main() -> anyhow::Result<()> {
 
     tracing::info!("graceful shutdown complete");
 
-    otel_guard.shutdown();
-
-    Ok(())
+    // otel_guard.shutdown() の内部で reqwest-blocking が async コンテキストと
+    // 衝突するか、後続の Drop で ort/onnxruntime の静的状態と解放順が衝突して
+    // SIGSEGV になる。Rust デストラクタを走らせずに終了することで回避する。
+    std::process::exit(0);
 }
 
 async fn shutdown_signal() {
@@ -219,4 +209,10 @@ async fn shutdown_signal() {
     }
 
     tracing::info!("shutdown signal received");
+
+    tokio::spawn(async {
+        tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+        tracing::warn!("graceful shutdown timed out, forcing exit");
+        std::process::exit(0);
+    });
 }

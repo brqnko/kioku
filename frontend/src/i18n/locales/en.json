@@ -319,6 +319,7 @@
   },
   "projectChat": {
     "back": "Back",
+    "copy": "Copy",
     "newChat": "New Chat",
     "creating": "Creating...",
     "newChatName": "Chat {{date}}",
@@ -394,6 +395,26 @@
       },
       "settings": {
         "title": "Podcast details"
+      },
+      "voice": {
+        "title": "Voice",
+        "hint": "Listen to a sample before choosing.",
+        "play": "Play sample for {{name}}",
+        "stop": "Stop sample for {{name}}",
+        "female": "Female",
+        "male": "Male",
+        "styles": {
+          "F1": "F1 — Warm",
+          "F2": "F2 — Bright",
+          "F3": "F3 — Calm",
+          "F4": "F4 — Crisp",
+          "F5": "F5 — Soft",
+          "M1": "M1 — Steady",
+          "M2": "M2 — Rich",
+          "M3": "M3 — Clear",
+          "M4": "M4 — Mellow",
+          "M5": "M5 — Bold"
+        }
       },
       "fields": {
         "name": "Podcast name",
@@ -531,6 +552,33 @@
       "link": "Link",
       "image": "Image",
       "linkPrompt": "Enter URL"
+    }
+  },
+  "codeBlock": {
+    "selectCompiler": "Select compiler",
+    "selectCompilerHint": "Please select a compiler",
+    "running": "Running…",
+    "run": "▶ Run",
+    "stdin": "stdin",
+    "stdinPlaceholder": "stdin…",
+    "expand": "Expand",
+    "collapse": "Collapse",
+    "requestFailed": "request failed",
+    "exit": "exit",
+    "signal": "signal",
+    "outputs": {
+      "compileErrors": "compile errors",
+      "stdout": "stdout",
+      "stderr": "stderr"
+    },
+    "picker": {
+      "title": "Select compiler",
+      "search": "Search by language or compiler…",
+      "currentLanguage": "Current language tag:",
+      "loading": "Loading compilers…",
+      "empty": "No matching compilers",
+      "countLabel": "{{count}} items",
+      "hint": "↑↓ to move / Enter to select / Esc to close"
     }
   },
   "tos": {

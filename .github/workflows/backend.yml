@@ -23,7 +23,7 @@ jobs:
 
     services:
       mariadb:
-        image: mariadb:lts
+        image: mariadb:11.8.6
         env:
           MARIADB_ROOT_PASSWORD: root
           MARIADB_DATABASE: kioku_test
