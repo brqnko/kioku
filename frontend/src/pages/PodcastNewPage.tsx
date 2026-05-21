@@ -265,7 +265,7 @@ function FolderNode({ folder, selectedIds, onToggleFile }: FolderNodeProps) {
 }
 
 export default function PodcastNewPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   useDocumentHead({ title: "New podcast — kioku", robots: "noindex,nofollow" });
   const route = useRoute();
   const { route: navigate } = useLocation();
@@ -314,7 +314,9 @@ export default function PodcastNewPage() {
       setPlayingVoice(null);
       return;
     }
-    const audio = new Audio(`/voice-samples/${v}.wav`);
+    const lang = i18n.language.startsWith("ja") ? "ja" : "en";
+    const src = lang === "ja" ? `/voice-samples/${v}.wav` : `/voice-samples/${v}_en.wav`;
+    const audio = new Audio(src);
     audio.onended = () => setPlayingVoice(null);
     audio.onerror = () => setPlayingVoice(null);
     audio.play().catch(() => setPlayingVoice(null));
