@@ -63,6 +63,11 @@ jobs:
         with:
           version: v1.93.0
 
+      - name: Align database charset with devcontainer
+        run: |
+          mysql -h 127.0.0.1 -u root -proot -e \
+            "ALTER DATABASE kioku_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+
       - name: Run migrations
         env:
           DATABASE_URL: mysql://kioku:kioku@127.0.0.1:3306/kioku_test
