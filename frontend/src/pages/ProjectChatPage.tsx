@@ -56,6 +56,7 @@ function MessageBubble({
   locale: string;
   onCopy: (content: string) => void;
 }) {
+  const { t } = useTranslation();
   if (msg.thinking) {
     return (
       <div class="flex gap-3 max-w-3xl mx-auto w-full">
@@ -91,7 +92,7 @@ function MessageBubble({
             <button
               type="button"
               onClick={() => onCopy(msg.content)}
-              title="コピー"
+              title={t("projectChat.copy")}
               class="flex items-center justify-center w-7 h-7 rounded text-text-disabled hover:text-text-secondary hover:bg-overlay-faint cursor-pointer bg-transparent border-none"
             >
               <span class="material-symbols-outlined text-[15px]">
@@ -123,7 +124,7 @@ function MessageBubble({
           <button
             type="button"
             onClick={() => onCopy(msg.content)}
-            title="コピー"
+            title={t("projectChat.copy")}
             class="flex items-center justify-center w-7 h-7 rounded text-text-disabled hover:text-text-secondary hover:bg-overlay-faint cursor-pointer bg-transparent border-none"
           >
             <span class="material-symbols-outlined text-[15px]">
@@ -467,11 +468,11 @@ export default function ProjectChatPage() {
                 </button>
                 <a
                   href="/chat"
-                  class="hidden tablet:inline text-xs text-text-disabled hover:text-text-secondary no-underline whitespace-nowrap"
+                  class="hidden tablet:inline text-xs text-text-disabled hover:text-text-secondary no-underline whitespace-nowrap shrink-0"
                 >
                   {t("nav.chat")}
                 </a>
-                <span class="hidden tablet:inline text-text-disabled text-xs shrink-0">/</span>
+                <span class="hidden tablet:inline material-symbols-outlined text-text-disabled text-[14px] select-none shrink-0">chevron_right</span>
                 <a
                   href={`/projects/${projectId}`}
                   class="text-xs text-text-secondary hover:text-text-primary no-underline truncate min-w-0"
@@ -480,7 +481,7 @@ export default function ProjectChatPage() {
                 </a>
                 {activeChat && (
                   <>
-                    <span class="text-text-disabled text-xs shrink-0">/</span>
+                    <span class="material-symbols-outlined text-text-disabled text-[14px] select-none shrink-0">chevron_right</span>
                     <span class="text-xs text-text-primary font-medium truncate">
                       {activeChat.name}
                     </span>

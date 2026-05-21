@@ -108,6 +108,52 @@ export default function PodcastDetailPage() {
     setCurrentTime(audio.currentTime);
   };
 
+  const seekBy = (delta: number) => {
+    const audio = audioRef.current;
+    if (!audio || !Number.isFinite(audio.duration)) return;
+    audio.currentTime = Math.max(
+      0,
+      Math.min(audio.duration, audio.currentTime + delta),
+    );
+    setCurrentTime(audio.currentTime);
+  };
+
+  const seekTo = (ratio: number) => {
+    const audio = audioRef.current;
+    if (!audio || !Number.isFinite(audio.duration)) return;
+    audio.currentTime = Math.max(0, Math.min(1, ratio)) * audio.duration;
+    setCurrentTime(audio.currentTime);
+  };
+
+  const handleProgressKeyDown = (e: KeyboardEvent) => {
+    switch (e.key) {
+      case "ArrowLeft":
+        e.preventDefault();
+        seekBy(-5);
+        break;
+      case "ArrowRight":
+        e.preventDefault();
+        seekBy(5);
+        break;
+      case "Home":
+        e.preventDefault();
+        seekTo(0);
+        break;
+      case "End":
+        e.preventDefault();
+        seekTo(1);
+        break;
+      case "PageDown":
+        e.preventDefault();
+        seekBy(-30);
+        break;
+      case "PageUp":
+        e.preventDefault();
+        seekBy(30);
+        break;
+    }
+  };
+
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   const isGenerating =
@@ -123,36 +169,27 @@ export default function PodcastDetailPage() {
       <TopAppBar />
       <main class="ml-[var(--sidebar-width)] p-4 tablet:p-8 h-[calc(100vh-3.5rem)] overflow-y-auto transition-[margin-left] duration-200 ease-in-out">
         <div class="max-w-[800px] mx-auto flex flex-col gap-8">
-          <nav class="flex items-center gap-2 text-text-secondary text-sm font-medium flex-wrap">
+          <nav class="flex items-center gap-1.5 text-text-secondary text-sm font-medium flex-wrap">
             <a
-              href="/library"
+              href="/podcast"
               class="hover:text-text-primary no-underline text-inherit"
             >
-              {t("project.breadcrumb.library")}
+              {t("nav.podcast")}
             </a>
-            <span class="material-symbols-outlined text-[16px]">
-              chevron_right
-            </span>
-            <a
-              href={`/projects/${projectId}`}
-              class="hover:text-text-primary no-underline text-inherit"
-            >
-              {project?.name ?? "..."}
-            </a>
-            <span class="material-symbols-outlined text-[16px]">
+            <span class="material-symbols-outlined text-[16px] select-none">
               chevron_right
             </span>
             <a
               href={podcastsHref}
-              class="hover:text-text-primary no-underline text-inherit"
+              class="hover:text-text-primary no-underline text-inherit truncate max-w-[160px]"
             >
-              {t("podcast.list.crumb")}
+              {project?.name ?? "..."}
             </a>
-            <span class="material-symbols-outlined text-[16px]">
+            <span class="material-symbols-outlined text-[16px] select-none">
               chevron_right
             </span>
-            <span class="text-text-primary">
-              {t("podcast.detail.crumb")}
+            <span class="text-text-primary truncate max-w-[200px]">
+              {podcast?.name ?? t("podcast.detail.crumb")}
             </span>
           </nav>
 
@@ -234,7 +271,8 @@ export default function PodcastDetailPage() {
                     aria-valuenow={currentTime}
                     tabIndex={0}
                     onClick={seekFromEvent}
-                    class="h-2 w-full bg-surface-container-high rounded-full overflow-hidden relative cursor-pointer group"
+                    onKeyDown={handleProgressKeyDown}
+                    class="h-2 w-full bg-surface-container-high rounded-full overflow-hidden relative cursor-pointer group focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-blue/60"
                   >
                     <div
                       class="absolute left-0 top-0 h-full bg-text-primary group-hover:bg-accent-blue rounded-full"

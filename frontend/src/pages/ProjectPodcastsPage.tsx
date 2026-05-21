@@ -63,26 +63,19 @@ export default function ProjectPodcastsPage() {
       <TopAppBar />
       <main class="ml-[var(--sidebar-width)] p-4 tablet:p-8 h-[calc(100vh-3.5rem)] overflow-y-auto transition-[margin-left] duration-200 ease-in-out">
         <div class="max-w-[1200px] mx-auto">
-          <nav class="flex items-center gap-2 text-text-secondary text-sm font-medium flex-wrap mb-6">
+          <nav class="flex items-center gap-1.5 text-text-secondary text-sm font-medium flex-wrap mb-6">
             <a
-              href="/library"
+              href="/podcast"
               class="hover:text-text-primary no-underline text-inherit"
             >
-              {t("project.breadcrumb.library")}
+              {t("nav.podcast")}
             </a>
-            <span class="material-symbols-outlined text-[16px]">
+            <span class="material-symbols-outlined text-[16px] select-none">
               chevron_right
             </span>
-            <a
-              href={`/projects/${projectId}`}
-              class="hover:text-text-primary no-underline text-inherit"
-            >
+            <span class="text-text-primary">
               {project?.name ?? (projectError ? "—" : "...")}
-            </a>
-            <span class="material-symbols-outlined text-[16px]">
-              chevron_right
             </span>
-            <span class="text-text-primary">{t("podcast.list.crumb")}</span>
           </nav>
 
           <header class="flex items-end justify-between gap-6 flex-wrap mb-8 tablet:mb-12">

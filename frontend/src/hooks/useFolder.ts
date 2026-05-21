@@ -1,6 +1,7 @@
 import useSWR from "swr";
 import useSWRInfinite from "swr/infinite";
 import { kyInstance } from "../api/mutator";
+import { folderKey } from "../api/keys";
 import type {
   GetFileAncestors200,
   GetFolder200,
@@ -9,7 +10,6 @@ import type {
 } from "../api/generated/backend.schemas";
 
 const PAGE_SIZE = 32;
-const folderKey = (id: string) => `folders/${id}`;
 
 type FolderChildCursor = NonNullable<ListFolderChildren200["next_cursor"]>;
 

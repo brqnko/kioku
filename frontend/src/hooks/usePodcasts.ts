@@ -1,6 +1,7 @@
 import useSWR from "swr";
 import useSWRInfinite from "swr/infinite";
 import { kyInstance } from "../api/mutator";
+import { podcastKey } from "../api/keys";
 import type {
   GetPodcast200,
   ListPodcasts200,
@@ -11,9 +12,7 @@ export function usePodcast(
   podcastId: string | undefined,
 ) {
   return useSWR<GetPodcast200>(
-    projectId && podcastId
-      ? `projects/${projectId}/podcasts/${podcastId}`
-      : null,
+    projectId && podcastId ? podcastKey(projectId, podcastId) : null,
     () =>
       kyInstance
         .get(`projects/${projectId}/podcasts/${podcastId}`)

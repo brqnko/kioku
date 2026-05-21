@@ -1,5 +1,5 @@
-import { useState } from "preact/hooks";
-import { useRoute } from "preact-iso";
+import { useEffect, useRef, useState } from "preact/hooks";
+import { useLocation, useRoute } from "preact-iso";
 import { useTranslation } from "react-i18next";
 import SideNavBar from "../components/SideNavBar";
 import TopAppBar from "../components/TopAppBar";
@@ -20,6 +20,124 @@ type ChildItem =
   | ListFolderChildren200ItemsItem;
 type FolderItem = Extract<ChildItem, { kind: "folder" }>;
 type FileItem = Extract<ChildItem, { kind: "file" }>;
+
+type VoiceStyle =
+  | "F1"
+  | "F2"
+  | "F3"
+  | "F4"
+  | "F5"
+  | "M1"
+  | "M2"
+  | "M3"
+  | "M4"
+  | "M5";
+
+const FEMALE_VOICES: VoiceStyle[] = ["F1", "F2", "F3", "F4", "F5"];
+const MALE_VOICES: VoiceStyle[] = ["M1", "M2", "M3", "M4", "M5"];
+const DEFAULT_VOICE: VoiceStyle = "M2";
+const VOICE_STORAGE_KEY = "podcast.voiceStyle";
+const ALL_VOICES: VoiceStyle[] = [...FEMALE_VOICES, ...MALE_VOICES];
+
+const loadStoredVoice = (): VoiceStyle => {
+  try {
+    const saved = localStorage.getItem(VOICE_STORAGE_KEY);
+    if (saved && (ALL_VOICES as string[]).includes(saved)) {
+      return saved as VoiceStyle;
+    }
+  } catch {
+    // ignore (SSR / private mode)
+  }
+  return DEFAULT_VOICE;
+};
+
+interface VoicePickerProps {
+  value: VoiceStyle;
+  onChange: (v: VoiceStyle) => void;
+  playing: VoiceStyle | null;
+  onPreview: (v: VoiceStyle) => void;
+}
+
+function VoicePicker({ value, onChange, playing, onPreview }: VoicePickerProps) {
+  const { t } = useTranslation();
+
+  const renderGroup = (title: string, items: VoiceStyle[]) => (
+    <div class="flex flex-col gap-1.5">
+      <span class="text-[10px] font-bold uppercase tracking-widest text-text-secondary">
+        {title}
+      </span>
+      <div class="grid grid-cols-1 tablet:grid-cols-2 gap-1.5">
+        {items.map((v) => {
+          const selected = value === v;
+          const isPlaying = playing === v;
+          return (
+            <div
+              key={v}
+              class={`flex items-center gap-1 rounded-md border pl-2.5 pr-1 transition-colors ${
+                selected
+                  ? "border-accent-blue bg-overlay-faint"
+                  : "border-border-subtle hover:bg-overlay-faint"
+              }`}
+            >
+              <button
+                type="button"
+                onClick={() => onChange(v)}
+                aria-pressed={selected}
+                class="flex flex-1 min-w-0 items-center gap-2 bg-transparent border-none p-0 py-1.5 text-left cursor-pointer"
+              >
+                <span
+                  aria-hidden
+                  class={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border ${
+                    selected ? "border-accent-blue" : "border-overlay-medium"
+                  }`}
+                >
+                  {selected && (
+                    <span class="h-1.5 w-1.5 rounded-full bg-accent-blue" />
+                  )}
+                </span>
+                <span class="text-[13px] leading-tight text-text-primary truncate">
+                  {t(`podcast.create.voice.styles.${v}`)}
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => onPreview(v)}
+                aria-label={
+                  isPlaying
+                    ? t("podcast.create.voice.stop", { name: v })
+                    : t("podcast.create.voice.play", { name: v })
+                }
+                class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-transparent text-text-secondary hover:text-text-primary hover:bg-overlay-faint cursor-pointer"
+              >
+                <span
+                  class="material-symbols-outlined text-[16px]"
+                  style={{ fontVariationSettings: "'FILL' 1" }}
+                >
+                  {isPlaying ? "stop" : "play_arrow"}
+                </span>
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  return (
+    <div class="flex flex-col gap-3">
+      <div class="flex flex-col gap-1">
+        <label class="text-xs font-bold uppercase tracking-widest text-text-secondary">
+          {t("podcast.create.voice.title")}
+        </label>
+        <span class="text-[11px] text-text-disabled leading-snug">
+          {t("podcast.create.voice.hint")}
+        </span>
+      </div>
+      {renderGroup(t("podcast.create.voice.female"), FEMALE_VOICES)}
+      {renderGroup(t("podcast.create.voice.male"), MALE_VOICES)}
+    </div>
+  );
+}
 
 interface FileRowProps {
   file: FileItem;
@@ -150,6 +268,7 @@ export default function PodcastNewPage() {
   const { t } = useTranslation();
   useDocumentHead({ title: "New podcast — kioku", robots: "noindex,nofollow" });
   const route = useRoute();
+  const { route: navigate } = useLocation();
   const projectId = route.params.projectId;
 
   const { data: project, error: projectError } = useProject(projectId);
@@ -165,8 +284,43 @@ export default function PodcastNewPage() {
   const [selected, setSelected] = useState<Map<string, string>>(new Map());
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [voiceStyle, setVoiceStyle] = useState<VoiceStyle>(loadStoredVoice);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(VOICE_STORAGE_KEY, voiceStyle);
+    } catch {
+      // ignore (private mode / quota)
+    }
+  }, [voiceStyle]);
+  const [playingVoice, setPlayingVoice] = useState<VoiceStyle | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      audioRef.current?.pause();
+      audioRef.current = null;
+    };
+  }, []);
+
+  const previewVoice = (v: VoiceStyle) => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    if (playingVoice === v) {
+      setPlayingVoice(null);
+      return;
+    }
+    const audio = new Audio(`/voice-samples/${v}.wav`);
+    audio.onended = () => setPlayingVoice(null);
+    audio.onerror = () => setPlayingVoice(null);
+    audio.play().catch(() => setPlayingVoice(null));
+    audioRef.current = audio;
+    setPlayingVoice(v);
+  };
 
   const folders = items.filter((i): i is FolderItem => i.kind === "folder");
   const files = items.filter((i): i is FileItem => i.kind === "file");
@@ -198,11 +352,12 @@ export default function PodcastNewPage() {
         name: finalName,
         description: description.trim(),
         used_file_ids: Array.from(selected.keys()),
+        voice_style: voiceStyle,
       };
       await kyInstance
         .post(`projects/${projectId}/podcasts`, { json: body })
         .json<CreatePodcast200>();
-      window.location.href = `/projects/${projectId}/podcasts`;
+      navigate(`/projects/${projectId}/podcasts`);
     } catch {
       setSubmitError(t("podcast.create.errors.failed"));
       setSubmitting(false);
@@ -217,32 +372,23 @@ export default function PodcastNewPage() {
       <TopAppBar />
       <main class="ml-[var(--sidebar-width)] p-4 tablet:p-8 h-[calc(100vh-3.5rem)] overflow-hidden flex flex-col transition-[margin-left] duration-200 ease-in-out">
         <header class="mb-6 flex flex-col gap-2">
-          <nav class="flex items-center gap-2 text-text-secondary text-sm font-medium flex-wrap">
+          <nav class="flex items-center gap-1.5 text-text-secondary text-sm font-medium flex-wrap">
             <a
-              href="/library"
+              href="/podcast"
               class="hover:text-text-primary no-underline text-inherit"
             >
-              {t("project.breadcrumb.library")}
+              {t("nav.podcast")}
             </a>
-            <span class="material-symbols-outlined text-[16px]">
-              chevron_right
-            </span>
-            <a
-              href={`/projects/${projectId}`}
-              class="hover:text-text-primary no-underline text-inherit"
-            >
-              {project?.name ?? (projectError ? "—" : "...")}
-            </a>
-            <span class="material-symbols-outlined text-[16px]">
+            <span class="material-symbols-outlined text-[16px] select-none">
               chevron_right
             </span>
             <a
               href={`/projects/${projectId}/podcasts`}
-              class="hover:text-text-primary no-underline text-inherit"
+              class="hover:text-text-primary no-underline text-inherit truncate max-w-[160px]"
             >
-              {t("podcast.list.crumb")}
+              {project?.name ?? (projectError ? "—" : "...")}
             </a>
-            <span class="material-symbols-outlined text-[16px]">
+            <span class="material-symbols-outlined text-[16px] select-none">
               chevron_right
             </span>
             <span class="text-text-primary">
@@ -360,6 +506,13 @@ export default function PodcastNewPage() {
                   class="textarea-field"
                 />
               </div>
+
+              <VoicePicker
+                value={voiceStyle}
+                onChange={(v) => setVoiceStyle(v)}
+                playing={playingVoice}
+                onPreview={previewVoice}
+              />
             </div>
 
             <div class="mt-auto flex flex-col gap-3">

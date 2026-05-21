@@ -4,28 +4,8 @@ import TopAppBar from "../components/TopAppBar";
 import { CreateProjectTile } from "../components/CreateProjectTile";
 import { useLibrary } from "../hooks/useLibrary";
 import { useDocumentHead } from "../hooks/useDocumentHead";
+import { formatRelative } from "../utils/datetime";
 import type { ListProjects200ItemsItem } from "../api/generated/backend.schemas";
-
-const RELATIVE_THRESHOLDS: [Intl.RelativeTimeFormatUnit, number][] = [
-  ["year", 60 * 60 * 24 * 365],
-  ["month", 60 * 60 * 24 * 30],
-  ["day", 60 * 60 * 24],
-  ["hour", 60 * 60],
-  ["minute", 60],
-];
-
-function formatRelative(iso: string, locale: string) {
-  const then = new Date(iso).getTime();
-  if (Number.isNaN(then)) return "";
-  const diffSec = Math.round((then - Date.now()) / 1000);
-  const rtf = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
-  for (const [unit, sec] of RELATIVE_THRESHOLDS) {
-    if (Math.abs(diffSec) >= sec) {
-      return rtf.format(Math.round(diffSec / sec), unit);
-    }
-  }
-  return rtf.format(diffSec, "second");
-}
 
 export default function PodcastPage() {
   const { t, i18n } = useTranslation();

@@ -65,3 +65,5 @@ export function formatDate(iso: string, locale: string): string {
     day: "numeric",
   });
 }
+
+export { formatRelative } from "./datetime";

@@ -1,6 +1,25 @@
 pub const MAX_CONCURRENT_GENERATIONS: usize = 4;
 pub const MAX_PODCASTS_PER_PROJECT: usize = 50;
 
+pub const VOICE_STYLES: &[&str] = &[
+    "F1", "F2", "F3", "F4", "F5", "M1", "M2", "M3", "M4", "M5",
+];
+
+pub struct VoiceStyle(#[allow(dead_code)] pub String);
+
+impl VoiceStyle {
+    pub fn new(string: String) -> Result<Self, crate::domain::DomainError> {
+        if !VOICE_STYLES.contains(&string.as_str()) {
+            return Err(crate::domain::DomainError::new(
+                "invalid_voice_style",
+                format!("unknown voice style: {string}"),
+                crate::domain::DomainErrorKind::BadInput,
+            ));
+        }
+        Ok(Self(string))
+    }
+}
+
 pub struct PodcastName(pub String);
 
 impl PodcastName {

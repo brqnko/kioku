@@ -1,5 +1,6 @@
 import { useEffect, useState } from "preact/hooks";
 import { marked, Renderer, type Tokens } from "marked";
+import DOMPurify from "isomorphic-dompurify";
 import { highlightToHtml, normalizeLang } from "../utils/shiki";
 
 interface Props {
@@ -28,15 +29,17 @@ export function MarkdownView({ source, className }: Props) {
     const renderer = new Renderer();
     renderer.code = ({ text, lang }: Tokens.Code): string => {
       const normalized = normalizeLang(lang);
-      // Returning a Promise is supported by marked when async is true.
       return highlightToHtml(text, normalized).catch(
         () => `<pre><code>${escapeHtml(text)}</code></pre>`,
       ) as unknown as string;
     };
     marked
       .parse(source, { async: true, breaks: true, renderer })
-      .then((s) => {
-        if (!cancelled) setHtml(s);
+      .then((raw) => {
+        const safe = DOMPurify.sanitize(raw, {
+          ADD_ATTR: ["target", "rel"],
+        });
+        if (!cancelled) setHtml(safe);
       })
       .catch(() => {
         if (!cancelled) setHtml(escapeHtml(source));

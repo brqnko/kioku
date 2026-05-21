@@ -24,11 +24,7 @@ interface ItemProps {
 function NotificationItem({ notification, dismissLabel }: ItemProps) {
   const { icon, accent } = KIND_STYLES[notification.kind];
   return (
-    <div
-      role="status"
-      aria-live="polite"
-      class="flex items-start gap-3 bg-surface-dark border border-border-subtle rounded-[12px] px-4 py-3 shadow-[0_4px_12px_rgba(0,0,0,0.15)] animate-fade-in-up"
-    >
+    <div class="flex items-start gap-3 bg-surface-dark border border-border-subtle rounded-[12px] px-4 py-3 shadow-[0_4px_12px_rgba(0,0,0,0.15)] animate-fade-in-up">
       <Icon name={icon} class={`shrink-0 mt-0.5 ${accent}`} />
       <p class="flex-1 text-sm leading-6 text-text-primary">
         {notification.message}
@@ -52,8 +48,10 @@ export function NotificationBanner() {
 
   return (
     <div
-      class="fixed top-4 left-1/2 -translate-x-1/2 z-[200] flex flex-col gap-2 w-[calc(100%-32px)] max-w-[480px] pointer-events-none"
+      role="region"
+      aria-live="polite"
       aria-label={t("notification.region", { defaultValue: "Notifications" })}
+      class="fixed top-4 left-1/2 -translate-x-1/2 z-[200] flex flex-col gap-2 w-[calc(100%-32px)] max-w-[480px] pointer-events-none"
     >
       {notifications.map((n) => (
         <div key={n.id} class="pointer-events-auto">

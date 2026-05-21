@@ -4,6 +4,7 @@ import TopAppBar from "../components/TopAppBar";
 import { MarkdownView } from "../components/MarkdownView";
 import { useDashboard } from "../hooks/useDashboard";
 import { useDocumentHead } from "../hooks/useDocumentHead";
+import { formatRelative } from "../utils/datetime";
 import type { GetDashboard200RecentSeenFilesItem } from "../api/generated/backend.schemas";
 
 function fileIcon(name: string): { icon: string; tone: "danger" | "info" } {
@@ -16,27 +17,6 @@ const toneClass = {
   danger: "bg-danger/10 text-danger",
   info: "bg-accent-blue/10 text-accent-blue",
 } as const;
-
-const RELATIVE_THRESHOLDS: [Intl.RelativeTimeFormatUnit, number][] = [
-  ["year", 60 * 60 * 24 * 365],
-  ["month", 60 * 60 * 24 * 30],
-  ["day", 60 * 60 * 24],
-  ["hour", 60 * 60],
-  ["minute", 60],
-];
-
-function formatRelative(iso: string, locale: string) {
-  const then = new Date(iso).getTime();
-  if (Number.isNaN(then)) return "";
-  const diffSec = Math.round((then - Date.now()) / 1000);
-  const rtf = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
-  for (const [unit, sec] of RELATIVE_THRESHOLDS) {
-    if (Math.abs(diffSec) >= sec) {
-      return rtf.format(Math.round(diffSec / sec), unit);
-    }
-  }
-  return rtf.format(diffSec, "second");
-}
 
 export default function DashboardPage() {
   const { t, i18n } = useTranslation();

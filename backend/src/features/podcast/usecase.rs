@@ -6,6 +6,7 @@ pub struct CreatePodcastInput {
     pub name: String,
     pub description: String,
     pub used_file_ids: Vec<uuid::Uuid>,
+    pub voice_style: String,
 }
 
 pub struct CreatePodcastOutput {
@@ -20,6 +21,9 @@ pub async fn create_podcast(
         return Ok(Err(err));
     }
     if let Err(err) = super::domain::PodcastDescription::new(input.description.clone()) {
+        return Ok(Err(err));
+    }
+    if let Err(err) = super::domain::VoiceStyle::new(input.voice_style.clone()) {
         return Ok(Err(err));
     }
     if input.used_file_ids.is_empty() {
@@ -93,6 +97,7 @@ pub async fn create_podcast(
                 description: input.description,
                 used_file_ids: input.used_file_ids,
                 started_at: chrono::Utc::now(),
+                voice_style: input.voice_style,
             };
 
             app.podcast_request_service

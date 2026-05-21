@@ -7,6 +7,7 @@ pub struct PodcastRequest {
     pub description: String,
     pub used_file_ids: Vec<uuid::Uuid>,
     pub started_at: chrono::DateTime<chrono::Utc>,
+    pub voice_style: String,
 }
 
 #[async_trait::async_trait]

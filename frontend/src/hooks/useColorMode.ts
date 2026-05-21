@@ -1,8 +1,17 @@
-import { useState, useEffect } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 
 export type ColorMode = "light" | "dark" | "system";
 
 const STORAGE_KEY = "color-mode";
+
+function readInitial(): ColorMode {
+  if (typeof window === "undefined") return "system";
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if (stored === "light" || stored === "dark" || stored === "system") {
+    return stored;
+  }
+  return "system";
+}
 
 function getSystemTheme(): "light" | "dark" {
   return window.matchMedia("(prefers-color-scheme: dark)").matches
@@ -11,30 +20,44 @@ function getSystemTheme(): "light" | "dark" {
 }
 
 function applyTheme(mode: ColorMode) {
+  if (typeof document === "undefined") return;
   const resolved = mode === "system" ? getSystemTheme() : mode;
   document.documentElement.setAttribute("data-theme", resolved);
 }
 
-export function useColorMode() {
-  const [mode, setMode] = useState<ColorMode>(() => {
-    if (typeof window === "undefined") return "system";
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return (stored as ColorMode) || "system";
+let currentMode: ColorMode = readInitial();
+const subscribers = new Set<() => void>();
+
+if (typeof window !== "undefined") {
+  applyTheme(currentMode);
+  const mq = window.matchMedia("(prefers-color-scheme: dark)");
+  mq.addEventListener("change", () => {
+    if (currentMode === "system") applyTheme("system");
   });
+}
+
+function setModeInternal(next: ColorMode) {
+  currentMode = next;
+  if (typeof window !== "undefined") {
+    localStorage.setItem(STORAGE_KEY, next);
+    applyTheme(next);
+  }
+  for (const fn of subscribers) fn();
+}
+
+export function useColorMode() {
+  const [, setTick] = useState(0);
 
   useEffect(() => {
-    applyTheme(mode);
-    localStorage.setItem(STORAGE_KEY, mode);
-  }, [mode]);
+    const fn = () => setTick((t) => t + 1);
+    subscribers.add(fn);
+    return () => {
+      subscribers.delete(fn);
+    };
+  }, []);
 
-  useEffect(() => {
-    if (mode !== "system") return;
-
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const handler = () => applyTheme("system");
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, [mode]);
-
-  return { mode, setMode } as const;
+  return {
+    mode: currentMode,
+    setMode: setModeInternal,
+  } as const;
 }

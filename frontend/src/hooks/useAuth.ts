@@ -1,8 +1,7 @@
 import useSWR from "swr";
 import { kyInstance } from "../api/mutator";
+import { PROFILE_KEY } from "../api/keys";
 import type { GetUserProfile200 } from "../api/generated/backend.schemas";
-
-const PROFILE_KEY = "users/me";
 
 const fetcher = (path: string) =>
   kyInstance.get(path).json<GetUserProfile200>();

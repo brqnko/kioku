@@ -1,8 +1,7 @@
 import type { ScopedMutator } from "swr";
 import { unstable_serialize } from "swr/infinite";
 import { LIBRARY_CACHE_KEY } from "../hooks/useLibrary";
-
-const DASHBOARD_KEY = "users/me/dashboard";
+import { DASHBOARD_KEY } from "../api/keys";
 
 function makeInfiniteKey(
   marker: string,

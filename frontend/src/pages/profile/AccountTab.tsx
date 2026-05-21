@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import { useTranslation } from "react-i18next";
 import useSWR from "swr";
 import { kyInstance } from "../../api/mutator";
+import { PROFILE_KEY } from "../../api/keys";
 import { useColorMode, type ColorMode } from "../../hooks/useColorMode";
 import { languages, modeIcons, modeOrder } from "../../constants";
 import { Dialog } from "../../components/Dialog";
@@ -9,8 +10,6 @@ import type {
   GetUserProfile200,
   UpdateUserProfileBody,
 } from "../../api/generated/backend.schemas";
-
-const PROFILE_KEY = "users/me";
 
 const profileFetcher = (path: string) =>
   kyInstance.get(path).json<GetUserProfile200>();
@@ -65,7 +64,12 @@ export default function AccountTab() {
   useEffect(() => {
     if (data) {
       setDisplayName(data.display_name ?? "");
-      setLanguageCode(data.language_code ?? i18n.language);
+      const serverLang = data.language_code ?? i18n.language;
+      setLanguageCode(serverLang);
+      if (serverLang && serverLang !== i18n.language) {
+        void i18n.changeLanguage(serverLang);
+        localStorage.setItem("lang", serverLang);
+      }
     }
   }, [data]);
 

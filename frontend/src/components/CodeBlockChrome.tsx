@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { Compiler } from "../hooks/useCompilers";
 import type { RunCode200 } from "../api/generated/backend.schemas";
 import { CompilerPicker } from "./CompilerPicker";
@@ -33,6 +34,7 @@ export function CodeBlockToolbar({
   onOpenPicker,
   onClosePicker,
 }: ToolbarProps) {
+  const { t } = useTranslation();
   const runDisabled = !compiler || loading;
   const selected = compiler
     ? allCompilers.find((c) => c.name === compiler)
@@ -41,7 +43,7 @@ export function CodeBlockToolbar({
     ? `${selected.display_name || selected.name}${
         selected.version ? ` (${selected.version})` : ""
       }`
-    : "コンパイラを選択";
+    : t("codeBlock.selectCompiler");
   return (
     <div class="flex flex-col gap-2 mb-2">
       <div class="flex items-center gap-2 flex-wrap">
@@ -68,23 +70,23 @@ export function CodeBlockToolbar({
             checked={stdinOpen}
             onChange={onToggleStdin}
           />
-          stdin
+          {t("codeBlock.stdin")}
         </label>
         <button
           type="button"
           class="ml-auto text-xs px-3 py-1 rounded bg-accent-blue hover:brightness-110 text-white disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer border-none"
           disabled={runDisabled}
-          title={!compiler ? "コンパイラを選択してください" : ""}
+          title={!compiler ? t("codeBlock.selectCompilerHint") : ""}
           onClick={onRun}
         >
-          {loading ? "Running…" : "▶ Run"}
+          {loading ? t("codeBlock.running") : t("codeBlock.run")}
         </button>
       </div>
       {stdinOpen && (
         <textarea
           class="text-xs font-mono w-full p-2 rounded border border-border-subtle bg-surface-container-low text-text-primary"
           rows={3}
-          placeholder="stdin…"
+          placeholder={t("codeBlock.stdinPlaceholder")}
           value={stdin}
           maxLength={32 * 1024}
           onInput={(e) => onStdinChange((e.target as HTMLTextAreaElement).value)}
@@ -121,6 +123,7 @@ export function CodeBlockOutput({
   collapsed,
   onToggleCollapsed,
 }: OutputProps) {
+  const { t } = useTranslation();
   if (!result && !loading && !errorMessage) return null;
 
   const compileErr = result ? nonEmpty(result.compiler_error) : null;
@@ -134,9 +137,9 @@ export function CodeBlockOutput({
     <div class="mt-2 rounded border border-border-subtle bg-surface-container-low p-2 text-xs">
       <div class={`flex items-center gap-2 ${collapsed || !hasBody ? "" : "mb-1"}`}>
         {loading ? (
-          <span class="text-text-secondary">running…</span>
+          <span class="text-text-secondary">{t("codeBlock.running")}</span>
         ) : errorMessage ? (
-          <span class="text-danger">request failed</span>
+          <span class="text-danger">{t("codeBlock.requestFailed")}</span>
         ) : (
           <>
             <span
@@ -146,11 +149,11 @@ export function CodeBlockOutput({
                   : "bg-amber-600/20 text-amber-700 dark:text-amber-300"
               }`}
             >
-              exit {status || "?"}
+              {t("codeBlock.exit")} {status || "?"}
             </span>
             {signal && (
               <span class="px-2 py-0.5 rounded bg-red-600/20 text-red-700 dark:text-red-300">
-                signal {signal}
+                {t("codeBlock.signal")} {signal}
               </span>
             )}
           </>
@@ -161,7 +164,7 @@ export function CodeBlockOutput({
           onClick={onToggleCollapsed}
           disabled={!hasBody}
           aria-expanded={!collapsed}
-          title={collapsed ? "展開" : "折りたたむ"}
+          title={collapsed ? t("codeBlock.expand") : t("codeBlock.collapse")}
         >
           <span class="material-symbols-outlined text-[18px]">
             {collapsed ? "expand_more" : "expand_less"}
@@ -174,10 +177,22 @@ export function CodeBlockOutput({
             <pre class="whitespace-pre-wrap font-mono text-danger">{errorMessage}</pre>
           )}
           {compileErr && (
-            <Section label="compile errors" body={compileErr} tone="error" />
+            <Section
+              label={t("codeBlock.outputs.compileErrors")}
+              body={compileErr}
+              tone="error"
+            />
           )}
-          {stdout && <Section label="stdout" body={stdout} />}
-          {stderr && <Section label="stderr" body={stderr} tone="error" />}
+          {stdout && (
+            <Section label={t("codeBlock.outputs.stdout")} body={stdout} />
+          )}
+          {stderr && (
+            <Section
+              label={t("codeBlock.outputs.stderr")}
+              body={stderr}
+              tone="error"
+            />
+          )}
         </>
       )}
     </div>
