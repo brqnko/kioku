@@ -1,6 +1,7 @@
 export const PROFILE_KEY = "users/me";
 export const DASHBOARD_KEY = "users/me/dashboard";
 export const SESSIONS_KEY = "users/me/sessions?limit=32";
+export const RATE_LIMITS_KEY = "users/me/rate-limits";
 export const COMPILERS_KEY = "code/compilers";
 
 export const fileContentKey = (id: string) => `files/${id}/content`;

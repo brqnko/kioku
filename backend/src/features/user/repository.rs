@@ -285,7 +285,13 @@ impl UserRepository<sqlx::MySqlConnection> for UserRepositoryImpl {
                 sub,
                 recent_seen_file_ids as "recent_seen_file_ids: sqlx::types::Json<Vec<uuid::Uuid>>",
                 ai_learning_summary,
-                ai_learning_summary_updated_at
+                ai_learning_summary_updated_at,
+                podcast_daily_count,
+                podcast_daily_count_reset_at,
+                chatbot_daily_count,
+                chatbot_daily_count_reset_at,
+                file_upload_daily_count,
+                file_upload_daily_count_reset_at
             FROM user
             WHERE user_id = ?
             FOR UPDATE
@@ -306,6 +312,12 @@ impl UserRepository<sqlx::MySqlConnection> for UserRepositoryImpl {
                 recent_seen_file_ids: r.recent_seen_file_ids.0,
                 ai_learning_summary: r.ai_learning_summary,
                 ai_learning_summary_updated_at: r.ai_learning_summary_updated_at.and_utc(),
+                podcast_daily_count: r.podcast_daily_count,
+                podcast_daily_count_reset_at: r.podcast_daily_count_reset_at.and_utc(),
+                chatbot_daily_count: r.chatbot_daily_count,
+                chatbot_daily_count_reset_at: r.chatbot_daily_count_reset_at.and_utc(),
+                file_upload_daily_count: r.file_upload_daily_count,
+                file_upload_daily_count_reset_at: r.file_upload_daily_count_reset_at.and_utc(),
             })),
             None => Ok(None),
         }
@@ -329,7 +341,13 @@ impl UserRepository<sqlx::MySqlConnection> for UserRepositoryImpl {
                 sub,
                 recent_seen_file_ids as "recent_seen_file_ids: sqlx::types::Json<Vec<uuid::Uuid>>",
                 ai_learning_summary,
-                ai_learning_summary_updated_at
+                ai_learning_summary_updated_at,
+                podcast_daily_count,
+                podcast_daily_count_reset_at,
+                chatbot_daily_count,
+                chatbot_daily_count_reset_at,
+                file_upload_daily_count,
+                file_upload_daily_count_reset_at
             FROM user
             WHERE iss = ? AND sub = ?
             FOR UPDATE
@@ -351,6 +369,12 @@ impl UserRepository<sqlx::MySqlConnection> for UserRepositoryImpl {
                 recent_seen_file_ids: r.recent_seen_file_ids.0,
                 ai_learning_summary: r.ai_learning_summary,
                 ai_learning_summary_updated_at: r.ai_learning_summary_updated_at.and_utc(),
+                podcast_daily_count: r.podcast_daily_count,
+                podcast_daily_count_reset_at: r.podcast_daily_count_reset_at.and_utc(),
+                chatbot_daily_count: r.chatbot_daily_count,
+                chatbot_daily_count_reset_at: r.chatbot_daily_count_reset_at.and_utc(),
+                file_upload_daily_count: r.file_upload_daily_count,
+                file_upload_daily_count_reset_at: r.file_upload_daily_count_reset_at.and_utc(),
             }))),
             None => Ok(Ok(None)),
         }
@@ -365,14 +389,23 @@ impl UserRepository<sqlx::MySqlConnection> for UserRepositoryImpl {
             r#"
             INSERT INTO user
                 (user_id, display_name, language_code, joined_at, iss, sub,
-                 recent_seen_file_ids, ai_learning_summary, ai_learning_summary_updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 recent_seen_file_ids, ai_learning_summary, ai_learning_summary_updated_at,
+                 podcast_daily_count, podcast_daily_count_reset_at,
+                 chatbot_daily_count, chatbot_daily_count_reset_at,
+                 file_upload_daily_count, file_upload_daily_count_reset_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON DUPLICATE KEY UPDATE
-                display_name                   = VALUES(display_name),
-                language_code                  = VALUES(language_code),
-                recent_seen_file_ids           = VALUES(recent_seen_file_ids),
-                ai_learning_summary            = VALUES(ai_learning_summary),
-                ai_learning_summary_updated_at = VALUES(ai_learning_summary_updated_at)
+                display_name                     = VALUES(display_name),
+                language_code                    = VALUES(language_code),
+                recent_seen_file_ids             = VALUES(recent_seen_file_ids),
+                ai_learning_summary              = VALUES(ai_learning_summary),
+                ai_learning_summary_updated_at   = VALUES(ai_learning_summary_updated_at),
+                podcast_daily_count              = VALUES(podcast_daily_count),
+                podcast_daily_count_reset_at     = VALUES(podcast_daily_count_reset_at),
+                chatbot_daily_count              = VALUES(chatbot_daily_count),
+                chatbot_daily_count_reset_at     = VALUES(chatbot_daily_count_reset_at),
+                file_upload_daily_count          = VALUES(file_upload_daily_count),
+                file_upload_daily_count_reset_at = VALUES(file_upload_daily_count_reset_at)
             "#,
             user.id.as_bytes().as_slice(),
             user.display_name.0,
@@ -383,6 +416,12 @@ impl UserRepository<sqlx::MySqlConnection> for UserRepositoryImpl {
             sqlx::types::Json(&user.recent_seen_file_ids) as _,
             user.ai_learning_summary,
             user.ai_learning_summary_updated_at,
+            user.podcast_daily_count,
+            user.podcast_daily_count_reset_at,
+            user.chatbot_daily_count,
+            user.chatbot_daily_count_reset_at,
+            user.file_upload_daily_count,
+            user.file_upload_daily_count_reset_at,
         )
         .execute(c)
         .await?;

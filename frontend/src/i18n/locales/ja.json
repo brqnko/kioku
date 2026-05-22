@@ -51,7 +51,8 @@
   "profile": {
     "tabs": {
       "account": "アカウント",
-      "security": "セキュリティ"
+      "security": "セキュリティ",
+      "usage": "利用状況"
     },
     "loading": "読み込み中...",
     "save": "変更を保存",
@@ -110,6 +111,20 @@
       "revokeAllConfirm": {
         "title": "他のすべてのデバイスからログアウト",
         "body": "現在のセッションを除き、すべてのデバイスからログアウトされます。再度利用するには再ログインが必要です。"
+      }
+    },
+    "usage": {
+      "title": "1日の利用状況",
+      "subtitle": "1日あたりのクォータの利用状況です。カウンターは毎日 UTC 00:00 にリセットされます。",
+      "error": "利用状況の取得に失敗しました。",
+      "exhausted": "上限に達しました",
+      "remaining_one": "残り {{count}} 回",
+      "remaining_other": "残り {{count}} 回",
+      "resetAt": "リセット: {{time}}",
+      "items": {
+        "podcast": "ポッドキャスト生成",
+        "chatbot": "チャットボット",
+        "fileUpload": "ファイルアップロード"
       }
     }
   },
@@ -414,6 +429,15 @@
           "M3": "M3 — クリア",
           "M4": "M4 — まろやか",
           "M5": "M5 — 力強い"
+        }
+      },
+      "length": {
+        "title": "長さ",
+        "hint": "ナレーションの詳細度を選択します。",
+        "options": {
+          "short": { "label": "短い", "desc": "簡潔に" },
+          "normal": { "label": "普通", "desc": "標準" },
+          "long": { "label": "長い", "desc": "詳しく" }
         }
       },
       "fields": {

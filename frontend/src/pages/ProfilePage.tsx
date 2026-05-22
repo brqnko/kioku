@@ -4,9 +4,10 @@ import SideNavBar from "../components/SideNavBar";
 import TopAppBar from "../components/TopAppBar";
 import AccountTab from "./profile/AccountTab";
 import SecurityTab from "./profile/SecurityTab";
+import UsageTab from "./profile/UsageTab";
 import { useDocumentHead } from "../hooks/useDocumentHead";
 
-type Tab = "account" | "security";
+type Tab = "account" | "security" | "usage";
 
 export default function ProfilePage() {
   const { t } = useTranslation();
@@ -30,10 +31,16 @@ export default function ProfilePage() {
               onClick={() => setTab("security")}
               label={t("profile.tabs.security")}
             />
+            <TabButton
+              active={tab === "usage"}
+              onClick={() => setTab("usage")}
+              label={t("profile.tabs.usage")}
+            />
           </nav>
 
           {tab === "account" && <AccountTab />}
           {tab === "security" && <SecurityTab />}
+          {tab === "usage" && <UsageTab />}
         </div>
       </main>
     </div>

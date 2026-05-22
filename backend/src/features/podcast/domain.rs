@@ -1,4 +1,3 @@
-pub const MAX_CONCURRENT_GENERATIONS: usize = 4;
 pub const MAX_PODCASTS_PER_PROJECT: usize = 50;
 
 pub const VOICE_STYLES: &[&str] = &[
@@ -34,6 +33,36 @@ impl PodcastName {
         }
 
         Ok(Self(string))
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PodcastLength {
+    Short,
+    Normal,
+    Long,
+}
+
+impl PodcastLength {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Short => "short",
+            Self::Normal => "normal",
+            Self::Long => "long",
+        }
+    }
+
+    pub fn new(string: &str) -> Result<Self, crate::domain::DomainError> {
+        match string {
+            "short" => Ok(Self::Short),
+            "normal" => Ok(Self::Normal),
+            "long" => Ok(Self::Long),
+            _ => Err(crate::domain::DomainError::new(
+                "invalid_podcast_length",
+                format!("unknown podcast length: {string}"),
+                crate::domain::DomainErrorKind::BadInput,
+            )),
+        }
     }
 }
 

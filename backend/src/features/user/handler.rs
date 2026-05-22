@@ -596,6 +596,68 @@ pub async fn get_dashboard(
     }))
 }
 
+// get rate limits
+
+#[derive(serde::Serialize, utoipa::ToSchema)]
+pub struct RateLimitItem {
+    used: u32,
+    limit: u32,
+    reset_at: chrono::DateTime<chrono::Utc>,
+}
+
+#[derive(serde::Serialize, utoipa::ToSchema)]
+pub struct RateLimitsResponse {
+    #[schema(inline)]
+    podcast: RateLimitItem,
+    #[schema(inline)]
+    chatbot: RateLimitItem,
+    #[schema(inline)]
+    file_upload: RateLimitItem,
+}
+
+#[utoipa::path(
+    get,
+    path = "/users/me/rate-limits",
+    security(("cookieAuth" = [], "csrfToken" = [])),
+    responses(
+        (status = 200, body = inline(RateLimitsResponse)),
+        (status = 400, body = crate::server::schema::ErrorBody),
+        (status = 401, body = crate::server::schema::ErrorBody),
+        (status = 403, body = crate::server::schema::ErrorBody),
+        (status = 404, body = crate::server::schema::ErrorBody),
+        (status = 500, body = crate::server::schema::ErrorBody),
+    )
+)]
+pub async fn get_rate_limits(
+    axum::extract::Extension(user_id): axum::extract::Extension<uuid::Uuid>,
+    axum::extract::State(app): axum::extract::State<std::sync::Arc<crate::app::App>>,
+) -> crate::server::HandlerResult<axum::Json<RateLimitsResponse>> {
+    let input = super::usecase::GetRateLimitsInput { user_id };
+    let output = super::usecase::get_rate_limits(&app, input).await;
+
+    crate::server::schema::HandlerResult(output.map(|r| {
+        r.map(|o| {
+            axum::Json(RateLimitsResponse {
+                podcast: RateLimitItem {
+                    used: o.podcast.used,
+                    limit: o.podcast.limit,
+                    reset_at: o.podcast.reset_at,
+                },
+                chatbot: RateLimitItem {
+                    used: o.chatbot.used,
+                    limit: o.chatbot.limit,
+                    reset_at: o.chatbot.reset_at,
+                },
+                file_upload: RateLimitItem {
+                    used: o.file_upload.used,
+                    limit: o.file_upload.limit,
+                    reset_at: o.file_upload.reset_at,
+                },
+            })
+        })
+    }))
+}
+
 pub fn public_router() -> utoipa_axum::router::OpenApiRouter<std::sync::Arc<crate::app::App>> {
     use utoipa_axum::routes;
 
@@ -614,4 +676,5 @@ pub fn protected_router() -> utoipa_axum::router::OpenApiRouter<std::sync::Arc<c
         .routes(routes!(list_sessions, revoke_all_sessions))
         .routes(routes!(revoke_session))
         .routes(routes!(get_dashboard))
+        .routes(routes!(get_rate_limits))
 }

@@ -194,6 +194,25 @@ pub async fn send_message(
 ) -> Result<Result<SendMessageOutput, crate::domain::DomainError>, anyhow::Error> {
     let mut tx = app.pool.begin().await?;
 
+    let mut user = match app
+        .user_repository
+        .find_for_update(&mut tx, input.user_id)
+        .await?
+    {
+        Some(ok) => ok,
+        None => {
+            return Ok(Err(crate::domain::DomainError::new(
+                "user_not_found",
+                "user not found".to_string(),
+                crate::domain::DomainErrorKind::NotFound,
+            )));
+        }
+    };
+
+    if let Err(err) = user.check_chatbot_daily_quota()? {
+        return Ok(Err(err));
+    }
+
     let mut chat = match app
         .chat_repository
         .find_for_update(&mut tx, input.chat_id)
@@ -251,6 +270,13 @@ pub async fn send_message(
         Ok(()) => {}
         Err(err) => return Ok(Err(err)),
     }
+
+    user.consume_chatbot_daily_quota();
+    match app.user_repository.save(&mut tx, &user).await? {
+        Ok(()) => {}
+        Err(err) => return Ok(Err(err)),
+    }
+
     tx.commit().await?;
 
     let len = chat.messages.len();

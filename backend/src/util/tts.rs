@@ -103,7 +103,7 @@ impl SupertonicTtsImpl {
             config: Arc::new(config),
             proc: Arc::new(proc),
             voices: Arc::new(voices),
-            denoising_steps: 8,
+            denoising_steps: 12,
             speed: 1.0,
         })
     }

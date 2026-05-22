@@ -39,6 +39,23 @@ const DEFAULT_VOICE: VoiceStyle = "M2";
 const VOICE_STORAGE_KEY = "podcast.voiceStyle";
 const ALL_VOICES: VoiceStyle[] = [...FEMALE_VOICES, ...MALE_VOICES];
 
+type PodcastLength = "short" | "normal" | "long";
+const LENGTHS: PodcastLength[] = ["short", "normal", "long"];
+const DEFAULT_LENGTH: PodcastLength = "normal";
+const LENGTH_STORAGE_KEY = "podcast.length";
+
+const loadStoredLength = (): PodcastLength => {
+  try {
+    const saved = localStorage.getItem(LENGTH_STORAGE_KEY);
+    if (saved && (LENGTHS as string[]).includes(saved)) {
+      return saved as PodcastLength;
+    }
+  } catch {
+    // ignore (SSR / private mode)
+  }
+  return DEFAULT_LENGTH;
+};
+
 const loadStoredVoice = (): VoiceStyle => {
   try {
     const saved = localStorage.getItem(VOICE_STORAGE_KEY);
@@ -135,6 +152,60 @@ function VoicePicker({ value, onChange, playing, onPreview }: VoicePickerProps) 
       </div>
       {renderGroup(t("podcast.create.voice.female"), FEMALE_VOICES)}
       {renderGroup(t("podcast.create.voice.male"), MALE_VOICES)}
+    </div>
+  );
+}
+
+interface LengthPickerProps {
+  value: PodcastLength;
+  onChange: (v: PodcastLength) => void;
+}
+
+function LengthPicker({ value, onChange }: LengthPickerProps) {
+  const { t } = useTranslation();
+  return (
+    <div class="flex flex-col gap-3">
+      <div class="flex flex-col gap-1">
+        <label class="text-xs font-bold uppercase tracking-widest text-text-secondary">
+          {t("podcast.create.length.title")}
+        </label>
+        <span class="text-[11px] text-text-disabled leading-snug">
+          {t("podcast.create.length.hint")}
+        </span>
+      </div>
+      <div
+        role="radiogroup"
+        class="grid grid-cols-3 gap-1.5"
+      >
+        {LENGTHS.map((v) => {
+          const selected = value === v;
+          return (
+            <button
+              key={v}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              onClick={() => onChange(v)}
+              class={`flex flex-col items-center justify-center gap-0.5 rounded-md border px-2 py-2 text-center transition-colors cursor-pointer bg-transparent ${
+                selected
+                  ? "border-accent-blue bg-overlay-faint"
+                  : "border-border-subtle hover:bg-overlay-faint"
+              }`}
+            >
+              <span
+                class={`text-[13px] leading-tight font-medium ${
+                  selected ? "text-text-primary" : "text-text-secondary"
+                }`}
+              >
+                {t(`podcast.create.length.options.${v}.label`)}
+              </span>
+              <span class="text-[10px] leading-tight text-text-disabled">
+                {t(`podcast.create.length.options.${v}.desc`)}
+              </span>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -285,6 +356,7 @@ export default function PodcastNewPage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [voiceStyle, setVoiceStyle] = useState<VoiceStyle>(loadStoredVoice);
+  const [length, setLength] = useState<PodcastLength>(loadStoredLength);
 
   useEffect(() => {
     try {
@@ -293,6 +365,14 @@ export default function PodcastNewPage() {
       // ignore (private mode / quota)
     }
   }, [voiceStyle]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(LENGTH_STORAGE_KEY, length);
+    } catch {
+      // ignore (private mode / quota)
+    }
+  }, [length]);
   const [playingVoice, setPlayingVoice] = useState<VoiceStyle | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -355,6 +435,7 @@ export default function PodcastNewPage() {
         description: description.trim(),
         used_file_ids: Array.from(selected.keys()),
         voice_style: voiceStyle,
+        length,
       };
       await kyInstance
         .post(`projects/${projectId}/podcasts`, { json: body })
@@ -515,6 +596,8 @@ export default function PodcastNewPage() {
                 playing={playingVoice}
                 onPreview={previewVoice}
               />
+
+              <LengthPicker value={length} onChange={(v) => setLength(v)} />
             </div>
 
             <div class="mt-auto flex flex-col gap-3">

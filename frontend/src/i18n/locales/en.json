@@ -51,7 +51,8 @@
   "profile": {
     "tabs": {
       "account": "Account",
-      "security": "Security"
+      "security": "Security",
+      "usage": "Usage"
     },
     "loading": "Loading...",
     "save": "Save changes",
@@ -110,6 +111,20 @@
       "revokeAllConfirm": {
         "title": "Log out of all other devices",
         "body": "All sessions other than the current one will be terminated. You will need to sign in again on those devices."
+      }
+    },
+    "usage": {
+      "title": "Daily usage",
+      "subtitle": "Your current consumption of daily quotas. Counters reset at 00:00 UTC.",
+      "error": "Failed to load usage.",
+      "exhausted": "Limit reached",
+      "remaining_one": "{{count}} remaining",
+      "remaining_other": "{{count}} remaining",
+      "resetAt": "Resets {{time}}",
+      "items": {
+        "podcast": "Podcast generation",
+        "chatbot": "Chatbot messages",
+        "fileUpload": "File uploads"
       }
     }
   },
@@ -414,6 +429,15 @@
           "M3": "M3 — Clear",
           "M4": "M4 — Mellow",
           "M5": "M5 — Bold"
+        }
+      },
+      "length": {
+        "title": "Length",
+        "hint": "Choose how detailed the narration should be.",
+        "options": {
+          "short": { "label": "Short", "desc": "Concise" },
+          "normal": { "label": "Normal", "desc": "Balanced" },
+          "long": { "label": "Long", "desc": "Detailed" }
         }
       },
       "fields": {

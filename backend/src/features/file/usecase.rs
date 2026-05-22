@@ -19,8 +19,6 @@ pub async fn request_upload_url(
     app: &crate::app::App,
     input: RequestUploadUrlInput,
 ) -> Result<Result<RequestUploadUrlOutput, crate::domain::DomainError>, anyhow::Error> {
-    let _ = input.user_id;
-
     let content_type = match super::domain::ContentType::from_mime(&input.content_type) {
         Ok(ok) => ok,
         Err(err) => return Ok(Err(err)),
@@ -29,6 +27,27 @@ pub async fn request_upload_url(
         Ok(ok) => ok,
         Err(err) => return Ok(Err(err)),
     };
+
+    let mut tx = app.pool.begin().await?;
+
+    let mut user = match app
+        .user_repository
+        .find_for_update(&mut tx, input.user_id)
+        .await?
+    {
+        Some(u) => u,
+        None => {
+            return Ok(Err(crate::domain::DomainError::new(
+                "user_not_found",
+                "user not found".to_string(),
+                crate::domain::DomainErrorKind::NotFound,
+            )));
+        }
+    };
+
+    if let Err(err) = user.check_file_upload_daily_quota()? {
+        return Ok(Err(err));
+    }
 
     let storage_id = uuid::Uuid::new_v4();
     let expires_in = std::time::Duration::from_secs(60);
@@ -42,6 +61,14 @@ pub async fn request_upload_url(
             expires_in,
         )
         .await?;
+
+    user.consume_file_upload_daily_quota();
+    match app.user_repository.save(&mut tx, &user).await? {
+        Ok(()) => {}
+        Err(err) => return Ok(Err(err)),
+    }
+
+    tx.commit().await?;
 
     Ok(Ok(RequestUploadUrlOutput {
         storage_id,

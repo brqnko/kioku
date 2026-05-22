@@ -725,6 +725,8 @@ export type ListPodcasts200 = {
 export type CreatePodcastBody = {
   /** @maxLength 1024 */
   description: string;
+  /** One of: short, normal, long */
+  length: string;
   /** @maxLength 256 */
   name: string;
   used_file_ids: string[];
@@ -824,6 +826,36 @@ export type GetDashboard200 = {
   ai_learning_summary: string;
   ai_learning_summary_updated_at: string;
   recent_seen_files: GetDashboard200RecentSeenFilesItem[];
+};
+
+export type GetRateLimits200Chatbot = {
+  /** @minimum 0 */
+  limit: number;
+  reset_at: string;
+  /** @minimum 0 */
+  used: number;
+};
+
+export type GetRateLimits200FileUpload = {
+  /** @minimum 0 */
+  limit: number;
+  reset_at: string;
+  /** @minimum 0 */
+  used: number;
+};
+
+export type GetRateLimits200Podcast = {
+  /** @minimum 0 */
+  limit: number;
+  reset_at: string;
+  /** @minimum 0 */
+  used: number;
+};
+
+export type GetRateLimits200 = {
+  chatbot: GetRateLimits200Chatbot;
+  file_upload: GetRateLimits200FileUpload;
+  podcast: GetRateLimits200Podcast;
 };
 
 export type ListSessionsParams = {

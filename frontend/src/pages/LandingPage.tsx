@@ -334,20 +334,16 @@ export default function LandingPage() {
                   <PodcastMock t={t} />
                 );
               const mockBlock = (
-                <div class={`relative max-w-2xl ${key === "library" ? "mr-auto" : "mx-auto"}`}>
+                <div class={`relative w-full max-w-2xl ${key === "library" ? "mr-auto" : "mx-auto"}`}>
                   <div
                     aria-hidden="true"
-                    class="pointer-events-none absolute inset-0 flex items-center justify-center"
+                    class="pointer-events-none absolute inset-0 flex items-center justify-center -z-10"
                   >
                     <div
-                      class={`w-[750px] h-[450px] rounded-[100%] blur-3xl ${blurClass}`}
+                      class={`w-[120%] max-w-[750px] aspect-[5/3] rounded-[100%] blur-3xl ${blurClass}`}
                     />
                   </div>
-                  <div class="relative w-full overflow-x-clip">
-                    <div class="w-[178%] [zoom:0.56] tablet:w-[133%] tablet:[zoom:0.75] md:w-[111%] md:[zoom:0.9]">
-                      {mockNode}
-                    </div>
-                  </div>
+                  <div class="relative w-full">{mockNode}</div>
                 </div>
               );
 

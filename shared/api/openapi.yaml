@@ -2681,11 +2681,14 @@ paths:
           application/json:
             schema:
               type: object
-              required: [name, description, used_file_ids, voice_style]
+              required: [name, description, used_file_ids, voice_style, length]
               properties:
                 description:
                   type: string
                   maxLength: 1024
+                length:
+                  type: string
+                  description: 'One of: short, normal, long'
                 name:
                   type: string
                   maxLength: 256
@@ -3196,6 +3199,97 @@ paths:
                           minimum: 0
                         user_id:
                           type: string
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '401':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '403':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+      security:
+      - cookieAuth: []
+        csrfToken: []
+  /users/me/rate-limits:
+    get:
+      tags: []
+      operationId: get_rate_limits
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [podcast, chatbot, file_upload]
+                properties:
+                  chatbot:
+                    type: object
+                    required: [used, limit, reset_at]
+                    properties:
+                      limit:
+                        type: integer
+                        format: int32
+                        minimum: 0
+                      reset_at:
+                        type: string
+                        format: date-time
+                      used:
+                        type: integer
+                        format: int32
+                        minimum: 0
+                  file_upload:
+                    type: object
+                    required: [used, limit, reset_at]
+                    properties:
+                      limit:
+                        type: integer
+                        format: int32
+                        minimum: 0
+                      reset_at:
+                        type: string
+                        format: date-time
+                      used:
+                        type: integer
+                        format: int32
+                        minimum: 0
+                  podcast:
+                    type: object
+                    required: [used, limit, reset_at]
+                    properties:
+                      limit:
+                        type: integer
+                        format: int32
+                        minimum: 0
+                      reset_at:
+                        type: string
+                        format: date-time
+                      used:
+                        type: integer
+                        format: int32
+                        minimum: 0
         '400':
           description: ''
           content:

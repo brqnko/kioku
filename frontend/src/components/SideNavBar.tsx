@@ -3,10 +3,9 @@ import { useTranslation } from "react-i18next";
 import { useLocation } from "preact-iso";
 import { CreateProjectDialog } from "./CreateProjectDialog";
 import { REPORT_FORM_URL } from "../constants";
-import { useLibrary } from "../hooks/useLibrary";
-import { useProjectChildren } from "../hooks/useProject";
+import { useDashboard } from "../hooks/useDashboard";
 import { useSidebar } from "../hooks/useSidebar";
-import { folderTone } from "../utils/file";
+import { fileMeta } from "../utils/file";
 
 interface NavItem {
   href: string;
@@ -26,11 +25,8 @@ export default function SideNavBar() {
   const { path } = useLocation();
   const { isMobile, isOpen, close } = useSidebar();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const { items: projects } = useLibrary();
-  const projectMatch = path.match(/^\/projects\/([^/]+)/);
-  const currentProjectId = projectMatch ? projectMatch[1] : undefined;
-  const { items: projectChildren } = useProjectChildren(currentProjectId);
-  const folders = projectChildren.filter((c) => c.kind === "folder");
+  const { data: dashboard } = useDashboard();
+  const recentFiles = (dashboard?.recent_seen_files ?? []).slice(0, 10);
 
   const navItemClass = (active: boolean) =>
     `flex items-center gap-3 px-3 py-2.5 tablet:py-2 rounded-lg no-underline cursor-pointer ${
@@ -99,53 +95,33 @@ export default function SideNavBar() {
             })}
           </div>
 
-          {projects.length > 0 && (
+          {recentFiles.length > 0 && (
             <div class="flex flex-col gap-0.5 p-2 pt-1">
               <p class="text-[11px] text-text-disabled px-3 py-1.5 uppercase tracking-widest font-medium">
-                {t("nav.projects")}
+                {t("nav.recentFiles")}
               </p>
-              {projects.slice(0, 10).map((project) => {
-                const isActive = path.startsWith(`/projects/${project.id}`);
+              {recentFiles.map((file) => {
+                const isActive = path === `/files/${file.id}`;
+                const { icon, tone } = fileMeta(file.name);
                 return (
-                  <div key={project.id}>
-                    <a
-                      href={`/projects/${project.id}`}
-                      class={`flex items-center gap-2.5 px-3 py-1.5 rounded-lg no-underline cursor-pointer ${
-                        isActive
-                          ? "text-text-primary bg-overlay-soft"
-                          : "text-text-secondary hover:text-text-primary hover:bg-overlay-faint"
-                      }`}
-                      onClick={handleLinkClick}
+                  <a
+                    key={file.id}
+                    href={`/files/${file.id}`}
+                    class={`flex items-center gap-2.5 px-3 py-1.5 rounded-lg no-underline cursor-pointer ${
+                      isActive
+                        ? "text-text-primary bg-overlay-soft"
+                        : "text-text-secondary hover:text-text-primary hover:bg-overlay-faint"
+                    }`}
+                    onClick={handleLinkClick}
+                    title={file.name}
+                  >
+                    <span
+                      class={`material-symbols-outlined text-[16px] shrink-0 ${tone}`}
                     >
-                      <span
-                        class="material-symbols-outlined text-[16px] shrink-0"
-                        style={isActive ? { fontVariationSettings: "'FILL' 1" } : undefined}
-                      >
-                        folder_open
-                      </span>
-                      <span class="truncate text-sm">{project.name}</span>
-                    </a>
-                    {isActive && folders.map((folder) => (
-                      <a
-                        key={folder.id}
-                        href={`/folders/${folder.id}`}
-                        class={`flex items-center gap-2.5 pl-7 pr-3 py-1.5 rounded-lg no-underline cursor-pointer ${
-                          path.startsWith(`/folders/${folder.id}`)
-                            ? "text-text-primary bg-overlay-soft"
-                            : "text-text-secondary hover:text-text-primary hover:bg-overlay-faint"
-                        }`}
-                        onClick={handleLinkClick}
-                      >
-                        <span
-                          class={`material-symbols-outlined text-[14px] shrink-0 ${folderTone(folder.id)}`}
-                          style={{ fontVariationSettings: "'FILL' 1" }}
-                        >
-                          folder
-                        </span>
-                        <span class="truncate text-sm">{folder.name}</span>
-                      </a>
-                    ))}
-                  </div>
+                      {icon}
+                    </span>
+                    <span class="truncate text-sm">{file.name}</span>
+                  </a>
                 );
               })}
             </div>

@@ -79,11 +79,14 @@ pub async fn generate_podcast(
 
     let is_japanese = user_lang.starts_with("ja");
 
+    let length = crate::features::podcast::domain::PodcastLength::new(&request.length)
+        .unwrap_or(crate::features::podcast::domain::PodcastLength::Normal);
     let (system, user_msg) = build_script_prompt(
         &podcast_intermediate.name.0,
         &podcast_intermediate.description.0,
         &user_lang,
         &source,
+        length,
     );
 
     let script_raw = app
@@ -280,23 +283,38 @@ pub fn build_script_prompt(
     description: &str,
     lang: &str,
     source: &str,
+    length: crate::features::podcast::domain::PodcastLength,
 ) -> (String, String) {
+    use crate::features::podcast::domain::PodcastLength;
+
     let system = if lang.starts_with("ja") {
+        let length_directive = match length {
+            PodcastLength::Short => "簡潔に書くこと。",
+            PodcastLength::Normal => "",
+            PodcastLength::Long => "現在ある内容を端折らず、必要な分だけ長さを惜しまずに書くこと。",
+        };
         format!(
             "あなたはポッドキャストのナレーターです。\
             「{name}」（{description}）の完全なナレーションスクリプトを書いてください。\
             一人のナレーターによるモノローグ形式で段落ごとに書き、段落間は空行で区切ること。\
             自然な話し言葉で書き、タグや記号は含めないこと。すべて日本語で書くこと。\
-            内容を端折らず、必要な分だけ長さを惜しまずに書くこと。",
+            {length_directive}",
         )
     } else {
+        let length_directive = match length {
+            PodcastLength::Short => "Keep it concise.",
+            PodcastLength::Normal => "",
+            PodcastLength::Long => {
+                "Do not cut corners — write as much length as the material warrants."
+            }
+        };
         format!(
             "You are a podcast narrator. \
             Write a complete narration script for \"{name}\" ({description}). \
             Single narrator monologue, paragraphs separated by blank lines. \
             Natural spoken language only, no tags or non-speech symbols. \
             Write entirely in BCP-47 \"{lang}\". \
-            Do not cut corners — write as much length as the material warrants.",
+            {length_directive}",
         )
     };
     (system, source.to_string())
