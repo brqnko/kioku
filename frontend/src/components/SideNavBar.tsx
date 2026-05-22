@@ -46,6 +46,7 @@ export default function SideNavBar() {
   const { t } = useTranslation();
   const { path } = useLocation();
   const { isMobile, isOpen, close } = useSidebar();
+  const currentProjectId = path.match(/^\/projects\/([^/]+)/)?.[1] ?? null;
   const [dialogOpen, setDialogOpen] = useState(false);
   const { data: dashboard } = useDashboard();
   const recentFiles = (dashboard?.recent_seen_files ?? []).slice(0, 10);
