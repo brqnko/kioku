@@ -1,0 +1,84 @@
+{
+  "db_name": "MySQL",
+  "query": "\n                    SELECT project_id, created_by, name, description,\n                           indexed_at, last_seen_at, last_seen_file_id\n                    FROM project\n                    WHERE created_by = ?\n                    ORDER BY last_seen_at ASC, project_id ASC\n                    LIMIT ?\n                    ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "project_id",
+        "type_info": {
+          "type": "VarString",
+          "flags": "NOT_NULL | PRIMARY_KEY | BINARY | NO_DEFAULT_VALUE",
+          "max_size": 16
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "created_by",
+        "type_info": {
+          "type": "VarString",
+          "flags": "NOT_NULL | MULTIPLE_KEY | BINARY | NO_DEFAULT_VALUE",
+          "max_size": 16
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "name",
+        "type_info": {
+          "type": "VarString",
+          "flags": "NOT_NULL | NO_DEFAULT_VALUE",
+          "max_size": 1024
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "description",
+        "type_info": {
+          "type": "VarString",
+          "flags": "NOT_NULL | NO_DEFAULT_VALUE",
+          "max_size": 2048
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "indexed_at",
+        "type_info": {
+          "type": "Datetime",
+          "flags": "NOT_NULL | BINARY",
+          "max_size": 19
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "last_seen_at",
+        "type_info": {
+          "type": "Datetime",
+          "flags": "NOT_NULL | BINARY",
+          "max_size": 19
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "last_seen_file_id",
+        "type_info": {
+          "type": "VarString",
+          "flags": "NOT_NULL | BINARY | NO_DEFAULT_VALUE",
+          "max_size": 16
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "6e92ba9786a99adfbe933c606dcd792bfcc59fc793b592b393171f40c671a99f"
+}

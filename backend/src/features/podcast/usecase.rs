@@ -377,7 +377,10 @@ pub async fn update_podcast(
 
     let audio_url = app
         .storage_service
-        .presign_get(view.audio_storage_id, std::time::Duration::from_secs(60 * 60))
+        .presign_get(
+            view.audio_storage_id,
+            std::time::Duration::from_secs(60 * 60),
+        )
         .await?
         .url;
 

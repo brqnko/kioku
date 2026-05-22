@@ -119,7 +119,10 @@ struct WandboxRequest<'a> {
     stdin: Option<&'a str>,
     #[serde(skip_serializing_if = "Option::is_none")]
     options: Option<&'a str>,
-    #[serde(rename = "compiler-option-raw", skip_serializing_if = "Option::is_none")]
+    #[serde(
+        rename = "compiler-option-raw",
+        skip_serializing_if = "Option::is_none"
+    )]
     compiler_option_raw: Option<&'a str>,
     #[serde(rename = "runtime-option-raw", skip_serializing_if = "Option::is_none")]
     runtime_option_raw: Option<&'a str>,

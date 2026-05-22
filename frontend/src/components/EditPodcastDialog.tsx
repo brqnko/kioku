@@ -68,7 +68,9 @@ export function EditPodcastDialog({
     setSubmitting(true);
     setError(null);
     try {
-      await kyInstance.patch(`projects/${projectId}/podcasts/${podcastId}`, { json: body });
+      await kyInstance.patch(`projects/${projectId}/podcasts/${podcastId}`, {
+        json: body,
+      });
       await onSuccess();
       onClose();
     } catch {
@@ -78,7 +80,12 @@ export function EditPodcastDialog({
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} ariaLabel={t("renameItem.title")} maxWidth="max-w-[480px]">
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      ariaLabel={t("renameItem.title")}
+      maxWidth="max-w-[480px]"
+    >
       <form onSubmit={handleSubmit} class="p-6 flex flex-col gap-4">
         <h2 class="heading-h2">{t("renameItem.title")}</h2>
 
@@ -112,7 +119,9 @@ export function EditPodcastDialog({
           <textarea
             id="edit-podcast-description"
             value={description}
-            onInput={(e) => setDescription((e.target as HTMLTextAreaElement).value)}
+            onInput={(e) =>
+              setDescription((e.target as HTMLTextAreaElement).value)
+            }
             placeholder={t("renameItem.descriptionPlaceholder")}
             maxLength={1024}
             rows={3}

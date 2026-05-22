@@ -45,12 +45,13 @@ pub struct App {
         std::sync::Arc<dyn crate::features::chatbot::query_service::QueryService>,
     pub embedding_client: std::sync::Arc<dyn crate::util::embedding::EmbeddingClient>,
     pub llm_client: std::sync::Arc<dyn crate::util::llm::LLMClient>,
-    pub tts_client: std::sync::Arc<dyn crate::util::tts::TTSClient>,
     pub pdf2md_service: std::sync::Arc<dyn crate::util::pdf2md::Pdf2MdService>,
     pub podcast_request_service:
         std::sync::Arc<dyn crate::util::podcast_request::PodcastRequestService>,
     pub code_runner_client: std::sync::Arc<dyn crate::util::code_runner::CodeRunnerClient>,
     pub locker: std::sync::Arc<dyn crate::util::ad_lock::Locker>,
+    pub sgi_url: String,
+    pub sgi_token: String,
 }
 
 pub struct AppArgs {
@@ -62,7 +63,6 @@ pub struct AppArgs {
     pub jti_blacklist_service: std::sync::Arc<dyn crate::util::jti_blacklist::JtiBlacklistService>,
     pub embedding_client: std::sync::Arc<dyn crate::util::embedding::EmbeddingClient>,
     pub llm_client: std::sync::Arc<dyn crate::util::llm::LLMClient>,
-    pub tts_client: std::sync::Arc<dyn crate::util::tts::TTSClient>,
     pub pdf2md_service: std::sync::Arc<dyn crate::util::pdf2md::Pdf2MdService>,
     pub podcast_request_service:
         std::sync::Arc<dyn crate::util::podcast_request::PodcastRequestService>,
@@ -71,6 +71,8 @@ pub struct AppArgs {
     pub access_token_duration: chrono::Duration,
     pub refresh_token_duration: chrono::Duration,
     pub frontend_url: String,
+    pub sgi_url: String,
+    pub sgi_token: String,
 }
 
 impl App {
@@ -84,7 +86,6 @@ impl App {
             jti_blacklist_service,
             embedding_client,
             llm_client,
-            tts_client,
             pdf2md_service,
             podcast_request_service,
             code_runner_client,
@@ -92,6 +93,8 @@ impl App {
             access_token_duration,
             refresh_token_duration,
             frontend_url,
+            sgi_url,
+            sgi_token,
         } = args;
         use std::sync::Arc;
 
@@ -146,10 +149,11 @@ impl App {
             frontend_url,
             embedding_client,
             llm_client,
-            tts_client,
             pdf2md_service,
             podcast_request_service,
             code_runner_client,
+            sgi_url,
+            sgi_token,
         }
     }
 }

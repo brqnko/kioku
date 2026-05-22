@@ -118,9 +118,7 @@ export default function FolderPage() {
                 {folder?.name ?? (folderError ? "—" : "...")}
               </span>
             </nav>
-            <h1 class="heading-h2">
-              {folder?.name ?? t("project.loading")}
-            </h1>
+            <h1 class="heading-h2">{folder?.name ?? t("project.loading")}</h1>
             {folder?.description && (
               <p class="text-body text-text-secondary max-w-2xl">
                 {folder.description}
@@ -152,7 +150,9 @@ export default function FolderPage() {
               onClick={() => setUploadDialogOpen(true)}
               class="btn-secondary"
             >
-              <span class="material-symbols-outlined text-[20px]">note_add</span>
+              <span class="material-symbols-outlined text-[20px]">
+                note_add
+              </span>
               {t("project.upload.label")}
             </button>
           </div>
@@ -250,7 +250,9 @@ export default function FolderPage() {
                     <td class="hidden tablet:table-cell px-3 py-3 tablet:px-6 text-sm text-text-secondary">
                       {t("project.table.folder")}
                     </td>
-                    <td class="hidden tablet:table-cell px-3 py-3 tablet:px-6 text-sm text-text-secondary">—</td>
+                    <td class="hidden tablet:table-cell px-3 py-3 tablet:px-6 text-sm text-text-secondary">
+                      —
+                    </td>
                     <td class="px-3 py-3 tablet:px-6 text-sm text-text-secondary">
                       {formatDate(child.changed_at, i18n.language)}
                     </td>

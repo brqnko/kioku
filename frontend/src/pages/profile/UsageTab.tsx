@@ -5,8 +5,7 @@ import { RATE_LIMITS_KEY } from "../../api/keys";
 import { formatRelative } from "../../utils/datetime";
 import type { GetRateLimits200 } from "../../api/generated/backend.schemas";
 
-const fetcher = (path: string) =>
-  kyInstance.get(path).json<GetRateLimits200>();
+const fetcher = (path: string) => kyInstance.get(path).json<GetRateLimits200>();
 
 function nextResetIso(resetAt: string): string {
   const last = new Date(resetAt);

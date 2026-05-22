@@ -5,7 +5,9 @@
 @theme {
   --breakpoint-tablet: 768px;
   --breakpoint-wide: 1313px;
-  --font-display: "Inter", -apple-system, "system-ui", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif;
+  --font-display:
+    "Inter", -apple-system, "system-ui", "Segoe UI", Helvetica,
+    "Apple Color Emoji", Arial, sans-serif;
 
   /* Brand */
   --color-primary: #2383e2;
@@ -105,8 +107,18 @@ body {
   overflow-x: hidden;
   color: var(--color-text);
   background-color: var(--color-bg);
-  font-family: "Inter", -apple-system, "system-ui", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif;
-  font-feature-settings: "lnum", "locl" 0;
+  font-family:
+    "Inter",
+    -apple-system,
+    "system-ui",
+    "Segoe UI",
+    Helvetica,
+    "Apple Color Emoji",
+    Arial,
+    sans-serif;
+  font-feature-settings:
+    "lnum",
+    "locl" 0;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -114,7 +126,11 @@ body {
 }
 
 .material-symbols-outlined {
-  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+  font-variation-settings:
+    "FILL" 0,
+    "wght" 400,
+    "GRAD" 0,
+    "opsz" 24;
 }
 
 /* ============================================================
@@ -341,7 +357,7 @@ body {
   /* Typography scale ----------------------------------------- */
   .heading-display {
     font-size: 64px;
-    line-height: 1.0;
+    line-height: 1;
     font-weight: 700;
     letter-spacing: normal;
     color: var(--color-text-primary);
@@ -527,7 +543,9 @@ body {
   font-size: 16px;
   line-height: 1.5;
   color: var(--color-text-primary);
-  font-feature-settings: "lnum", "locl" 0;
+  font-feature-settings:
+    "lnum",
+    "locl" 0;
   max-width: 820px;
   margin-left: auto;
   margin-right: auto;
@@ -558,9 +576,18 @@ body {
   margin: 1.5rem 0 0.5rem;
 }
 @media (max-width: 768px) {
-  .markdown-doc h1 { font-size: 32px; line-height: 1.15; }
-  .markdown-doc h2 { font-size: 24px; line-height: 1.25; }
-  .markdown-doc h3 { font-size: 20px; line-height: 1.35; }
+  .markdown-doc h1 {
+    font-size: 32px;
+    line-height: 1.15;
+  }
+  .markdown-doc h2 {
+    font-size: 24px;
+    line-height: 1.25;
+  }
+  .markdown-doc h3 {
+    font-size: 20px;
+    line-height: 1.35;
+  }
 }
 .markdown-doc h4 {
   font-size: 16px;
@@ -741,8 +768,18 @@ body {
   color: var(--color-text-primary);
   font-size: 16px;
   line-height: 1.5;
-  font-family: "Inter", -apple-system, "system-ui", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif;
-  font-feature-settings: "lnum", "locl" 0;
+  font-family:
+    "Inter",
+    -apple-system,
+    "system-ui",
+    "Segoe UI",
+    Helvetica,
+    "Apple Color Emoji",
+    Arial,
+    sans-serif;
+  font-feature-settings:
+    "lnum",
+    "locl" 0;
   word-break: break-word;
   overflow-wrap: break-word;
   max-width: 820px;
@@ -781,9 +818,18 @@ body {
   margin: 1.5rem 0 0.5rem;
 }
 @media (max-width: 768px) {
-  .milkdown-host .ProseMirror h1 { font-size: 32px; line-height: 1.15; }
-  .milkdown-host .ProseMirror h2 { font-size: 24px; line-height: 1.25; }
-  .milkdown-host .ProseMirror h3 { font-size: 20px; line-height: 1.35; }
+  .milkdown-host .ProseMirror h1 {
+    font-size: 32px;
+    line-height: 1.15;
+  }
+  .milkdown-host .ProseMirror h2 {
+    font-size: 24px;
+    line-height: 1.25;
+  }
+  .milkdown-host .ProseMirror h3 {
+    font-size: 20px;
+    line-height: 1.35;
+  }
 }
 .milkdown-host .ProseMirror h4 {
   font-size: 16px;

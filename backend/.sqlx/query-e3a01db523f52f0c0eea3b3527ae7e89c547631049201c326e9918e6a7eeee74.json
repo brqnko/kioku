@@ -1,0 +1,12 @@
+{
+  "db_name": "MySQL",
+  "query": "\n            INSERT INTO refresh_token\n                (refresh_token_id, user_id, token_hash, generation, ip_address, user_agent,\n                 access_token_jti, activated_at, last_used_at, expires_at)\n            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)\n            ON DUPLICATE KEY UPDATE\n                token_hash       = VALUES(token_hash),\n                generation       = VALUES(generation),\n                ip_address       = VALUES(ip_address),\n                user_agent       = VALUES(user_agent),\n                access_token_jti = VALUES(access_token_jti),\n                last_used_at     = VALUES(last_used_at),\n                expires_at       = VALUES(expires_at)\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 10
+    },
+    "nullable": []
+  },
+  "hash": "e3a01db523f52f0c0eea3b3527ae7e89c547631049201c326e9918e6a7eeee74"
+}

@@ -58,8 +58,7 @@ export default function GoogleSignInButton({
         {t("auth.signInWithGoogle")}
       </button>
       <p class="text-caption text-text-secondary leading-relaxed max-w-xs">
-        {t("auth.idOnlyNotice")}{" "}
-        {t("auth.consentBefore")}
+        {t("auth.idOnlyNotice")} {t("auth.consentBefore")}
         <a
           href="/tos"
           target="_blank"

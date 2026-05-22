@@ -1,0 +1,24 @@
+{
+  "db_name": "MySQL",
+  "query": "\n            SELECT content\n            FROM text_storage\n            WHERE storage_id = ?\n            FOR UPDATE\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "content",
+        "type_info": {
+          "type": "Blob",
+          "flags": "NOT_NULL | BLOB | NO_DEFAULT_VALUE",
+          "max_size": 4294967295
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "6a7ec5f5e659da1919927a2f50463c024b3fb1f8c94cc82444bf94846703cb80"
+}

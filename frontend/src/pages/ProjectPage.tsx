@@ -67,7 +67,10 @@ export default function ProjectPage() {
         <section class="mb-8 flex items-end justify-between flex-wrap gap-4">
           <div class="flex flex-col gap-3">
             <nav class="flex items-center gap-2 text-text-secondary text-sm font-medium">
-              <a href="/library" class="hover:text-text-primary no-underline text-inherit">
+              <a
+                href="/library"
+                class="hover:text-text-primary no-underline text-inherit"
+              >
                 {t("project.breadcrumb.library")}
               </a>
               <span class="material-symbols-outlined text-[16px]">
@@ -77,9 +80,7 @@ export default function ProjectPage() {
                 {project?.name ?? (projectError ? "—" : "...")}
               </span>
             </nav>
-            <h1 class="heading-h2">
-              {project?.name ?? t("project.loading")}
-            </h1>
+            <h1 class="heading-h2">{project?.name ?? t("project.loading")}</h1>
             {project?.description && (
               <p class="text-body text-text-secondary max-w-2xl">
                 {project.description}
@@ -111,7 +112,9 @@ export default function ProjectPage() {
               onClick={() => setUploadDialogOpen(true)}
               class="btn-secondary"
             >
-              <span class="material-symbols-outlined text-[20px]">note_add</span>
+              <span class="material-symbols-outlined text-[20px]">
+                note_add
+              </span>
               {t("project.upload.label")}
             </button>
           </div>
@@ -209,7 +212,9 @@ export default function ProjectPage() {
                     <td class="hidden tablet:table-cell px-3 py-3 tablet:px-6 text-sm text-text-secondary">
                       {t("project.table.folder")}
                     </td>
-                    <td class="hidden tablet:table-cell px-3 py-3 tablet:px-6 text-sm text-text-secondary">—</td>
+                    <td class="hidden tablet:table-cell px-3 py-3 tablet:px-6 text-sm text-text-secondary">
+                      —
+                    </td>
                     <td class="px-3 py-3 tablet:px-6 text-sm text-text-secondary">
                       {formatDate(folder.changed_at, i18n.language)}
                     </td>

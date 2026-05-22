@@ -1,8 +1,28 @@
 import type { Extension } from "@codemirror/state";
-import { EditorView, keymap, lineNumbers, highlightActiveLine } from "@codemirror/view";
-import { history, defaultKeymap, historyKeymap, indentWithTab } from "@codemirror/commands";
-import { bracketMatching, indentOnInput, defaultHighlightStyle, syntaxHighlighting } from "@codemirror/language";
-import { autocompletion, completionKeymap, closeBrackets, closeBracketsKeymap } from "@codemirror/autocomplete";
+import {
+  EditorView,
+  keymap,
+  lineNumbers,
+  highlightActiveLine,
+} from "@codemirror/view";
+import {
+  history,
+  defaultKeymap,
+  historyKeymap,
+  indentWithTab,
+} from "@codemirror/commands";
+import {
+  bracketMatching,
+  indentOnInput,
+  defaultHighlightStyle,
+  syntaxHighlighting,
+} from "@codemirror/language";
+import {
+  autocompletion,
+  completionKeymap,
+  closeBrackets,
+  closeBracketsKeymap,
+} from "@codemirror/autocomplete";
 import { searchKeymap, highlightSelectionMatches } from "@codemirror/search";
 import { oneDark } from "@codemirror/theme-one-dark";
 
@@ -13,13 +33,19 @@ const LOADERS: Record<string, LangLoader> = {
   cpp: async () => (await import("@codemirror/lang-cpp")).cpp(),
   c: async () => (await import("@codemirror/lang-cpp")).cpp(),
   rust: async () => (await import("@codemirror/lang-rust")).rust(),
-  javascript: async () => (await import("@codemirror/lang-javascript")).javascript(),
+  javascript: async () =>
+    (await import("@codemirror/lang-javascript")).javascript(),
   typescript: async () =>
-    (await import("@codemirror/lang-javascript")).javascript({ typescript: true }),
+    (await import("@codemirror/lang-javascript")).javascript({
+      typescript: true,
+    }),
   jsx: async () =>
     (await import("@codemirror/lang-javascript")).javascript({ jsx: true }),
   tsx: async () =>
-    (await import("@codemirror/lang-javascript")).javascript({ jsx: true, typescript: true }),
+    (await import("@codemirror/lang-javascript")).javascript({
+      jsx: true,
+      typescript: true,
+    }),
   go: async () => (await import("@codemirror/lang-go")).go(),
   java: async () => (await import("@codemirror/lang-java")).java(),
   php: async () => (await import("@codemirror/lang-php")).php(),

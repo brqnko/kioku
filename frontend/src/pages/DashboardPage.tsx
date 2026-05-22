@@ -45,23 +45,32 @@ export default function DashboardPage() {
                       auto_awesome
                     </span>
                   </div>
-                  <h2 class="text-base font-bold">{t("dashboard.summary.title")}</h2>
+                  <h2 class="text-base font-bold">
+                    {t("dashboard.summary.title")}
+                  </h2>
                 </div>
                 {data?.ai_learning_summary_updated_at && (
                   <span class="text-xs text-text-disabled">
-                    {formatRelative(data.ai_learning_summary_updated_at, i18n.language)}
+                    {formatRelative(
+                      data.ai_learning_summary_updated_at,
+                      i18n.language,
+                    )}
                   </span>
                 )}
               </div>
 
               {isLoading && (
-                <p class="text-sm text-text-muted-dark">{t("dashboard.loading")}</p>
+                <p class="text-sm text-text-muted-dark">
+                  {t("dashboard.loading")}
+                </p>
               )}
               {error && (
                 <p class="text-sm text-danger">{t("dashboard.error")}</p>
               )}
               {data && !data.ai_learning_summary && (
-                <p class="text-sm text-text-muted-dark">{t("dashboard.summary.empty")}</p>
+                <p class="text-sm text-text-muted-dark">
+                  {t("dashboard.summary.empty")}
+                </p>
               )}
               {data?.ai_learning_summary && (
                 <MarkdownView
@@ -85,7 +94,9 @@ export default function DashboardPage() {
                 class="text-text-muted-dark text-xs hover:text-text-primary flex items-center gap-1 no-underline"
               >
                 {t("dashboard.recent.toLibrary")}
-                <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+                <span class="material-symbols-outlined text-[14px]">
+                  arrow_forward
+                </span>
               </a>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -104,30 +115,36 @@ export default function DashboardPage() {
                   {t("dashboard.recent.empty")}
                 </p>
               )}
-              {data?.recent_seen_files?.map((file: GetDashboard200RecentSeenFilesItem) => {
-                const { icon, tone } = fileIcon(file.name);
-                return (
-                  <a
-                    key={file.id}
-                    href={`/files/${file.id}`}
-                    class="bg-surface-dark border border-border-subtle rounded-[12px] p-4 flex flex-col gap-4 hover:bg-overlay-faint hover:border-overlay-medium group no-underline text-inherit"
-                  >
-                    <div class="flex items-start">
-                      <div class={`w-10 h-10 rounded-lg flex items-center justify-center ${toneClass[tone]}`}>
-                        <span class="material-symbols-outlined text-[20px]">{icon}</span>
+              {data?.recent_seen_files?.map(
+                (file: GetDashboard200RecentSeenFilesItem) => {
+                  const { icon, tone } = fileIcon(file.name);
+                  return (
+                    <a
+                      key={file.id}
+                      href={`/files/${file.id}`}
+                      class="bg-surface-dark border border-border-subtle rounded-[12px] p-4 flex flex-col gap-4 hover:bg-overlay-faint hover:border-overlay-medium group no-underline text-inherit"
+                    >
+                      <div class="flex items-start">
+                        <div
+                          class={`w-10 h-10 rounded-lg flex items-center justify-center ${toneClass[tone]}`}
+                        >
+                          <span class="material-symbols-outlined text-[20px]">
+                            {icon}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                    <div>
-                      <h3 class="text-sm font-bold truncate mb-1 group-hover:text-accent-blue">
-                        {file.name}
-                      </h3>
-                      <p class="text-xs text-text-disabled">
-                        {formatRelative(file.changed_at, i18n.language)}
-                      </p>
-                    </div>
-                  </a>
-                );
-              })}
+                      <div>
+                        <h3 class="text-sm font-bold truncate mb-1 group-hover:text-accent-blue">
+                          {file.name}
+                        </h3>
+                        <p class="text-xs text-text-disabled">
+                          {formatRelative(file.changed_at, i18n.language)}
+                        </p>
+                      </div>
+                    </a>
+                  );
+                },
+              )}
             </div>
           </section>
         </div>

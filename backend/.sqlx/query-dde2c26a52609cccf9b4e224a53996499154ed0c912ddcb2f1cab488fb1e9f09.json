@@ -1,0 +1,24 @@
+{
+  "db_name": "MySQL",
+  "query": "\n            SELECT 1 AS `hit!: i32`\n            FROM folder\n            WHERE parent_kind = 1 AND parent_id = ?\n            UNION ALL\n            SELECT 1 AS `hit!: i32`\n            FROM file\n            WHERE parent_kind = 1 AND parent_id = ?\n            LIMIT 1\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "hit!: i32",
+        "type_info": {
+          "type": "Long",
+          "flags": "NOT_NULL",
+          "max_size": 1
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "dde2c26a52609cccf9b4e224a53996499154ed0c912ddcb2f1cab488fb1e9f09"
+}

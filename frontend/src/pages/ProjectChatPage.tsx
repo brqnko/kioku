@@ -144,7 +144,10 @@ function MessageBubble({
 
 export default function ProjectChatPage() {
   const { t, i18n } = useTranslation();
-  useDocumentHead({ title: "Project chat — kioku", robots: "noindex,nofollow" });
+  useDocumentHead({
+    title: "Project chat — kioku",
+    robots: "noindex,nofollow",
+  });
   const route = useRoute();
   const projectId = route.params.projectId as string;
 
@@ -200,13 +203,17 @@ export default function ProjectChatPage() {
       .json<GetChat200>()
       .then((data) => {
         if (!cancelled)
-        setMessages(
-          (data.messages as Array<(typeof data.messages)[0] & { sent_at?: string }>).map((m) => ({
-            role: m.role,
-            content: m.content,
-            sent_at: m.sent_at,
-          })),
-        );
+          setMessages(
+            (
+              data.messages as Array<
+                (typeof data.messages)[0] & { sent_at?: string }
+              >
+            ).map((m) => ({
+              role: m.role,
+              content: m.content,
+              sent_at: m.sent_at,
+            })),
+          );
       })
       .catch(() => {})
       .finally(() => {
@@ -270,10 +277,9 @@ export default function ProjectChatPage() {
     if (!renamingChat || !renameInput.trim() || renameSubmitting) return;
     setRenameSubmitting(true);
     try {
-      await kyInstance.patch(
-        `projects/${projectId}/chats/${renamingChat.id}`,
-        { json: { name: renameInput.trim() } },
-      );
+      await kyInstance.patch(`projects/${projectId}/chats/${renamingChat.id}`, {
+        json: { name: renameInput.trim() },
+      });
       await refreshChats();
       setRenamingChat(null);
     } catch {
@@ -291,9 +297,7 @@ export default function ProjectChatPage() {
     if (!deletingChat || deleteSubmitting) return;
     setDeleteSubmitting(true);
     try {
-      await kyInstance.delete(
-        `projects/${projectId}/chats/${deletingChat.id}`,
-      );
+      await kyInstance.delete(`projects/${projectId}/chats/${deletingChat.id}`);
       if (activeChatId === deletingChat.id) {
         const remaining = chats.filter((c) => c.id !== deletingChat.id);
         setActiveChatId(remaining.length > 0 ? remaining[0].id : null);
@@ -331,7 +335,9 @@ export default function ProjectChatPage() {
         })
         .json<SendMessage200>();
 
-      const am = result.assistant_message as typeof result.assistant_message & { sent_at?: string };
+      const am = result.assistant_message as typeof result.assistant_message & {
+        sent_at?: string;
+      };
       setMessages((prev) => [
         ...prev.filter((m) => !m.thinking),
         {
@@ -369,7 +375,9 @@ export default function ProjectChatPage() {
 
       <div class="ml-[var(--sidebar-width)] flex h-[calc(100vh-3.5rem)] overflow-hidden transition-[margin-left] duration-200 ease-in-out">
         {/* ── Sessions panel ── */}
-        <aside class={`${activeChatId ? "hidden tablet:flex" : "flex"} w-full tablet:w-64 tablet:shrink-0 border-r border-border-subtle flex-col bg-surface-container-low overflow-hidden`}>
+        <aside
+          class={`${activeChatId ? "hidden tablet:flex" : "flex"} w-full tablet:w-64 tablet:shrink-0 border-r border-border-subtle flex-col bg-surface-container-low overflow-hidden`}
+        >
           <div class="shrink-0 p-3 border-b border-border-subtle">
             <button
               type="button"
@@ -429,9 +437,15 @@ export default function ProjectChatPage() {
                     <div class="shrink-0 pr-1 opacity-0 group-hover:opacity-100">
                       <RowActionMenu
                         icon="more_vert"
-                        ariaLabel={t("renameItem.menu") + " / " + t("deleteItem.menu")}
-                        onEdit={() => handleRenameOpen({ id: chat.id, name: chat.name })}
-                        onDelete={() => handleDeleteOpen({ id: chat.id, name: chat.name })}
+                        ariaLabel={
+                          t("renameItem.menu") + " / " + t("deleteItem.menu")
+                        }
+                        onEdit={() =>
+                          handleRenameOpen({ id: chat.id, name: chat.name })
+                        }
+                        onDelete={() =>
+                          handleDeleteOpen({ id: chat.id, name: chat.name })
+                        }
                       />
                     </div>
                   </div>
@@ -453,7 +467,9 @@ export default function ProjectChatPage() {
         </aside>
 
         {/* ── Chat panel ── */}
-        <section class={`${!activeChatId ? "hidden tablet:flex" : "flex"} flex-1 flex-col min-w-0 bg-background-dark overflow-hidden`}>
+        <section
+          class={`${!activeChatId ? "hidden tablet:flex" : "flex"} flex-1 flex-col min-w-0 bg-background-dark overflow-hidden`}
+        >
           {activeChatId ? (
             <>
               {/* Header */}
@@ -464,7 +480,9 @@ export default function ProjectChatPage() {
                   aria-label={t("projectChat.back")}
                   class="tablet:hidden flex items-center justify-center w-8 h-8 rounded hover:bg-overlay-faint cursor-pointer bg-transparent border-none text-text-secondary shrink-0"
                 >
-                  <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+                  <span class="material-symbols-outlined text-[20px]">
+                    arrow_back
+                  </span>
                 </button>
                 <a
                   href="/chat"
@@ -472,7 +490,9 @@ export default function ProjectChatPage() {
                 >
                   {t("nav.chat")}
                 </a>
-                <span class="hidden tablet:inline material-symbols-outlined text-text-disabled text-[14px] select-none shrink-0">chevron_right</span>
+                <span class="hidden tablet:inline material-symbols-outlined text-text-disabled text-[14px] select-none shrink-0">
+                  chevron_right
+                </span>
                 <a
                   href={`/projects/${projectId}`}
                   class="text-xs text-text-secondary hover:text-text-primary no-underline truncate min-w-0"
@@ -481,7 +501,9 @@ export default function ProjectChatPage() {
                 </a>
                 {activeChat && (
                   <>
-                    <span class="material-symbols-outlined text-text-disabled text-[14px] select-none shrink-0">chevron_right</span>
+                    <span class="material-symbols-outlined text-text-disabled text-[14px] select-none shrink-0">
+                      chevron_right
+                    </span>
                     <span class="text-xs text-text-primary font-medium truncate">
                       {activeChat.name}
                     </span>
@@ -503,7 +525,12 @@ export default function ProjectChatPage() {
                   </div>
                 ) : (
                   messages.map((msg, i) => (
-                    <MessageBubble key={i} msg={msg} locale={i18n.language} onCopy={handleCopy} />
+                    <MessageBubble
+                      key={i}
+                      msg={msg}
+                      locale={i18n.language}
+                      onCopy={handleCopy}
+                    />
                   ))
                 )}
                 <div ref={messagesEndRef} />

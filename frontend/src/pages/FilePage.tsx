@@ -8,7 +8,10 @@ import { MarkdownEditor } from "../components/MarkdownEditor";
 import { useFileContent, fileContentKeyFor } from "../hooks/useFile";
 import { useDocumentHead } from "../hooks/useDocumentHead";
 import { invalidateAfterMutation } from "../utils/swrCache";
-import { fetchFileAncestors, type BreadcrumbAncestor } from "../hooks/useFolder";
+import {
+  fetchFileAncestors,
+  type BreadcrumbAncestor,
+} from "../hooks/useFolder";
 import { kyInstance } from "../api/mutator";
 import { uploadFile } from "../api/upload";
 import { formatSize } from "../utils/file";
@@ -47,10 +50,14 @@ export default function FilePage() {
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const initRef = useRef<string | null>(null);
 
-  const [copiedField, setCopiedField] = useState<"created" | "updated" | null>(null);
+  const [copiedField, setCopiedField] = useState<"created" | "updated" | null>(
+    null,
+  );
 
   const copyDate = (field: "created" | "updated", iso: string) => {
-    navigator.clipboard.writeText(formatDate(iso, i18n.language)).catch(() => {});
+    navigator.clipboard
+      .writeText(formatDate(iso, i18n.language))
+      .catch(() => {});
     setCopiedField(field);
     setTimeout(() => setCopiedField(null), 1500);
   };
@@ -62,9 +69,10 @@ export default function FilePage() {
   const nameInputRef = useRef<HTMLInputElement>(null);
   const descTextareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const patchMeta = async (
-    patch: { name?: string; description?: string },
-  ): Promise<void> => {
+  const patchMeta = async (patch: {
+    name?: string;
+    description?: string;
+  }): Promise<void> => {
     if (!fileId) return;
     await kyInstance.patch(`files/${fileId}`, { json: patch });
     await Promise.all([
@@ -187,7 +195,6 @@ export default function FilePage() {
     return () => window.clearTimeout(handle);
   }, [saveState]);
 
-
   return (
     <div class="min-h-screen bg-background-dark text-text-primary">
       <SideNavBar />
@@ -297,9 +304,7 @@ export default function FilePage() {
                       </>
                     )}
                     {saveState === "error" && (
-                      <span class="text-danger">
-                        {t("file.errors.save")}
-                      </span>
+                      <span class="text-danger">{t("file.errors.save")}</span>
                     )}
                   </div>
                 )}
@@ -404,7 +409,6 @@ export default function FilePage() {
                   )}
                 </div>
               </div>
-
             </header>
           )}
 

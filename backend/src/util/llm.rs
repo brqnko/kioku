@@ -84,8 +84,14 @@ impl CopilotImpl {
         }
 
         let mut h = reqwest::header::HeaderMap::new();
-        h.insert(reqwest::header::USER_AGENT, reqwest::header::HeaderValue::from_static("kioku"));
-        h.insert(reqwest::header::ACCEPT, reqwest::header::HeaderValue::from_static("application/json"));
+        h.insert(
+            reqwest::header::USER_AGENT,
+            reqwest::header::HeaderValue::from_static("kioku"),
+        );
+        h.insert(
+            reqwest::header::ACCEPT,
+            reqwest::header::HeaderValue::from_static("application/json"),
+        );
         h.insert(
             reqwest::header::AUTHORIZATION,
             reqwest::header::HeaderValue::from_str(&format!("Token {}", self.github_token))?,
@@ -106,7 +112,10 @@ impl CopilotImpl {
 
         {
             let mut cache = self.cached_token.lock().unwrap();
-            *cache = Some(CachedCopilotToken { token: resp.token.clone(), expires_at });
+            *cache = Some(CachedCopilotToken {
+                token: resp.token.clone(),
+                expires_at,
+            });
         }
 
         Ok(resp.token)
@@ -115,12 +124,30 @@ impl CopilotImpl {
     async fn build_headers(&self) -> Result<reqwest::header::HeaderMap, anyhow::Error> {
         let token = self.copilot_token().await?;
         let mut h = reqwest::header::HeaderMap::new();
-        h.insert(reqwest::header::AUTHORIZATION, reqwest::header::HeaderValue::from_str(&format!("Bearer {token}"))?);
-        h.insert("Editor-Version", reqwest::header::HeaderValue::from_str(&self.editor_version)?);
-        h.insert("Editor-Plugin-Version", reqwest::header::HeaderValue::from_static("kioku/*"));
-        h.insert("Copilot-Integration-Id", reqwest::header::HeaderValue::from_static("vscode-chat"));
-        h.insert(reqwest::header::USER_AGENT, reqwest::header::HeaderValue::from_static("kioku"));
-        h.insert(reqwest::header::ACCEPT, reqwest::header::HeaderValue::from_static("application/json"));
+        h.insert(
+            reqwest::header::AUTHORIZATION,
+            reqwest::header::HeaderValue::from_str(&format!("Bearer {token}"))?,
+        );
+        h.insert(
+            "Editor-Version",
+            reqwest::header::HeaderValue::from_str(&self.editor_version)?,
+        );
+        h.insert(
+            "Editor-Plugin-Version",
+            reqwest::header::HeaderValue::from_static("kioku/*"),
+        );
+        h.insert(
+            "Copilot-Integration-Id",
+            reqwest::header::HeaderValue::from_static("vscode-chat"),
+        );
+        h.insert(
+            reqwest::header::USER_AGENT,
+            reqwest::header::HeaderValue::from_static("kioku"),
+        );
+        h.insert(
+            reqwest::header::ACCEPT,
+            reqwest::header::HeaderValue::from_static("application/json"),
+        );
         Ok(h)
     }
 }
@@ -133,18 +160,44 @@ impl LLMClient for CopilotImpl {
         input: CompletionInput,
     ) -> Result<CompletionOutput, anyhow::Error> {
         #[derive(serde::Serialize)]
-        struct MessageBody<'a> { role: &'a str, content: &'a str }
+        struct MessageBody<'a> {
+            role: &'a str,
+            content: &'a str,
+        }
         #[derive(serde::Serialize)]
-        struct ChatRequest<'a> { model: &'a str, messages: Vec<MessageBody<'a>>, n: u32, stream: bool }
+        struct ChatRequest<'a> {
+            model: &'a str,
+            messages: Vec<MessageBody<'a>>,
+            n: u32,
+            stream: bool,
+        }
         #[derive(serde::Deserialize)]
-        struct ChatResponse { choices: Vec<ChatChoice> }
+        struct ChatResponse {
+            choices: Vec<ChatChoice>,
+        }
         #[derive(serde::Deserialize)]
-        struct ChatChoice { message: ChatMessage }
+        struct ChatChoice {
+            message: ChatMessage,
+        }
         #[derive(serde::Deserialize)]
-        struct ChatMessage { content: String }
+        struct ChatMessage {
+            content: String,
+        }
 
-        let messages = input.messages.iter().map(|m| MessageBody { role: m.role.as_str(), content: &m.content }).collect::<Vec<_>>();
-        let req = ChatRequest { model, messages, n: 1, stream: false };
+        let messages = input
+            .messages
+            .iter()
+            .map(|m| MessageBody {
+                role: m.role.as_str(),
+                content: &m.content,
+            })
+            .collect::<Vec<_>>();
+        let req = ChatRequest {
+            model,
+            messages,
+            n: 1,
+            stream: false,
+        };
 
         let headers = self.build_headers().await?;
         let raw = self
@@ -157,7 +210,9 @@ impl LLMClient for CopilotImpl {
             .await?;
 
         if let Err(e) = raw.error_for_status_ref() {
-            let retry_after = raw.headers().get("retry-after")
+            let retry_after = raw
+                .headers()
+                .get("retry-after")
                 .or_else(|| raw.headers().get("x-ratelimit-reset-requests"))
                 .and_then(|v| v.to_str().ok())
                 .map(|s| format!(", retry after: {s}"))
@@ -165,12 +220,16 @@ impl LLMClient for CopilotImpl {
             return Err(anyhow::anyhow!("{e}{retry_after}"));
         }
 
-        let content = raw.json::<ChatResponse>().await?
-            .choices.into_iter().next()
+        let content = raw
+            .json::<ChatResponse>()
+            .await?
+            .choices
+            .into_iter()
+            .next()
             .ok_or_else(|| anyhow::anyhow!("no choices in copilot response"))?
-            .message.content;
+            .message
+            .content;
 
         Ok(CompletionOutput { content })
     }
 }
-

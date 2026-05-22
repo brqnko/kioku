@@ -1,0 +1,104 @@
+{
+  "db_name": "MySQL",
+  "query": "\n            SELECT podcast_id, name, description, user_id, project_id,\n                   used_file_ids AS \"used_file_ids: sqlx::types::Json<Vec<uuid::Uuid>>\",\n                   podcast_script AS \"podcast_script: sqlx::types::Json<Vec<super::domain::PodcastScriptEntry>>\",\n                   audio_storage_id,\n                   podcast_created_at\n            FROM podcast\n            WHERE podcast_id = ?\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "podcast_id",
+        "type_info": {
+          "type": "VarString",
+          "flags": "NOT_NULL | PRIMARY_KEY | BINARY | NO_DEFAULT_VALUE",
+          "max_size": 16
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": {
+          "type": "VarString",
+          "flags": "NOT_NULL | NO_DEFAULT_VALUE",
+          "max_size": 1024
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "description",
+        "type_info": {
+          "type": "VarString",
+          "flags": "NOT_NULL | NO_DEFAULT_VALUE",
+          "max_size": 4096
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "user_id",
+        "type_info": {
+          "type": "VarString",
+          "flags": "NOT_NULL | BINARY | NO_DEFAULT_VALUE",
+          "max_size": 16
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "project_id",
+        "type_info": {
+          "type": "VarString",
+          "flags": "NOT_NULL | MULTIPLE_KEY | BINARY | NO_DEFAULT_VALUE",
+          "max_size": 16
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "used_file_ids: sqlx::types::Json<Vec<uuid::Uuid>>",
+        "type_info": {
+          "type": "Blob",
+          "flags": "NOT_NULL | BLOB | BINARY | NO_DEFAULT_VALUE",
+          "max_size": 4294967295
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "podcast_script: sqlx::types::Json<Vec<super::domain::PodcastScriptEntry>>",
+        "type_info": {
+          "type": "Blob",
+          "flags": "NOT_NULL | BLOB | BINARY | NO_DEFAULT_VALUE",
+          "max_size": 4294967295
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "audio_storage_id",
+        "type_info": {
+          "type": "VarString",
+          "flags": "NOT_NULL | BINARY | NO_DEFAULT_VALUE",
+          "max_size": 16
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "podcast_created_at",
+        "type_info": {
+          "type": "Datetime",
+          "flags": "NOT_NULL | BINARY | NO_DEFAULT_VALUE",
+          "max_size": 19
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "4335d3491f2917cf4bcbe98451cdfcca38752389e6bfdbe9b2466db564d25854"
+}

@@ -71,7 +71,11 @@ export default function TOSPage() {
   const renderBody = (key: SectionKey) => {
     switch (key) {
       case "intro":
-        return introParagraphs.map((p, i) => <p key={i} class="m-0">{p}</p>);
+        return introParagraphs.map((p, i) => (
+          <p key={i} class="m-0">
+            {p}
+          </p>
+        ));
       case "definitions":
         return (
           <>
@@ -115,9 +119,17 @@ export default function TOSPage() {
           </>
         );
       case "privacy":
-        return privacyParagraphs.map((p, i) => <p key={i} class="m-0">{p}</p>);
+        return privacyParagraphs.map((p, i) => (
+          <p key={i} class="m-0">
+            {p}
+          </p>
+        ));
       case "ip":
-        return ipParagraphs.map((p, i) => <p key={i} class="m-0">{p}</p>);
+        return ipParagraphs.map((p, i) => (
+          <p key={i} class="m-0">
+            {p}
+          </p>
+        ));
     }
   };
 

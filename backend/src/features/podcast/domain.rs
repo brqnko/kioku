@@ -1,8 +1,6 @@
 pub const MAX_PODCASTS_PER_PROJECT: usize = 50;
 
-pub const VOICE_STYLES: &[&str] = &[
-    "F1", "F2", "F3", "F4", "F5", "M1", "M2", "M3", "M4", "M5",
-];
+pub const VOICE_STYLES: &[&str] = &["F1", "F2", "F3", "F4", "F5", "M1", "M2", "M3", "M4", "M5"];
 
 pub struct VoiceStyle(#[allow(dead_code)] pub String);
 

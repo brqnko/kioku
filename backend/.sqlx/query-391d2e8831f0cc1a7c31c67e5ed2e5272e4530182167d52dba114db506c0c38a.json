@@ -1,0 +1,12 @@
+{
+  "db_name": "MySQL",
+  "query": "\n            INSERT INTO chat\n                (chat_id, name, user_id, project_id, messages, started_at, last_activity_at)\n            VALUES (?, ?, ?, ?, ?, ?, ?)\n            ON DUPLICATE KEY UPDATE\n                name             = VALUES(name),\n                messages         = VALUES(messages),\n                last_activity_at = VALUES(last_activity_at)\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 7
+    },
+    "nullable": []
+  },
+  "hash": "391d2e8831f0cc1a7c31c67e5ed2e5272e4530182167d52dba114db506c0c38a"
+}

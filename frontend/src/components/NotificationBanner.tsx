@@ -7,14 +7,12 @@ import {
 } from "../notifications/store";
 import { Icon } from "./Icon";
 
-const KIND_STYLES: Record<
-  NotificationKind,
-  { icon: string; accent: string }
-> = {
-  warning: { icon: "warning", accent: "text-warning" },
-  error: { icon: "error", accent: "text-danger" },
-  success: { icon: "check_circle", accent: "text-success" },
-};
+const KIND_STYLES: Record<NotificationKind, { icon: string; accent: string }> =
+  {
+    warning: { icon: "warning", accent: "text-warning" },
+    error: { icon: "error", accent: "text-danger" },
+    success: { icon: "check_circle", accent: "text-success" },
+  };
 
 interface ItemProps {
   notification: Notification;

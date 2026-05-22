@@ -1,0 +1,84 @@
+{
+  "db_name": "MySQL",
+  "query": "\n            SELECT chat_id, name, user_id, project_id,\n                   messages AS \"messages: sqlx::types::Json<Vec<super::domain::ChatMessage>>\",\n                   started_at, last_activity_at\n            FROM chat\n            WHERE chat_id = ?\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "chat_id",
+        "type_info": {
+          "type": "VarString",
+          "flags": "NOT_NULL | PRIMARY_KEY | BINARY | NO_DEFAULT_VALUE",
+          "max_size": 16
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": {
+          "type": "VarString",
+          "flags": "NOT_NULL | NO_DEFAULT_VALUE",
+          "max_size": 1024
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "user_id",
+        "type_info": {
+          "type": "VarString",
+          "flags": "NOT_NULL | BINARY | NO_DEFAULT_VALUE",
+          "max_size": 16
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "project_id",
+        "type_info": {
+          "type": "VarString",
+          "flags": "NOT_NULL | MULTIPLE_KEY | BINARY | NO_DEFAULT_VALUE",
+          "max_size": 16
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "messages: sqlx::types::Json<Vec<super::domain::ChatMessage>>",
+        "type_info": {
+          "type": "Blob",
+          "flags": "NOT_NULL | BLOB | BINARY | NO_DEFAULT_VALUE",
+          "max_size": 4294967295
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "started_at",
+        "type_info": {
+          "type": "Datetime",
+          "flags": "NOT_NULL | BINARY | NO_DEFAULT_VALUE",
+          "max_size": 19
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "last_activity_at",
+        "type_info": {
+          "type": "Datetime",
+          "flags": "NOT_NULL | BINARY | NO_DEFAULT_VALUE",
+          "max_size": 19
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "14a33c0eb37e4c450de626cb84d91b27df52ecf61c1a34bd96b67bdc5b829861"
+}

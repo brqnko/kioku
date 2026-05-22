@@ -40,7 +40,8 @@ export function DeleteItemDialog({
     setSubmitting(true);
     setError(null);
     try {
-      const path = customPath ?? (kind === "file" ? `files/${id}` : `folders/${id}`);
+      const path =
+        customPath ?? (kind === "file" ? `files/${id}` : `folders/${id}`);
       await kyInstance.delete(path);
       await Promise.all([
         onSuccess(),

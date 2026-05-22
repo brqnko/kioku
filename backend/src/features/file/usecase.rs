@@ -57,7 +57,7 @@ pub async fn request_upload_url(
         .presign_put(
             storage_id,
             content_type.as_mime(),
-            content_length.0,
+            Some(content_length.0),
             expires_in,
         )
         .await?;
@@ -542,9 +542,7 @@ pub async fn get_file_raw_url(
         .presign_get(file.storage_id, std::time::Duration::from_secs(60 * 60))
         .await?;
 
-    Ok(Ok(GetFileRawUrlOutput {
-        url: presigned.url,
-    }))
+    Ok(Ok(GetFileRawUrlOutput { url: presigned.url }))
 }
 
 // index file

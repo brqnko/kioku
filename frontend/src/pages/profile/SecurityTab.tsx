@@ -131,9 +131,11 @@ export default function SecurityTab() {
           </p>
           {pendingRevoke && (
             <div class="bg-surface-container-high border border-border-subtle rounded-lg p-3 text-sm">
-              <div class="text-text-primary truncate" title={pendingRevoke.user_agent}>
-                {pendingRevoke.user_agent ||
-                  t("profile.security.unknownAgent")}
+              <div
+                class="text-text-primary truncate"
+                title={pendingRevoke.user_agent}
+              >
+                {pendingRevoke.user_agent || t("profile.security.unknownAgent")}
               </div>
               <div class="text-xs text-text-secondary mt-1">
                 {pendingRevoke.ip_address}
@@ -229,10 +231,7 @@ function SessionRow({
       }`}
     >
       <div class="col-span-5 md:col-span-4 min-w-0">
-        <div
-          class="text-text-primary truncate"
-          title={session.user_agent}
-        >
+        <div class="text-text-primary truncate" title={session.user_agent}>
           {session.user_agent || t("profile.security.unknownAgent")}
         </div>
         <div class="text-xs text-text-muted-dark mt-1 md:hidden truncate">
@@ -252,7 +251,9 @@ function SessionRow({
           disabled={revoking}
           class="btn-secondary"
         >
-          {revoking ? t("profile.security.revoking") : t("profile.security.revoke")}
+          {revoking
+            ? t("profile.security.revoking")
+            : t("profile.security.revoke")}
         </button>
       </div>
     </div>

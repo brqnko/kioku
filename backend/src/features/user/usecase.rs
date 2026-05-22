@@ -621,7 +621,11 @@ pub async fn get_rate_limits(
     app: &crate::app::App,
     input: GetRateLimitsInput,
 ) -> Result<Result<GetRateLimitsOutput, crate::domain::DomainError>, anyhow::Error> {
-    let view = match app.user_query_service.get_rate_limits(input.user_id).await? {
+    let view = match app
+        .user_query_service
+        .get_rate_limits(input.user_id)
+        .await?
+    {
         Some(ok) => ok,
         None => {
             return Ok(Err(crate::domain::DomainError::new(

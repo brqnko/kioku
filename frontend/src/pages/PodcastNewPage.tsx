@@ -75,7 +75,12 @@ interface VoicePickerProps {
   onPreview: (v: VoiceStyle) => void;
 }
 
-function VoicePicker({ value, onChange, playing, onPreview }: VoicePickerProps) {
+function VoicePicker({
+  value,
+  onChange,
+  playing,
+  onPreview,
+}: VoicePickerProps) {
   const { t } = useTranslation();
 
   const renderGroup = (title: string, items: VoiceStyle[]) => (
@@ -173,10 +178,7 @@ function LengthPicker({ value, onChange }: LengthPickerProps) {
           {t("podcast.create.length.hint")}
         </span>
       </div>
-      <div
-        role="radiogroup"
-        class="grid grid-cols-3 gap-1.5"
-      >
+      <div role="radiogroup" class="grid grid-cols-3 gap-1.5">
         {LENGTHS.map((v) => {
           const selected = value === v;
           return (
@@ -249,18 +251,10 @@ interface FolderNodeProps {
 function FolderNode({ folder, selectedIds, onToggleFile }: FolderNodeProps) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
-  const {
-    items,
-    isLoading,
-    error,
-    hasMore,
-    loadingMore,
-    loadMore,
-  } = useFolderChildren(expanded ? folder.id : undefined);
+  const { items, isLoading, error, hasMore, loadingMore, loadMore } =
+    useFolderChildren(expanded ? folder.id : undefined);
 
-  const subFolders = items.filter(
-    (i): i is FolderItem => i.kind === "folder",
-  );
+  const subFolders = items.filter((i): i is FolderItem => i.kind === "folder");
   const subFiles = items.filter((i): i is FileItem => i.kind === "file");
 
   return (
@@ -395,7 +389,8 @@ export default function PodcastNewPage() {
       return;
     }
     const lang = i18n.language.startsWith("ja") ? "ja" : "en";
-    const src = lang === "ja" ? `/voice-samples/${v}.wav` : `/voice-samples/${v}_en.wav`;
+    const src =
+      lang === "ja" ? `/voice-samples/${v}.wav` : `/voice-samples/${v}_en.wav`;
     const audio = new Audio(src);
     audio.onended = () => setPlayingVoice(null);
     audio.onerror = () => setPlayingVoice(null);
@@ -474,9 +469,7 @@ export default function PodcastNewPage() {
             <span class="material-symbols-outlined text-[16px] select-none">
               chevron_right
             </span>
-            <span class="text-text-primary">
-              {t("podcast.create.crumb")}
-            </span>
+            <span class="text-text-primary">{t("podcast.create.crumb")}</span>
           </nav>
           <h1 class="heading-h2">{t("podcast.create.title")}</h1>
         </header>
@@ -558,9 +551,7 @@ export default function PodcastNewPage() {
                   id="podcast-name"
                   type="text"
                   value={displayName}
-                  onInput={(e) =>
-                    setName((e.target as HTMLInputElement).value)
-                  }
+                  onInput={(e) => setName((e.target as HTMLInputElement).value)}
                   placeholder={t("podcast.create.placeholders.name")}
                   maxLength={256}
                   class="input-field"

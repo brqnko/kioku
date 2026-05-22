@@ -1,0 +1,12 @@
+{
+  "db_name": "MySQL",
+  "query": "DELETE FROM text_storage WHERE storage_id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "29d74b1be9352c3d3f1789d2335446ee20f2e32fce8052f745b8e5a5d21f0b4b"
+}

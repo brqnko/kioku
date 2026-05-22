@@ -217,7 +217,10 @@ export default function AccountTab() {
         </Field>
 
         <Field label={t("profile.account.theme")} bordered>
-          <div class="relative w-full tablet:w-fit min-w-[200px]" ref={themeRef}>
+          <div
+            class="relative w-full tablet:w-fit min-w-[200px]"
+            ref={themeRef}
+          >
             <button
               type="button"
               onClick={() => setThemeOpen(!themeOpen)}
@@ -281,9 +284,7 @@ export default function AccountTab() {
           {saved && (
             <span class="text-sm text-success">{t("profile.saved")}</span>
           )}
-          {saveError && (
-            <span class="text-sm text-danger">{saveError}</span>
-          )}
+          {saveError && <span class="text-sm text-danger">{saveError}</span>}
           <button
             type="button"
             onClick={handleSave}
@@ -302,7 +303,9 @@ export default function AccountTab() {
           rel="noopener noreferrer"
           class="flex items-center gap-4 p-2 rounded-lg hover:bg-overlay-faint text-text-primary text-left w-full h-11 no-underline"
         >
-          <span class="material-symbols-outlined text-text-muted-dark">flag</span>
+          <span class="material-symbols-outlined text-text-muted-dark">
+            flag
+          </span>
           <span class="text-base">{t("profile.actions.report")}</span>
         </a>
         <button
@@ -310,7 +313,9 @@ export default function AccountTab() {
           onClick={() => setShowLogout(true)}
           class="flex items-center gap-4 p-2 rounded-lg hover:bg-overlay-faint text-text-primary text-left w-full h-11 cursor-pointer bg-transparent border-none"
         >
-          <span class="material-symbols-outlined text-text-muted-dark">logout</span>
+          <span class="material-symbols-outlined text-text-muted-dark">
+            logout
+          </span>
           <span class="text-base">{t("profile.actions.logout")}</span>
         </button>
         <button

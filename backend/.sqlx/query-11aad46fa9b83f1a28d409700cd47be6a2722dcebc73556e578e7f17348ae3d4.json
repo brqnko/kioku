@@ -1,0 +1,164 @@
+{
+  "db_name": "MySQL",
+  "query": "\n            SELECT\n                user_id,\n                display_name,\n                language_code,\n                joined_at,\n                iss,\n                sub,\n                recent_seen_file_ids as \"recent_seen_file_ids: sqlx::types::Json<Vec<uuid::Uuid>>\",\n                ai_learning_summary,\n                ai_learning_summary_updated_at,\n                podcast_daily_count,\n                podcast_daily_count_reset_at,\n                chatbot_daily_count,\n                chatbot_daily_count_reset_at,\n                file_upload_daily_count,\n                file_upload_daily_count_reset_at\n            FROM user\n            WHERE iss = ? AND sub = ?\n            FOR UPDATE\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "user_id",
+        "type_info": {
+          "type": "VarString",
+          "flags": "NOT_NULL | PRIMARY_KEY | BINARY | NO_DEFAULT_VALUE",
+          "max_size": 16
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "display_name",
+        "type_info": {
+          "type": "VarString",
+          "flags": "NOT_NULL | NO_DEFAULT_VALUE",
+          "max_size": 128
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "language_code",
+        "type_info": {
+          "type": "VarString",
+          "flags": "NOT_NULL | NO_DEFAULT_VALUE",
+          "max_size": 28
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "joined_at",
+        "type_info": {
+          "type": "Datetime",
+          "flags": "NOT_NULL | BINARY | NO_DEFAULT_VALUE",
+          "max_size": 19
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "iss",
+        "type_info": {
+          "type": "VarString",
+          "flags": "NOT_NULL | MULTIPLE_KEY | NO_DEFAULT_VALUE",
+          "max_size": 1024
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "sub",
+        "type_info": {
+          "type": "VarString",
+          "flags": "NOT_NULL | NO_DEFAULT_VALUE",
+          "max_size": 1024
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "recent_seen_file_ids: sqlx::types::Json<Vec<uuid::Uuid>>",
+        "type_info": {
+          "type": "Blob",
+          "flags": "NOT_NULL | BLOB | BINARY | NO_DEFAULT_VALUE",
+          "max_size": 4294967295
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "ai_learning_summary",
+        "type_info": {
+          "type": "VarString",
+          "flags": "NOT_NULL | NO_DEFAULT_VALUE",
+          "max_size": 2048
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "ai_learning_summary_updated_at",
+        "type_info": {
+          "type": "Datetime",
+          "flags": "NOT_NULL | BINARY | NO_DEFAULT_VALUE",
+          "max_size": 19
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "podcast_daily_count",
+        "type_info": {
+          "type": "Long",
+          "flags": "NOT_NULL | UNSIGNED | NO_DEFAULT_VALUE",
+          "max_size": 10
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "podcast_daily_count_reset_at",
+        "type_info": {
+          "type": "Datetime",
+          "flags": "NOT_NULL | BINARY | NO_DEFAULT_VALUE",
+          "max_size": 19
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "chatbot_daily_count",
+        "type_info": {
+          "type": "Long",
+          "flags": "NOT_NULL | UNSIGNED | NO_DEFAULT_VALUE",
+          "max_size": 10
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "chatbot_daily_count_reset_at",
+        "type_info": {
+          "type": "Datetime",
+          "flags": "NOT_NULL | BINARY | NO_DEFAULT_VALUE",
+          "max_size": 19
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "file_upload_daily_count",
+        "type_info": {
+          "type": "Long",
+          "flags": "NOT_NULL | UNSIGNED | NO_DEFAULT_VALUE",
+          "max_size": 10
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "file_upload_daily_count_reset_at",
+        "type_info": {
+          "type": "Datetime",
+          "flags": "NOT_NULL | BINARY | NO_DEFAULT_VALUE",
+          "max_size": 19
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "11aad46fa9b83f1a28d409700cd47be6a2722dcebc73556e578e7f17348ae3d4"
+}

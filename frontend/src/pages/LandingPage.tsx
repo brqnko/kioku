@@ -334,7 +334,9 @@ export default function LandingPage() {
                   <PodcastMock t={t} />
                 );
               const mockBlock = (
-                <div class={`relative w-full max-w-2xl ${key === "library" ? "mr-auto" : "mx-auto"}`}>
+                <div
+                  class={`relative w-full max-w-2xl ${key === "library" ? "mr-auto" : "mx-auto"}`}
+                >
                   <div
                     aria-hidden="true"
                     class="pointer-events-none absolute inset-0 flex items-center justify-center -z-10"
@@ -409,7 +411,9 @@ export default function LandingPage() {
               <p class="whitespace-pre-line text-xl md:text-3xl font-bold text-charcoal dark:text-white max-w-2xl mx-auto leading-snug">
                 <Trans
                   i18nKey="cta.description"
-                  components={{ b: <strong class="font-extrabold text-primary" /> }}
+                  components={{
+                    b: <strong class="font-extrabold text-primary" />,
+                  }}
                 />
               </p>
               <div class="flex justify-center">

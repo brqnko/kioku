@@ -34,7 +34,9 @@ function makeItemId(): string {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
-function filesToItems(files: FileList | File[] | null | undefined): UploadItem[] {
+function filesToItems(
+  files: FileList | File[] | null | undefined,
+): UploadItem[] {
   if (!files) return [];
   const arr = Array.from(files);
   return arr.map((file) => ({ id: makeItemId(), file, status: "pending" }));
@@ -152,17 +154,19 @@ export function UploadDialog({
     };
 
     const results = new Map<string, "done" | "failed">();
-    const tasks: Array<() => Promise<void>> = targets.map((item) => async () => {
-      updateItem(item.id, { status: "uploading", errorKey: undefined });
-      try {
-        await uploadFile({ file: item.file, parentId, parentKind });
-        results.set(item.id, "done");
-        updateItem(item.id, { status: "done" });
-      } catch (err) {
-        results.set(item.id, "failed");
-        updateItem(item.id, { status: "failed", errorKey: errorKeyFor(err) });
-      }
-    });
+    const tasks: Array<() => Promise<void>> = targets.map(
+      (item) => async () => {
+        updateItem(item.id, { status: "uploading", errorKey: undefined });
+        try {
+          await uploadFile({ file: item.file, parentId, parentKind });
+          results.set(item.id, "done");
+          updateItem(item.id, { status: "done" });
+        } catch (err) {
+          results.set(item.id, "failed");
+          updateItem(item.id, { status: "failed", errorKey: errorKeyFor(err) });
+        }
+      },
+    );
 
     await runWithConcurrency(tasks, CONCURRENCY);
 
@@ -243,8 +247,7 @@ export function UploadDialog({
     : mode === "file" && hasItems
       ? t("upload.submitMultiple", { count: pendingCount || items.length })
       : t("upload.submit");
-  const submitDisabled =
-    submitting || (mode === "file" && pendingCount === 0);
+  const submitDisabled = submitting || (mode === "file" && pendingCount === 0);
 
   return (
     <Dialog open={open} onClose={onClose} ariaLabel={t("upload.title")}>
@@ -367,9 +370,7 @@ export function UploadDialog({
                   id="upload-text-name"
                   type="text"
                   value={name}
-                  onInput={(e) =>
-                    setName((e.target as HTMLInputElement).value)
-                  }
+                  onInput={(e) => setName((e.target as HTMLInputElement).value)}
                   placeholder={t("upload.text.namePlaceholder")}
                   maxLength={256}
                   required

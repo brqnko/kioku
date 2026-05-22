@@ -49,7 +49,5 @@ export function MarkdownView({ source, className }: Props) {
     };
   }, [source]);
 
-  return (
-    <div class={className} dangerouslySetInnerHTML={{ __html: html }} />
-  );
+  return <div class={className} dangerouslySetInnerHTML={{ __html: html }} />;
 }

@@ -57,418 +57,324 @@ import type {
   UpdateProject200,
   UpdateProjectBody,
   UpdateUserProfile200,
-  UpdateUserProfileBody
-} from './backend.schemas';
+  UpdateUserProfileBody,
+} from "./backend.schemas";
 
-import { customInstance } from '../mutator';
+import { customInstance } from "../mutator";
 
-
-
-
-  export const getDefault = () => {
-const logout = (
-
- ) => {
-      return customInstance<void>(
-      {url: `/auth/logout`, method: 'POST'
-    },
-      );
-    }
-  const oidcCallback = (
-    params: OidcCallbackParams,
- ) => {
-      return customInstance<unknown>(
-      {url: `/auth/oidc/callback`, method: 'GET',
-        params
-    },
-      );
-    }
-  const oidcStart = (
-
- ) => {
-      return customInstance<OidcStart200>(
-      {url: `/auth/oidc/start`, method: 'GET'
-    },
-      );
-    }
-  const refresh = (
-
- ) => {
-      return customInstance<void>(
-      {url: `/auth/refresh`, method: 'POST'
-    },
-      );
-    }
-  const listCompilers = (
-
- ) => {
-      return customInstance<ListCompilers200>(
-      {url: `/code/compilers`, method: 'GET'
-    },
-      );
-    }
-  const createFile = (
-    createFileBody: CreateFileBody,
- ) => {
-      return customInstance<CreateFile200>(
-      {url: `/files`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: createFileBody
-    },
-      );
-    }
-  const runCode = (
-    runCodeBody: RunCodeBody,
- ) => {
-      return customInstance<RunCode200>(
-      {url: `/files/run`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: runCodeBody
-    },
-      );
-    }
-  const requestUploadUrl = (
-    requestUploadUrlBody: RequestUploadUrlBody,
- ) => {
-      return customInstance<RequestUploadUrl200>(
-      {url: `/files/upload-url`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: requestUploadUrlBody
-    },
-      );
-    }
-  const removeFile = (
-    fileId: string,
- ) => {
-      return customInstance<void>(
-      {url: `/files/${fileId}`, method: 'DELETE'
-    },
-      );
-    }
-  const updateFile = (
-    fileId: string,
-    updateFileBody: UpdateFileBody,
- ) => {
-      return customInstance<UpdateFile200>(
-      {url: `/files/${fileId}`, method: 'PATCH',
-      headers: {'Content-Type': 'application/json', },
-      data: updateFileBody
-    },
-      );
-    }
-  const getFileAncestors = (
-    fileId: string,
- ) => {
-      return customInstance<GetFileAncestors200>(
-      {url: `/files/${fileId}/ancestors`, method: 'GET'
-    },
-      );
-    }
-  const getFileContent = (
-    fileId: string,
- ) => {
-      return customInstance<GetFileContent200>(
-      {url: `/files/${fileId}/content`, method: 'GET'
-    },
-      );
-    }
-  const getFileRaw = (
-    fileId: string,
- ) => {
-      return customInstance<unknown>(
-      {url: `/files/${fileId}/raw`, method: 'GET'
-    },
-      );
-    }
+export const getDefault = () => {
+  const logout = () => {
+    return customInstance<void>({ url: `/auth/logout`, method: "POST" });
+  };
+  const oidcCallback = (params: OidcCallbackParams) => {
+    return customInstance<unknown>({
+      url: `/auth/oidc/callback`,
+      method: "GET",
+      params,
+    });
+  };
+  const oidcStart = () => {
+    return customInstance<OidcStart200>({
+      url: `/auth/oidc/start`,
+      method: "GET",
+    });
+  };
+  const refresh = () => {
+    return customInstance<void>({ url: `/auth/refresh`, method: "POST" });
+  };
+  const listCompilers = () => {
+    return customInstance<ListCompilers200>({
+      url: `/code/compilers`,
+      method: "GET",
+    });
+  };
+  const createFile = (createFileBody: CreateFileBody) => {
+    return customInstance<CreateFile200>({
+      url: `/files`,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      data: createFileBody,
+    });
+  };
+  const runCode = (runCodeBody: RunCodeBody) => {
+    return customInstance<RunCode200>({
+      url: `/files/run`,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      data: runCodeBody,
+    });
+  };
+  const requestUploadUrl = (requestUploadUrlBody: RequestUploadUrlBody) => {
+    return customInstance<RequestUploadUrl200>({
+      url: `/files/upload-url`,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      data: requestUploadUrlBody,
+    });
+  };
+  const removeFile = (fileId: string) => {
+    return customInstance<void>({ url: `/files/${fileId}`, method: "DELETE" });
+  };
+  const updateFile = (fileId: string, updateFileBody: UpdateFileBody) => {
+    return customInstance<UpdateFile200>({
+      url: `/files/${fileId}`,
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      data: updateFileBody,
+    });
+  };
+  const getFileAncestors = (fileId: string) => {
+    return customInstance<GetFileAncestors200>({
+      url: `/files/${fileId}/ancestors`,
+      method: "GET",
+    });
+  };
+  const getFileContent = (fileId: string) => {
+    return customInstance<GetFileContent200>({
+      url: `/files/${fileId}/content`,
+      method: "GET",
+    });
+  };
+  const getFileRaw = (fileId: string) => {
+    return customInstance<unknown>({
+      url: `/files/${fileId}/raw`,
+      method: "GET",
+    });
+  };
   const updateFileText = (
     fileId: string,
     updateFileTextBody: UpdateFileTextBody,
- ) => {
-      return customInstance<UpdateFileText200>(
-      {url: `/files/${fileId}/text`, method: 'PUT',
-      headers: {'Content-Type': 'application/json', },
-      data: updateFileTextBody
-    },
-      );
-    }
-  const createFolder = (
-    createFolderBody: CreateFolderBody,
- ) => {
-      return customInstance<CreateFolder200>(
-      {url: `/folders`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: createFolderBody
-    },
-      );
-    }
-  const getFolder = (
-    folderId: string,
- ) => {
-      return customInstance<GetFolder200>(
-      {url: `/folders/${folderId}`, method: 'GET'
-    },
-      );
-    }
-  const removeFolder = (
-    folderId: string,
- ) => {
-      return customInstance<void>(
-      {url: `/folders/${folderId}`, method: 'DELETE'
-    },
-      );
-    }
+  ) => {
+    return customInstance<UpdateFileText200>({
+      url: `/files/${fileId}/text`,
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      data: updateFileTextBody,
+    });
+  };
+  const createFolder = (createFolderBody: CreateFolderBody) => {
+    return customInstance<CreateFolder200>({
+      url: `/folders`,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      data: createFolderBody,
+    });
+  };
+  const getFolder = (folderId: string) => {
+    return customInstance<GetFolder200>({
+      url: `/folders/${folderId}`,
+      method: "GET",
+    });
+  };
+  const removeFolder = (folderId: string) => {
+    return customInstance<void>({
+      url: `/folders/${folderId}`,
+      method: "DELETE",
+    });
+  };
   const updateFolder = (
     folderId: string,
     updateFolderBody: UpdateFolderBody,
- ) => {
-      return customInstance<UpdateFolder200>(
-      {url: `/folders/${folderId}`, method: 'PATCH',
-      headers: {'Content-Type': 'application/json', },
-      data: updateFolderBody
-    },
-      );
-    }
-  const getFolderAncestors = (
-    folderId: string,
- ) => {
-      return customInstance<GetFolderAncestors200>(
-      {url: `/folders/${folderId}/ancestors`, method: 'GET'
-    },
-      );
-    }
+  ) => {
+    return customInstance<UpdateFolder200>({
+      url: `/folders/${folderId}`,
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      data: updateFolderBody,
+    });
+  };
+  const getFolderAncestors = (folderId: string) => {
+    return customInstance<GetFolderAncestors200>({
+      url: `/folders/${folderId}/ancestors`,
+      method: "GET",
+    });
+  };
   const listFolderChildren = (
     folderId: string,
     params: ListFolderChildrenParams,
- ) => {
-      return customInstance<ListFolderChildren200>(
-      {url: `/folders/${folderId}/children`, method: 'GET',
-        params
-    },
-      );
-    }
-  const listProjects = (
-    params: ListProjectsParams,
- ) => {
-      return customInstance<ListProjects200>(
-      {url: `/projects`, method: 'GET',
-        params
-    },
-      );
-    }
-  const createProject = (
-    createProjectBody: CreateProjectBody,
- ) => {
-      return customInstance<CreateProject200>(
-      {url: `/projects`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: createProjectBody
-    },
-      );
-    }
-  const getProject = (
-    projectId: string,
- ) => {
-      return customInstance<GetProject200>(
-      {url: `/projects/${projectId}`, method: 'GET'
-    },
-      );
-    }
-  const removeProject = (
-    projectId: string,
- ) => {
-      return customInstance<void>(
-      {url: `/projects/${projectId}`, method: 'DELETE'
-    },
-      );
-    }
+  ) => {
+    return customInstance<ListFolderChildren200>({
+      url: `/folders/${folderId}/children`,
+      method: "GET",
+      params,
+    });
+  };
+  const listProjects = (params: ListProjectsParams) => {
+    return customInstance<ListProjects200>({
+      url: `/projects`,
+      method: "GET",
+      params,
+    });
+  };
+  const createProject = (createProjectBody: CreateProjectBody) => {
+    return customInstance<CreateProject200>({
+      url: `/projects`,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      data: createProjectBody,
+    });
+  };
+  const getProject = (projectId: string) => {
+    return customInstance<GetProject200>({
+      url: `/projects/${projectId}`,
+      method: "GET",
+    });
+  };
+  const removeProject = (projectId: string) => {
+    return customInstance<void>({
+      url: `/projects/${projectId}`,
+      method: "DELETE",
+    });
+  };
   const updateProject = (
     projectId: string,
     updateProjectBody: UpdateProjectBody,
- ) => {
-      return customInstance<UpdateProject200>(
-      {url: `/projects/${projectId}`, method: 'PATCH',
-      headers: {'Content-Type': 'application/json', },
-      data: updateProjectBody
-    },
-      );
-    }
-  const listChats = (
-    projectId: string,
-    params: ListChatsParams,
- ) => {
-      return customInstance<ListChats200>(
-      {url: `/projects/${projectId}/chats`, method: 'GET',
-        params
-    },
-      );
-    }
-  const createChat = (
-    projectId: string,
-    createChatBody: CreateChatBody,
- ) => {
-      return customInstance<CreateChat200>(
-      {url: `/projects/${projectId}/chats`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: createChatBody
-    },
-      );
-    }
-  const getChat = (
-    projectId: string,
-    chatId: string,
- ) => {
-      return customInstance<GetChat200>(
-      {url: `/projects/${projectId}/chats/${chatId}`, method: 'GET'
-    },
-      );
-    }
-  const removeChat = (
-    projectId: string,
-    chatId: string,
- ) => {
-      return customInstance<void>(
-      {url: `/projects/${projectId}/chats/${chatId}`, method: 'DELETE'
-    },
-      );
-    }
+  ) => {
+    return customInstance<UpdateProject200>({
+      url: `/projects/${projectId}`,
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      data: updateProjectBody,
+    });
+  };
+  const listChats = (projectId: string, params: ListChatsParams) => {
+    return customInstance<ListChats200>({
+      url: `/projects/${projectId}/chats`,
+      method: "GET",
+      params,
+    });
+  };
+  const createChat = (projectId: string, createChatBody: CreateChatBody) => {
+    return customInstance<CreateChat200>({
+      url: `/projects/${projectId}/chats`,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      data: createChatBody,
+    });
+  };
+  const getChat = (projectId: string, chatId: string) => {
+    return customInstance<GetChat200>({
+      url: `/projects/${projectId}/chats/${chatId}`,
+      method: "GET",
+    });
+  };
+  const removeChat = (projectId: string, chatId: string) => {
+    return customInstance<void>({
+      url: `/projects/${projectId}/chats/${chatId}`,
+      method: "DELETE",
+    });
+  };
   const sendMessage = (
     projectId: string,
     chatId: string,
     sendMessageBody: SendMessageBody,
- ) => {
-      return customInstance<SendMessage200>(
-      {url: `/projects/${projectId}/chats/${chatId}/messages`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: sendMessageBody
-    },
-      );
-    }
+  ) => {
+    return customInstance<SendMessage200>({
+      url: `/projects/${projectId}/chats/${chatId}/messages`,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      data: sendMessageBody,
+    });
+  };
   const listProjectChildren = (
     projectId: string,
     params: ListProjectChildrenParams,
- ) => {
-      return customInstance<ListProjectChildren200>(
-      {url: `/projects/${projectId}/children`, method: 'GET',
-        params
-    },
-      );
-    }
-  const listPodcasts = (
-    projectId: string,
-    params: ListPodcastsParams,
- ) => {
-      return customInstance<ListPodcasts200>(
-      {url: `/projects/${projectId}/podcasts`, method: 'GET',
-        params
-    },
-      );
-    }
+  ) => {
+    return customInstance<ListProjectChildren200>({
+      url: `/projects/${projectId}/children`,
+      method: "GET",
+      params,
+    });
+  };
+  const listPodcasts = (projectId: string, params: ListPodcastsParams) => {
+    return customInstance<ListPodcasts200>({
+      url: `/projects/${projectId}/podcasts`,
+      method: "GET",
+      params,
+    });
+  };
   const createPodcast = (
     projectId: string,
     createPodcastBody: CreatePodcastBody,
- ) => {
-      return customInstance<CreatePodcast200>(
-      {url: `/projects/${projectId}/podcasts`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: createPodcastBody
-    },
-      );
-    }
-  const getPodcast = (
-    projectId: string,
-    podcastId: string,
- ) => {
-      return customInstance<GetPodcast200>(
-      {url: `/projects/${projectId}/podcasts/${podcastId}`, method: 'GET'
-    },
-      );
-    }
-  const removePodcast = (
-    projectId: string,
-    podcastId: string,
- ) => {
-      return customInstance<void>(
-      {url: `/projects/${projectId}/podcasts/${podcastId}`, method: 'DELETE'
-    },
-      );
-    }
+  ) => {
+    return customInstance<CreatePodcast200>({
+      url: `/projects/${projectId}/podcasts`,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      data: createPodcastBody,
+    });
+  };
+  const getPodcast = (projectId: string, podcastId: string) => {
+    return customInstance<GetPodcast200>({
+      url: `/projects/${projectId}/podcasts/${podcastId}`,
+      method: "GET",
+    });
+  };
+  const removePodcast = (projectId: string, podcastId: string) => {
+    return customInstance<void>({
+      url: `/projects/${projectId}/podcasts/${podcastId}`,
+      method: "DELETE",
+    });
+  };
   const updatePodcast = (
     projectId: string,
     podcastId: string,
     updatePodcastBody: UpdatePodcastBody,
- ) => {
-      return customInstance<UpdatePodcast200>(
-      {url: `/projects/${projectId}/podcasts/${podcastId}`, method: 'PATCH',
-      headers: {'Content-Type': 'application/json', },
-      data: updatePodcastBody
-    },
-      );
-    }
-  const getUserProfile = (
-
- ) => {
-      return customInstance<GetUserProfile200>(
-      {url: `/users/me`, method: 'GET'
-    },
-      );
-    }
-  const removeUser = (
-
- ) => {
-      return customInstance<void>(
-      {url: `/users/me`, method: 'DELETE'
-    },
-      );
-    }
-  const updateUserProfile = (
-    updateUserProfileBody: UpdateUserProfileBody,
- ) => {
-      return customInstance<UpdateUserProfile200>(
-      {url: `/users/me`, method: 'PATCH',
-      headers: {'Content-Type': 'application/json', },
-      data: updateUserProfileBody
-    },
-      );
-    }
-  const getDashboard = (
-
- ) => {
-      return customInstance<GetDashboard200>(
-      {url: `/users/me/dashboard`, method: 'GET'
-    },
-      );
-    }
-  const getRateLimits = (
-
- ) => {
-      return customInstance<GetRateLimits200>(
-      {url: `/users/me/rate-limits`, method: 'GET'
-    },
-      );
-    }
-  const listSessions = (
-    params: ListSessionsParams,
- ) => {
-      return customInstance<ListSessions200>(
-      {url: `/users/me/sessions`, method: 'GET',
-        params
-    },
-      );
-    }
-  const revokeAllSessions = (
-
- ) => {
-      return customInstance<void>(
-      {url: `/users/me/sessions`, method: 'DELETE'
-    },
-      );
-    }
-  const revokeSession = (
-    sessionId: string,
- ) => {
-      return customInstance<void>(
-      {url: `/users/me/sessions/${sessionId}`, method: 'DELETE'
-    },
-      );
-    }
-  return {}};
+  ) => {
+    return customInstance<UpdatePodcast200>({
+      url: `/projects/${projectId}/podcasts/${podcastId}`,
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      data: updatePodcastBody,
+    });
+  };
+  const getUserProfile = () => {
+    return customInstance<GetUserProfile200>({
+      url: `/users/me`,
+      method: "GET",
+    });
+  };
+  const removeUser = () => {
+    return customInstance<void>({ url: `/users/me`, method: "DELETE" });
+  };
+  const updateUserProfile = (updateUserProfileBody: UpdateUserProfileBody) => {
+    return customInstance<UpdateUserProfile200>({
+      url: `/users/me`,
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      data: updateUserProfileBody,
+    });
+  };
+  const getDashboard = () => {
+    return customInstance<GetDashboard200>({
+      url: `/users/me/dashboard`,
+      method: "GET",
+    });
+  };
+  const getRateLimits = () => {
+    return customInstance<GetRateLimits200>({
+      url: `/users/me/rate-limits`,
+      method: "GET",
+    });
+  };
+  const listSessions = (params: ListSessionsParams) => {
+    return customInstance<ListSessions200>({
+      url: `/users/me/sessions`,
+      method: "GET",
+      params,
+    });
+  };
+  const revokeAllSessions = () => {
+    return customInstance<void>({
+      url: `/users/me/sessions`,
+      method: "DELETE",
+    });
+  };
+  const revokeSession = (sessionId: string) => {
+    return customInstance<void>({
+      url: `/users/me/sessions/${sessionId}`,
+      method: "DELETE",
+    });
+  };
+  return {};
+};

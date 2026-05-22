@@ -4,23 +4,16 @@
  * backend
  * OpenAPI spec version: 0.1.0
  */
-import type {
-  Health200
-} from './backend.schemas';
+import type { Health200 } from "./backend.schemas";
 
-import { customInstance } from '../mutator';
+import { customInstance } from "../mutator";
 
-
-
-
-  export const getHandler = () => {
-const health = (
-
- ) => {
-      return customInstance<Health200>(
-      {url: `/health`, method: 'GET'
-    },
-      );
-    }
-  return {health}};
-export type HealthResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getHandler>['health']>>>
+export const getHandler = () => {
+  const health = () => {
+    return customInstance<Health200>({ url: `/health`, method: "GET" });
+  };
+  return { health };
+};
+export type HealthResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getHandler>["health"]>>
+>;

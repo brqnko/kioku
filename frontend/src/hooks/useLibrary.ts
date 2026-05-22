@@ -29,9 +29,7 @@ const fetcher = async ([, cursor]: readonly [string, Cursor | null]) => {
     searchParams.cursor_last_seen_at = cursor.last_seen_at;
     searchParams.cursor_project_id = cursor.project_id;
   }
-  return kyInstance
-    .get("projects", { searchParams })
-    .json<ListProjects200>();
+  return kyInstance.get("projects", { searchParams }).json<ListProjects200>();
 };
 
 export function useLibrary() {
@@ -40,9 +38,8 @@ export function useLibrary() {
 
   const pages = data ?? [];
   const items = pages.flatMap((p) => p.items);
-  const hasMore = pages.length > 0
-    ? Boolean(pages[pages.length - 1]?.next_cursor)
-    : false;
+  const hasMore =
+    pages.length > 0 ? Boolean(pages[pages.length - 1]?.next_cursor) : false;
   const loadingMore = isValidating && pages.length > 0 && pages.length < size;
 
   const loadMore = () => setSize((s) => s + 1);

@@ -22,7 +22,8 @@ interface MarkdownEditorToolbarProps {
 }
 
 const isMac =
-  typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
+  typeof navigator !== "undefined" &&
+  /Mac|iPhone|iPad/.test(navigator.platform);
 const mod = isMac ? "⌘" : "Ctrl";
 
 interface ButtonSpec {
@@ -33,27 +34,77 @@ interface ButtonSpec {
 }
 
 const inlineButtons: ButtonSpec[] = [
-  { icon: "format_bold", labelKey: "editor.toolbar.bold", shortcut: `${mod}+B`, action: { kind: "bold" } },
-  { icon: "format_italic", labelKey: "editor.toolbar.italic", shortcut: `${mod}+I`, action: { kind: "italic" } },
-  { icon: "format_strikethrough", labelKey: "editor.toolbar.strikethrough", action: { kind: "strikethrough" } },
-  { icon: "code", labelKey: "editor.toolbar.inlineCode", action: { kind: "inlineCode" } },
+  {
+    icon: "format_bold",
+    labelKey: "editor.toolbar.bold",
+    shortcut: `${mod}+B`,
+    action: { kind: "bold" },
+  },
+  {
+    icon: "format_italic",
+    labelKey: "editor.toolbar.italic",
+    shortcut: `${mod}+I`,
+    action: { kind: "italic" },
+  },
+  {
+    icon: "format_strikethrough",
+    labelKey: "editor.toolbar.strikethrough",
+    action: { kind: "strikethrough" },
+  },
+  {
+    icon: "code",
+    labelKey: "editor.toolbar.inlineCode",
+    action: { kind: "inlineCode" },
+  },
 ];
 
 const headingButtons: ButtonSpec[] = [
-  { icon: "format_h1", labelKey: "editor.toolbar.h1", action: { kind: "heading", level: 1 } },
-  { icon: "format_h2", labelKey: "editor.toolbar.h2", action: { kind: "heading", level: 2 } },
-  { icon: "format_h3", labelKey: "editor.toolbar.h3", action: { kind: "heading", level: 3 } },
-  { icon: "format_paragraph", labelKey: "editor.toolbar.paragraph", action: { kind: "paragraph" } },
+  {
+    icon: "format_h1",
+    labelKey: "editor.toolbar.h1",
+    action: { kind: "heading", level: 1 },
+  },
+  {
+    icon: "format_h2",
+    labelKey: "editor.toolbar.h2",
+    action: { kind: "heading", level: 2 },
+  },
+  {
+    icon: "format_h3",
+    labelKey: "editor.toolbar.h3",
+    action: { kind: "heading", level: 3 },
+  },
+  {
+    icon: "format_paragraph",
+    labelKey: "editor.toolbar.paragraph",
+    action: { kind: "paragraph" },
+  },
 ];
 
 const listButtons: ButtonSpec[] = [
-  { icon: "format_list_bulleted", labelKey: "editor.toolbar.bulletList", action: { kind: "bulletList" } },
-  { icon: "format_list_numbered", labelKey: "editor.toolbar.orderedList", action: { kind: "orderedList" } },
+  {
+    icon: "format_list_bulleted",
+    labelKey: "editor.toolbar.bulletList",
+    action: { kind: "bulletList" },
+  },
+  {
+    icon: "format_list_numbered",
+    labelKey: "editor.toolbar.orderedList",
+    action: { kind: "orderedList" },
+  },
 ];
 
 const blockButtons: ButtonSpec[] = [
-  { icon: "format_quote", labelKey: "editor.toolbar.blockquote", action: { kind: "blockquote" } },
-  { icon: "code_blocks", labelKey: "editor.toolbar.codeBlock", action: { kind: "codeBlock" } },
+  {
+    icon: "format_quote",
+    labelKey: "editor.toolbar.blockquote",
+    action: { kind: "blockquote" },
+  },
+  {
+    icon: "code_blocks",
+    labelKey: "editor.toolbar.codeBlock",
+    action: { kind: "codeBlock" },
+  },
 ];
 
 export function MarkdownEditorToolbar({
@@ -92,7 +143,11 @@ export function MarkdownEditorToolbar({
   const imageLabel = t("editor.toolbar.image");
 
   return (
-    <div class="md-toolbar" role="toolbar" aria-label={t("editor.toolbar.label")}>
+    <div
+      class="md-toolbar"
+      role="toolbar"
+      aria-label={t("editor.toolbar.label")}
+    >
       <div class="md-toolbar-group">{inlineButtons.map(renderButton)}</div>
       <div class="md-toolbar-sep" aria-hidden="true" />
       <div class="md-toolbar-group">{headingButtons.map(renderButton)}</div>
