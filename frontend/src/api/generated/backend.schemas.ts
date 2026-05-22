@@ -10,8 +10,8 @@ export interface ErrorBody {
 }
 
 export type OidcCallbackParams = {
-  code: string;
-  state: string;
+code: string;
+state: string;
 };
 
 export type OidcStart200 = {
@@ -29,12 +29,12 @@ export type ListCompilers200 = {
   compilers: ListCompilers200CompilersItem[];
 };
 
-export type CreateFileBodyParentKind =
-  (typeof CreateFileBodyParentKind)[keyof typeof CreateFileBodyParentKind];
+export type CreateFileBodyParentKind = typeof CreateFileBodyParentKind[keyof typeof CreateFileBodyParentKind];
+
 
 export const CreateFileBodyParentKind = {
-  project: "project",
-  folder: "folder",
+  project: 'project',
+  folder: 'folder',
 } as const;
 
 export type CreateFileBody = {
@@ -47,18 +47,18 @@ export type CreateFileBody = {
   /** @nullable */
   storage_id?: string | null;
   /**
-   * @maxLength 33554432
-   * @nullable
-   */
+     * @maxLength 33554432
+     * @nullable
+     */
   text?: string | null;
 };
 
-export type CreateFile200ParentKind =
-  (typeof CreateFile200ParentKind)[keyof typeof CreateFile200ParentKind];
+export type CreateFile200ParentKind = typeof CreateFile200ParentKind[keyof typeof CreateFile200ParentKind];
+
 
 export const CreateFile200ParentKind = {
-  project: "project",
-  folder: "folder",
+  project: 'project',
+  folder: 'folder',
 } as const;
 
 export type CreateFile200 = {
@@ -83,24 +83,24 @@ export type RunCodeBody = {
   /** @maxLength 64 */
   compiler: string;
   /**
-   * @maxLength 4096
-   * @nullable
-   */
+     * @maxLength 4096
+     * @nullable
+     */
   compiler_option_raw?: string | null;
   /**
-   * @maxLength 4096
-   * @nullable
-   */
+     * @maxLength 4096
+     * @nullable
+     */
   compiler_options?: string | null;
   /**
-   * @maxLength 4096
-   * @nullable
-   */
+     * @maxLength 4096
+     * @nullable
+     */
   runtime_option_raw?: string | null;
   /**
-   * @maxLength 32768
-   * @nullable
-   */
+     * @maxLength 32768
+     * @nullable
+     */
   stdin?: string | null;
 };
 
@@ -125,9 +125,9 @@ export type RunCode200 = {
 
 export type RequestUploadUrlBody = {
   /**
-   * @minimum 1
-   * @maximum 33554432
-   */
+     * @minimum 1
+     * @maximum 33554432
+     */
   content_length: number;
   content_type: string;
 };
@@ -143,23 +143,23 @@ export type RequestUploadUrl200 = {
 
 export type UpdateFileBody = {
   /**
-   * @maxLength 1024
-   * @nullable
-   */
+     * @maxLength 1024
+     * @nullable
+     */
   description?: string | null;
   /**
-   * @maxLength 256
-   * @nullable
-   */
+     * @maxLength 256
+     * @nullable
+     */
   name?: string | null;
 };
 
-export type UpdateFile200ParentKind =
-  (typeof UpdateFile200ParentKind)[keyof typeof UpdateFile200ParentKind];
+export type UpdateFile200ParentKind = typeof UpdateFile200ParentKind[keyof typeof UpdateFile200ParentKind];
+
 
 export const UpdateFile200ParentKind = {
-  project: "project",
-  folder: "folder",
+  project: 'project',
+  folder: 'folder',
 } as const;
 
 export type UpdateFile200 = {
@@ -178,42 +178,38 @@ export type UpdateFile200 = {
   user_id: string;
 };
 
-export type GetFileAncestors200AncestorsItem =
-  | ({
-      id: string;
-      name: string;
-    } & {
-      kind: "project";
-    })
-  | ({
-      id: string;
-      name: string;
-    } & {
-      kind: "folder";
-    });
+export type GetFileAncestors200AncestorsItem = {
+  id: string;
+  name: string;
+} & {
+  kind: 'project';
+} | {
+  id: string;
+  name: string;
+} & {
+  kind: 'folder';
+};
 
 export type GetFileAncestors200 = {
   ancestors: GetFileAncestors200AncestorsItem[];
 };
 
-export type GetFileContent200Content =
-  | {
-      expires_at: string;
-      kind: "url";
-      method: string;
-      url: string;
-    }
-  | {
-      content: string;
-      kind: "text";
-    };
+export type GetFileContent200Content = {
+  expires_at: string;
+  kind: 'url';
+  method: string;
+  url: string;
+} | {
+  content: string;
+  kind: 'text';
+};
 
-export type GetFileContent200FileParentKind =
-  (typeof GetFileContent200FileParentKind)[keyof typeof GetFileContent200FileParentKind];
+export type GetFileContent200FileParentKind = typeof GetFileContent200FileParentKind[keyof typeof GetFileContent200FileParentKind];
+
 
 export const GetFileContent200FileParentKind = {
-  project: "project",
-  folder: "folder",
+  project: 'project',
+  folder: 'folder',
 } as const;
 
 export type GetFileContent200File = {
@@ -242,12 +238,12 @@ export type UpdateFileTextBody = {
   text: string;
 };
 
-export type UpdateFileText200ParentKind =
-  (typeof UpdateFileText200ParentKind)[keyof typeof UpdateFileText200ParentKind];
+export type UpdateFileText200ParentKind = typeof UpdateFileText200ParentKind[keyof typeof UpdateFileText200ParentKind];
+
 
 export const UpdateFileText200ParentKind = {
-  project: "project",
-  folder: "folder",
+  project: 'project',
+  folder: 'folder',
 } as const;
 
 export type UpdateFileText200 = {
@@ -266,12 +262,12 @@ export type UpdateFileText200 = {
   user_id: string;
 };
 
-export type CreateFolderBodyParentKind =
-  (typeof CreateFolderBodyParentKind)[keyof typeof CreateFolderBodyParentKind];
+export type CreateFolderBodyParentKind = typeof CreateFolderBodyParentKind[keyof typeof CreateFolderBodyParentKind];
+
 
 export const CreateFolderBodyParentKind = {
-  project: "project",
-  folder: "folder",
+  project: 'project',
+  folder: 'folder',
 } as const;
 
 export type CreateFolderBody = {
@@ -283,12 +279,12 @@ export type CreateFolderBody = {
   parent_kind: CreateFolderBodyParentKind;
 };
 
-export type CreateFolder200ParentKind =
-  (typeof CreateFolder200ParentKind)[keyof typeof CreateFolder200ParentKind];
+export type CreateFolder200ParentKind = typeof CreateFolder200ParentKind[keyof typeof CreateFolder200ParentKind];
+
 
 export const CreateFolder200ParentKind = {
-  project: "project",
-  folder: "folder",
+  project: 'project',
+  folder: 'folder',
 } as const;
 
 export type CreateFolder200 = {
@@ -304,12 +300,12 @@ export type CreateFolder200 = {
   user_id: string;
 };
 
-export type GetFolder200ParentKind =
-  (typeof GetFolder200ParentKind)[keyof typeof GetFolder200ParentKind];
+export type GetFolder200ParentKind = typeof GetFolder200ParentKind[keyof typeof GetFolder200ParentKind];
+
 
 export const GetFolder200ParentKind = {
-  project: "project",
-  folder: "folder",
+  project: 'project',
+  folder: 'folder',
 } as const;
 
 export type GetFolder200 = {
@@ -327,23 +323,23 @@ export type GetFolder200 = {
 
 export type UpdateFolderBody = {
   /**
-   * @maxLength 1024
-   * @nullable
-   */
+     * @maxLength 1024
+     * @nullable
+     */
   description?: string | null;
   /**
-   * @maxLength 256
-   * @nullable
-   */
+     * @maxLength 256
+     * @nullable
+     */
   name?: string | null;
 };
 
-export type UpdateFolder200ParentKind =
-  (typeof UpdateFolder200ParentKind)[keyof typeof UpdateFolder200ParentKind];
+export type UpdateFolder200ParentKind = typeof UpdateFolder200ParentKind[keyof typeof UpdateFolder200ParentKind];
+
 
 export const UpdateFolder200ParentKind = {
-  project: "project",
-  folder: "folder",
+  project: 'project',
+  folder: 'folder',
 } as const;
 
 export type UpdateFolder200 = {
@@ -359,76 +355,72 @@ export type UpdateFolder200 = {
   user_id: string;
 };
 
-export type GetFolderAncestors200AncestorsItem =
-  | ({
-      id: string;
-      name: string;
-    } & {
-      kind: "project";
-    })
-  | ({
-      id: string;
-      name: string;
-    } & {
-      kind: "folder";
-    });
+export type GetFolderAncestors200AncestorsItem = {
+  id: string;
+  name: string;
+} & {
+  kind: 'project';
+} | {
+  id: string;
+  name: string;
+} & {
+  kind: 'folder';
+};
 
 export type GetFolderAncestors200 = {
   ancestors: GetFolderAncestors200AncestorsItem[];
 };
 
 export type ListFolderChildrenParams = {
-  cursor_phase?: ListFolderChildrenCursorPhase;
-  cursor_name?: string;
-  cursor_id?: string;
-  /**
-   * @minimum 1
-   * @maximum 32
-   */
-  limit: number;
+cursor_phase?: ListFolderChildrenCursorPhase;
+cursor_name?: string;
+cursor_id?: string;
+/**
+ * @minimum 1
+ * @maximum 32
+ */
+limit: number;
 };
 
-export type ListFolderChildrenCursorPhase =
-  (typeof ListFolderChildrenCursorPhase)[keyof typeof ListFolderChildrenCursorPhase];
+export type ListFolderChildrenCursorPhase = typeof ListFolderChildrenCursorPhase[keyof typeof ListFolderChildrenCursorPhase];
+
 
 export const ListFolderChildrenCursorPhase = {
-  folders: "folders",
-  files: "files",
+  folders: 'folders',
+  files: 'files',
 } as const;
 
-export type ListFolderChildren200ItemsItem =
-  | ({
-      changed_at: string;
-      description: string;
-      id: string;
-      name: string;
-      parent_id: string;
-      parent_kind: "project" | "folder";
-      uploaded_at: string;
-      user_id: string;
-    } & {
-      kind: "folder";
-    })
-  | ({
-      changed_at: string;
-      description: string;
-      /** @minimum 0 */
-      file_size: number;
-      id: string;
-      name: string;
-      parent_id: string;
-      parent_kind: "project" | "folder";
-      storage_id: string;
-      uploaded_at: string;
-      user_id: string;
-    } & {
-      kind: "file";
-    });
+export type ListFolderChildren200ItemsItem = ({
+  changed_at: string;
+  description: string;
+  id: string;
+  name: string;
+  parent_id: string;
+  parent_kind: 'project' | 'folder';
+  uploaded_at: string;
+  user_id: string;
+}) & {
+  kind: 'folder';
+} | ({
+  changed_at: string;
+  description: string;
+  /** @minimum 0 */
+  file_size: number;
+  id: string;
+  name: string;
+  parent_id: string;
+  parent_kind: 'project' | 'folder';
+  storage_id: string;
+  uploaded_at: string;
+  user_id: string;
+}) & {
+  kind: 'file';
+};
 
 export type ListFolderChildren200NextCursor = null | {
   id: string;
   name: string;
-  phase: "folders" | "files";
+  phase: 'folders' | 'files';
 };
 
 export type ListFolderChildren200 = {
@@ -441,22 +433,22 @@ export type Health200 = {
 };
 
 export type ListProjectsParams = {
-  order: ListProjectsOrder;
-  cursor_last_seen_at?: string;
-  cursor_project_id?: string;
-  /**
-   * @minimum 1
-   * @maximum 32
-   */
-  limit: number;
+order: ListProjectsOrder;
+cursor_last_seen_at?: string;
+cursor_project_id?: string;
+/**
+ * @minimum 1
+ * @maximum 32
+ */
+limit: number;
 };
 
-export type ListProjectsOrder =
-  (typeof ListProjectsOrder)[keyof typeof ListProjectsOrder];
+export type ListProjectsOrder = typeof ListProjectsOrder[keyof typeof ListProjectsOrder];
+
 
 export const ListProjectsOrder = {
-  last_seen_at_asc: "last_seen_at_asc",
-  last_seen_at_desc: "last_seen_at_desc",
+  last_seen_at_asc: 'last_seen_at_asc',
+  last_seen_at_desc: 'last_seen_at_desc',
 } as const;
 
 export type ListProjects200ItemsItem = {
@@ -508,14 +500,14 @@ export type GetProject200 = {
 
 export type UpdateProjectBody = {
   /**
-   * @maxLength 512
-   * @nullable
-   */
+     * @maxLength 512
+     * @nullable
+     */
   description?: string | null;
   /**
-   * @maxLength 256
-   * @nullable
-   */
+     * @maxLength 256
+     * @nullable
+     */
   name?: string | null;
 };
 
@@ -530,13 +522,13 @@ export type UpdateProject200 = {
 };
 
 export type ListChatsParams = {
-  cursor_last_activity_at?: string;
-  cursor_chat_id?: string;
-  /**
-   * @minimum 1
-   * @maximum 32
-   */
-  limit: number;
+cursor_last_activity_at?: string;
+cursor_chat_id?: string;
+/**
+ * @minimum 1
+ * @maximum 32
+ */
+limit: number;
 };
 
 export type ListChats200ItemsItem = {
@@ -572,12 +564,12 @@ export type CreateChat200 = {
   user_id: string;
 };
 
-export type GetChat200MessagesItemRole =
-  (typeof GetChat200MessagesItemRole)[keyof typeof GetChat200MessagesItemRole];
+export type GetChat200MessagesItemRole = typeof GetChat200MessagesItemRole[keyof typeof GetChat200MessagesItemRole];
+
 
 export const GetChat200MessagesItemRole = {
-  user: "user",
-  assistant: "assistant",
+  user: 'user',
+  assistant: 'assistant',
 } as const;
 
 export type GetChat200MessagesItem = {
@@ -601,12 +593,12 @@ export type SendMessageBody = {
   content: string;
 };
 
-export type SendMessage200AssistantMessageRole =
-  (typeof SendMessage200AssistantMessageRole)[keyof typeof SendMessage200AssistantMessageRole];
+export type SendMessage200AssistantMessageRole = typeof SendMessage200AssistantMessageRole[keyof typeof SendMessage200AssistantMessageRole];
+
 
 export const SendMessage200AssistantMessageRole = {
-  user: "user",
-  assistant: "assistant",
+  user: 'user',
+  assistant: 'assistant',
 } as const;
 
 export type SendMessage200AssistantMessage = {
@@ -615,12 +607,12 @@ export type SendMessage200AssistantMessage = {
   sent_at: string;
 };
 
-export type SendMessage200UserMessageRole =
-  (typeof SendMessage200UserMessageRole)[keyof typeof SendMessage200UserMessageRole];
+export type SendMessage200UserMessageRole = typeof SendMessage200UserMessageRole[keyof typeof SendMessage200UserMessageRole];
+
 
 export const SendMessage200UserMessageRole = {
-  user: "user",
-  assistant: "assistant",
+  user: 'user',
+  assistant: 'assistant',
 } as const;
 
 export type SendMessage200UserMessage = {
@@ -636,57 +628,55 @@ export type SendMessage200 = {
 };
 
 export type ListProjectChildrenParams = {
-  cursor_phase?: ListProjectChildrenCursorPhase;
-  cursor_name?: string;
-  cursor_id?: string;
-  /**
-   * @minimum 1
-   * @maximum 32
-   */
-  limit: number;
+cursor_phase?: ListProjectChildrenCursorPhase;
+cursor_name?: string;
+cursor_id?: string;
+/**
+ * @minimum 1
+ * @maximum 32
+ */
+limit: number;
 };
 
-export type ListProjectChildrenCursorPhase =
-  (typeof ListProjectChildrenCursorPhase)[keyof typeof ListProjectChildrenCursorPhase];
+export type ListProjectChildrenCursorPhase = typeof ListProjectChildrenCursorPhase[keyof typeof ListProjectChildrenCursorPhase];
+
 
 export const ListProjectChildrenCursorPhase = {
-  folders: "folders",
-  files: "files",
+  folders: 'folders',
+  files: 'files',
 } as const;
 
-export type ListProjectChildren200ItemsItem =
-  | ({
-      changed_at: string;
-      description: string;
-      id: string;
-      name: string;
-      parent_id: string;
-      parent_kind: "project" | "folder";
-      uploaded_at: string;
-      user_id: string;
-    } & {
-      kind: "folder";
-    })
-  | ({
-      changed_at: string;
-      description: string;
-      /** @minimum 0 */
-      file_size: number;
-      id: string;
-      name: string;
-      parent_id: string;
-      parent_kind: "project" | "folder";
-      storage_id: string;
-      uploaded_at: string;
-      user_id: string;
-    } & {
-      kind: "file";
-    });
+export type ListProjectChildren200ItemsItem = ({
+  changed_at: string;
+  description: string;
+  id: string;
+  name: string;
+  parent_id: string;
+  parent_kind: 'project' | 'folder';
+  uploaded_at: string;
+  user_id: string;
+}) & {
+  kind: 'folder';
+} | ({
+  changed_at: string;
+  description: string;
+  /** @minimum 0 */
+  file_size: number;
+  id: string;
+  name: string;
+  parent_id: string;
+  parent_kind: 'project' | 'folder';
+  storage_id: string;
+  uploaded_at: string;
+  user_id: string;
+}) & {
+  kind: 'file';
+};
 
 export type ListProjectChildren200NextCursor = null | {
   id: string;
   name: string;
-  phase: "folders" | "files";
+  phase: 'folders' | 'files';
 };
 
 export type ListProjectChildren200 = {
@@ -695,21 +685,21 @@ export type ListProjectChildren200 = {
 };
 
 export type ListPodcastsParams = {
-  cursor_created_at?: string;
-  cursor_podcast_id?: string;
-  /**
-   * @minimum 1
-   * @maximum 32
-   */
-  limit: number;
+cursor_created_at?: string;
+cursor_podcast_id?: string;
+/**
+ * @minimum 1
+ * @maximum 32
+ */
+limit: number;
 };
 
-export type ListPodcasts200ItemsItemStatus =
-  (typeof ListPodcasts200ItemsItemStatus)[keyof typeof ListPodcasts200ItemsItemStatus];
+export type ListPodcasts200ItemsItemStatus = typeof ListPodcasts200ItemsItemStatus[keyof typeof ListPodcasts200ItemsItemStatus];
+
 
 export const ListPodcasts200ItemsItemStatus = {
-  generating: "generating",
-  generated: "generated",
+  generating: 'generating',
+  generated: 'generated',
 } as const;
 
 export type ListPodcasts200ItemsItem = {
@@ -767,14 +757,14 @@ export type GetPodcast200 = {
 
 export type UpdatePodcastBody = {
   /**
-   * @maxLength 1024
-   * @nullable
-   */
+     * @maxLength 1024
+     * @nullable
+     */
   description?: string | null;
   /**
-   * @maxLength 256
-   * @nullable
-   */
+     * @maxLength 256
+     * @nullable
+     */
   name?: string | null;
 };
 
@@ -804,14 +794,14 @@ export type GetUserProfile200 = {
 
 export type UpdateUserProfileBody = {
   /**
-   * @maxLength 32
-   * @nullable
-   */
+     * @maxLength 32
+     * @nullable
+     */
   display_name?: string | null;
   /**
-   * @maxLength 7
-   * @nullable
-   */
+     * @maxLength 7
+     * @nullable
+     */
   language_code?: string | null;
 };
 
@@ -869,12 +859,12 @@ export type GetRateLimits200 = {
 };
 
 export type ListSessionsParams = {
-  cursor?: string;
-  /**
-   * @minimum 1
-   * @maximum 32
-   */
-  limit: number;
+cursor?: string;
+/**
+ * @minimum 1
+ * @maximum 32
+ */
+limit: number;
 };
 
 export type ListSessions200ItemsItem = {
@@ -891,3 +881,4 @@ export type ListSessions200 = {
   /** @nullable */
   next_cursor?: string | null;
 };
+
