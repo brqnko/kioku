@@ -51,7 +51,8 @@
   "profile": {
     "tabs": {
       "account": "Account",
-      "security": "Security"
+      "security": "Security",
+      "usage": "Usage"
     },
     "loading": "Loading...",
     "save": "Save changes",
@@ -110,6 +111,20 @@
       "revokeAllConfirm": {
         "title": "Log out of all other devices",
         "body": "All sessions other than the current one will be terminated. You will need to sign in again on those devices."
+      }
+    },
+    "usage": {
+      "title": "Daily usage",
+      "subtitle": "Your current consumption of daily quotas. Counters reset at 00:00 UTC.",
+      "error": "Failed to load usage.",
+      "exhausted": "Limit reached",
+      "remaining_one": "{{count}} remaining",
+      "remaining_other": "{{count}} remaining",
+      "resetAt": "Resets {{time}}",
+      "items": {
+        "podcast": "Podcast generation",
+        "chatbot": "Chatbot messages",
+        "fileUpload": "File uploads"
       }
     }
   },
@@ -416,6 +431,15 @@
           "M5": "M5 — Bold"
         }
       },
+      "length": {
+        "title": "Length",
+        "hint": "Choose how detailed the narration should be.",
+        "options": {
+          "short": { "label": "Short", "desc": "Concise" },
+          "normal": { "label": "Normal", "desc": "Balanced" },
+          "long": { "label": "Long", "desc": "Detailed" }
+        }
+      },
       "fields": {
         "name": "Podcast name",
         "nameHint": "If left empty, the selected filenames will be joined with \", \".",
@@ -595,10 +619,22 @@
         "title": "2. Definitions",
         "lead": "The following terms shall have the meanings set forth below when used in these Terms.",
         "items": [
-          { "term": "\"We\" / \"Us\"", "desc": " refers to the entity that operates kioku." },
-          { "term": "\"User\"", "desc": " refers to any individual or legal entity that registers for or uses the Service." },
-          { "term": "\"Content\"", "desc": " refers to all information made available through the Service, including text, audio, images, and data." },
-          { "term": "\"AI Models\"", "desc": " refers to the artificial intelligence technologies and algorithms that we provide within the Service." }
+          {
+            "term": "\"We\" / \"Us\"",
+            "desc": " refers to the entity that operates kioku."
+          },
+          {
+            "term": "\"User\"",
+            "desc": " refers to any individual or legal entity that registers for or uses the Service."
+          },
+          {
+            "term": "\"Content\"",
+            "desc": " refers to all information made available through the Service, including text, audio, images, and data."
+          },
+          {
+            "term": "\"AI Models\"",
+            "desc": " refers to the artificial intelligence technologies and algorithms that we provide within the Service."
+          }
         ]
       },
       "service": {
@@ -647,10 +683,22 @@
         "title": "1. Information We Collect",
         "lead": "To deliver the Service effectively, we collect the following information.",
         "items": [
-          { "term": "Account information:", "desc": " Name, email address, affiliated institution, and other information provided when you create an account." },
-          { "term": "Uploaded materials:", "desc": " Learning materials such as PDFs, documents, and images that you intentionally upload for AI-based analysis or summarization." },
-          { "term": "Conversation history:", "desc": " Logs of questions, prompts, and generated responses involving the AI assistant (used to maintain learning context)." },
-          { "term": "Usage data:", "desc": " Technical information such as access logs, device information, and IP addresses, used to monitor system performance and maintain security." }
+          {
+            "term": "Account information:",
+            "desc": " Name, email address, affiliated institution, and other information provided when you create an account."
+          },
+          {
+            "term": "Uploaded materials:",
+            "desc": " Learning materials such as PDFs, documents, and images that you intentionally upload for AI-based analysis or summarization."
+          },
+          {
+            "term": "Conversation history:",
+            "desc": " Logs of questions, prompts, and generated responses involving the AI assistant (used to maintain learning context)."
+          },
+          {
+            "term": "Usage data:",
+            "desc": " Technical information such as access logs, device information, and IP addresses, used to monitor system performance and maintain security."
+          }
         ]
       },
       "aiCommitment": {
@@ -686,8 +734,14 @@
         "title": "5. Your Rights",
         "lead": "You have the following rights with respect to your data.",
         "cards": [
-          { "title": "Data export", "body": "You can download your saved notes and conversation history in a standard format." },
-          { "title": "Complete deletion", "body": "The right to immediately delete specific uploaded files or your entire account." }
+          {
+            "title": "Data export",
+            "body": "You can download your saved notes and conversation history in a standard format."
+          },
+          {
+            "title": "Complete deletion",
+            "body": "The right to immediately delete specific uploaded files or your entire account."
+          }
         ]
       },
       "contact": {

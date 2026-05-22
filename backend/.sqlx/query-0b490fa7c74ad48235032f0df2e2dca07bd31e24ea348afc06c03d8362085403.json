@@ -1,0 +1,12 @@
+{
+  "db_name": "MySQL",
+  "query": "\n            INSERT INTO user\n                (user_id, display_name, language_code, joined_at, iss, sub,\n                 recent_seen_file_ids, ai_learning_summary, ai_learning_summary_updated_at,\n                 podcast_daily_count, podcast_daily_count_reset_at,\n                 chatbot_daily_count, chatbot_daily_count_reset_at,\n                 file_upload_daily_count, file_upload_daily_count_reset_at)\n            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)\n            ON DUPLICATE KEY UPDATE\n                display_name                     = VALUES(display_name),\n                language_code                    = VALUES(language_code),\n                recent_seen_file_ids             = VALUES(recent_seen_file_ids),\n                ai_learning_summary              = VALUES(ai_learning_summary),\n                ai_learning_summary_updated_at   = VALUES(ai_learning_summary_updated_at),\n                podcast_daily_count              = VALUES(podcast_daily_count),\n                podcast_daily_count_reset_at     = VALUES(podcast_daily_count_reset_at),\n                chatbot_daily_count              = VALUES(chatbot_daily_count),\n                chatbot_daily_count_reset_at     = VALUES(chatbot_daily_count_reset_at),\n                file_upload_daily_count          = VALUES(file_upload_daily_count),\n                file_upload_daily_count_reset_at = VALUES(file_upload_daily_count_reset_at)\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 15
+    },
+    "nullable": []
+  },
+  "hash": "0b490fa7c74ad48235032f0df2e2dca07bd31e24ea348afc06c03d8362085403"
+}

@@ -18,7 +18,9 @@ const RETRY_MARKER = "x-auth-retried";
 function readCookie(name: string): string | undefined {
   if (typeof document === "undefined") return undefined;
   const match = document.cookie.match(
-    new RegExp(`(?:^|; )${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}=([^;]*)`),
+    new RegExp(
+      `(?:^|; )${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}=([^;]*)`,
+    ),
   );
   return match ? decodeURIComponent(match[1]) : undefined;
 }
@@ -67,9 +69,9 @@ export const kyInstance = ky.create({
         if (response.status !== 429) return;
         let code: string | undefined;
         try {
-          const body = (await response.clone().json()) as
-            | { code?: unknown }
-            | null;
+          const body = (await response.clone().json()) as {
+            code?: unknown;
+          } | null;
           if (body && typeof body.code === "string") code = body.code;
         } catch {
           // ignore body parse errors

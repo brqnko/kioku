@@ -103,7 +103,10 @@ export default function PodcastDetailPage() {
     const bar = progressRef.current;
     if (!audio || !bar || !Number.isFinite(audio.duration)) return;
     const rect = bar.getBoundingClientRect();
-    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    const ratio = Math.max(
+      0,
+      Math.min(1, (e.clientX - rect.left) / rect.width),
+    );
     audio.currentTime = ratio * audio.duration;
     setCurrentTime(audio.currentTime);
   };
@@ -258,9 +261,7 @@ export default function PodcastDetailPage() {
                 <div class="flex flex-col gap-2">
                   <div class="flex justify-between text-sm text-text-secondary">
                     <span>{formatTime(currentTime)}</span>
-                    <span>
-                      {duration > 0 ? formatTime(duration) : "--:--"}
-                    </span>
+                    <span>{duration > 0 ? formatTime(duration) : "--:--"}</span>
                   </div>
                   <div
                     ref={progressRef}
@@ -390,9 +391,7 @@ export default function PodcastDetailPage() {
                 <section class="flex flex-col gap-4">
                   <div class="flex items-center gap-2 text-text-secondary border-b border-border-subtle pb-2">
                     <span class="material-symbols-outlined">subject</span>
-                    <h2 class="heading-h2">
-                      {t("podcast.detail.transcript")}
-                    </h2>
+                    <h2 class="heading-h2">{t("podcast.detail.transcript")}</h2>
                   </div>
                   <ol class="flex flex-col gap-4 list-none p-0 m-0">
                     {podcast.podcast_script.map((entry, idx) => (

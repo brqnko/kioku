@@ -65,11 +65,7 @@ export function CodeBlockToolbar({
           </span>
         </button>
         <label class="text-xs flex items-center gap-1 text-text-secondary cursor-pointer">
-          <input
-            type="checkbox"
-            checked={stdinOpen}
-            onChange={onToggleStdin}
-          />
+          <input type="checkbox" checked={stdinOpen} onChange={onToggleStdin} />
           {t("codeBlock.stdin")}
         </label>
         <button
@@ -89,7 +85,9 @@ export function CodeBlockToolbar({
           placeholder={t("codeBlock.stdinPlaceholder")}
           value={stdin}
           maxLength={32 * 1024}
-          onInput={(e) => onStdinChange((e.target as HTMLTextAreaElement).value)}
+          onInput={(e) =>
+            onStdinChange((e.target as HTMLTextAreaElement).value)
+          }
         />
       )}
       <CompilerPicker
@@ -135,7 +133,9 @@ export function CodeBlockOutput({
 
   return (
     <div class="mt-2 rounded border border-border-subtle bg-surface-container-low p-2 text-xs">
-      <div class={`flex items-center gap-2 ${collapsed || !hasBody ? "" : "mb-1"}`}>
+      <div
+        class={`flex items-center gap-2 ${collapsed || !hasBody ? "" : "mb-1"}`}
+      >
         {loading ? (
           <span class="text-text-secondary">{t("codeBlock.running")}</span>
         ) : errorMessage ? (
@@ -174,7 +174,9 @@ export function CodeBlockOutput({
       {!collapsed && (
         <>
           {errorMessage && (
-            <pre class="whitespace-pre-wrap font-mono text-danger">{errorMessage}</pre>
+            <pre class="whitespace-pre-wrap font-mono text-danger">
+              {errorMessage}
+            </pre>
           )}
           {compileErr && (
             <Section

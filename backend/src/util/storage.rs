@@ -28,7 +28,7 @@ pub trait StorageService: Send + Sync {
         &self,
         storage_id: uuid::Uuid,
         content_type: &str,
-        content_length: i64,
+        content_length: Option<i64>,
         expires_in: std::time::Duration,
     ) -> Result<PresignedPut, anyhow::Error>;
 
@@ -160,27 +160,28 @@ impl StorageService for StorageServiceImpl {
         &self,
         storage_id: uuid::Uuid,
         content_type: &str,
-        content_length: i64,
+        content_length: Option<i64>,
         expires_in: std::time::Duration,
     ) -> Result<PresignedPut, anyhow::Error> {
         let expires_at = chrono::Utc::now() + expires_in;
         let presigning_config = aws_sdk_s3::presigning::PresigningConfig::expires_in(expires_in)?;
 
-        let presigned = self
+        let mut builder = self
             .client
             .put_object()
             .bucket(&self.bucket)
             .key(storage_id.to_string())
-            .content_type(content_type)
-            .content_length(content_length)
-            .presigned(presigning_config)
-            .await?;
+            .content_type(content_type);
+        if let Some(len) = content_length {
+            builder = builder.content_length(len);
+        }
+        let presigned = builder.presigned(presigning_config).await?;
 
         Ok(PresignedPut {
             url: presigned.uri().to_string(),
             method: presigned.method().to_string(),
             content_type: content_type.to_string(),
-            content_length,
+            content_length: content_length.unwrap_or(-1),
             expires_at,
         })
     }

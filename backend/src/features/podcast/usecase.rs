@@ -7,6 +7,7 @@ pub struct CreatePodcastInput {
     pub description: String,
     pub used_file_ids: Vec<uuid::Uuid>,
     pub voice_style: String,
+    pub length: String,
 }
 
 pub struct CreatePodcastOutput {
@@ -24,6 +25,9 @@ pub async fn create_podcast(
         return Ok(Err(err));
     }
     if let Err(err) = super::domain::VoiceStyle::new(input.voice_style.clone()) {
+        return Ok(Err(err));
+    }
+    if let Err(err) = super::domain::PodcastLength::new(&input.length) {
         return Ok(Err(err));
     }
     if input.used_file_ids.is_empty() {
@@ -50,68 +54,89 @@ pub async fn create_podcast(
     let mut tx = app.pool.begin().await?;
     app.locker.acquire(&mut tx, &lock_name, 10).await?;
 
-    let work: Result<Result<CreatePodcastOutput, crate::domain::DomainError>, anyhow::Error> =
-        async move {
-            let in_progress = app
-                .podcast_request_service
-                .list_by_user(input.user_id)
-                .await?;
-            if in_progress.len() >= super::domain::MAX_CONCURRENT_GENERATIONS {
-                return Ok(Err(crate::domain::DomainError::new(
-                    "max_concurrent_podcast_generations_exceeded",
-                    format!(
-                        "user can have at most {} concurrent podcast generations",
-                        super::domain::MAX_CONCURRENT_GENERATIONS
-                    ),
-                    crate::domain::DomainErrorKind::BadInput,
-                )));
-            }
-
-            let in_progress_for_project = in_progress
-                .iter()
-                .filter(|r| r.project_id == input.project_id)
-                .count();
-            let persisted_for_project = app
-                .podcast_query_service
-                .count_by_project(input.project_id)
-                .await? as usize;
-            if persisted_for_project + in_progress_for_project
-                >= super::domain::MAX_PODCASTS_PER_PROJECT
-            {
-                return Ok(Err(crate::domain::DomainError::new(
-                    "podcast_per_project_quota_exceeded",
-                    format!(
-                        "project can have at most {} podcasts",
-                        super::domain::MAX_PODCASTS_PER_PROJECT
-                    ),
-                    crate::domain::DomainErrorKind::BadInput,
-                )));
-            }
-
-            let podcast_id = uuid::Uuid::new_v4();
-            let request = crate::util::podcast_request::PodcastRequest {
-                podcast_id,
-                user_id: input.user_id,
-                project_id: input.project_id,
-                name: input.name,
-                description: input.description,
-                used_file_ids: input.used_file_ids,
-                started_at: chrono::Utc::now(),
-                voice_style: input.voice_style,
-            };
-
-            app.podcast_request_service
-                .save(&request, std::time::Duration::from_secs(3600))
-                .await?;
-
-            Ok(Ok(CreatePodcastOutput { podcast_id }))
+    let mut user = match app
+        .user_repository
+        .find_for_update(&mut tx, input.user_id)
+        .await?
+    {
+        Some(u) => u,
+        None => {
+            app.locker.release(&mut tx, &lock_name).await?;
+            return Ok(Err(crate::domain::DomainError::new(
+                "user_not_found",
+                "user not found".to_string(),
+                crate::domain::DomainErrorKind::NotFound,
+            )));
         }
-        .await;
+    };
+
+    if let Err(err) = user.check_podcast_daily_quota()? {
+        app.locker.release(&mut tx, &lock_name).await?;
+        return Ok(Err(err));
+    }
+
+    let work: Result<Result<(), crate::domain::DomainError>, anyhow::Error> = async {
+        let persisted_for_project = app
+            .podcast_query_service
+            .count_by_project(input.project_id)
+            .await? as usize;
+        if persisted_for_project >= super::domain::MAX_PODCASTS_PER_PROJECT {
+            return Ok(Err(crate::domain::DomainError::new(
+                "podcast_per_project_quota_exceeded",
+                format!(
+                    "project can have at most {} podcasts",
+                    super::domain::MAX_PODCASTS_PER_PROJECT
+                ),
+                crate::domain::DomainErrorKind::BadInput,
+            )));
+        }
+
+        Ok(Ok(()))
+    }
+    .await;
+
+    let work_result = match work {
+        Ok(inner) => inner,
+        Err(err) => {
+            app.locker.release(&mut tx, &lock_name).await?;
+            return Err(err);
+        }
+    };
+    if let Err(err) = work_result {
+        app.locker.release(&mut tx, &lock_name).await?;
+        return Ok(Err(err));
+    }
+
+    user.consume_podcast_daily_quota();
+    match app.user_repository.save(&mut tx, &user).await? {
+        Ok(()) => {}
+        Err(err) => {
+            app.locker.release(&mut tx, &lock_name).await?;
+            return Ok(Err(err));
+        }
+    }
 
     app.locker.release(&mut tx, &lock_name).await?;
-    drop(tx);
+    tx.commit().await?;
 
-    work
+    let podcast_id = uuid::Uuid::new_v4();
+    let request = crate::util::podcast_request::PodcastRequest {
+        podcast_id,
+        user_id: input.user_id,
+        project_id: input.project_id,
+        name: input.name,
+        description: input.description,
+        used_file_ids: input.used_file_ids,
+        started_at: chrono::Utc::now(),
+        voice_style: input.voice_style,
+        length: input.length,
+    };
+
+    app.podcast_request_service
+        .save(&request, std::time::Duration::from_secs(3600))
+        .await?;
+
+    Ok(Ok(CreatePodcastOutput { podcast_id }))
 }
 
 pub mod generate;
@@ -352,7 +377,10 @@ pub async fn update_podcast(
 
     let audio_url = app
         .storage_service
-        .presign_get(view.audio_storage_id, std::time::Duration::from_secs(60 * 60))
+        .presign_get(
+            view.audio_storage_id,
+            std::time::Duration::from_secs(60 * 60),
+        )
         .await?
         .url;
 

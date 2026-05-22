@@ -46,8 +46,7 @@ export default function PrivacyPolicyPage() {
   const { t } = useTranslation();
   useDocumentHead({
     title: "Privacy Policy — kioku",
-    description:
-      "How kioku handles your account data and uploaded materials.",
+    description: "How kioku handles your account data and uploaded materials.",
     canonical: "/privacy",
     robots: "index,follow",
     ogTitle: "Privacy Policy — kioku",
@@ -124,7 +123,11 @@ export default function PrivacyPolicyPage() {
           </>
         );
       case "retention":
-        return retentionParagraphs.map((p, i) => <p key={i} class="m-0">{p}</p>);
+        return retentionParagraphs.map((p, i) => (
+          <p key={i} class="m-0">
+            {p}
+          </p>
+        ));
       case "rights":
         return (
           <>

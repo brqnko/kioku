@@ -599,5 +599,83 @@ pub async fn get_dashboard(
     Ok(Ok(GetDashboardOutput { dashboard }))
 }
 
+// get rate limits
+
+pub struct GetRateLimitsInput {
+    pub user_id: uuid::Uuid,
+}
+
+pub struct RateLimitItem {
+    pub used: u32,
+    pub limit: u32,
+    pub reset_at: chrono::DateTime<chrono::Utc>,
+}
+
+pub struct GetRateLimitsOutput {
+    pub podcast: RateLimitItem,
+    pub chatbot: RateLimitItem,
+    pub file_upload: RateLimitItem,
+}
+
+pub async fn get_rate_limits(
+    app: &crate::app::App,
+    input: GetRateLimitsInput,
+) -> Result<Result<GetRateLimitsOutput, crate::domain::DomainError>, anyhow::Error> {
+    let view = match app
+        .user_query_service
+        .get_rate_limits(input.user_id)
+        .await?
+    {
+        Some(ok) => ok,
+        None => {
+            return Ok(Err(crate::domain::DomainError::new(
+                "user_not_found",
+                "user not found".to_string(),
+                crate::domain::DomainErrorKind::NotFound,
+            )));
+        }
+    };
+
+    let today_midnight = crate::util::datetime::today_utc_midnight()?;
+
+    let (podcast_used, podcast_reset) = if view.podcast_daily_count_reset_at < today_midnight {
+        (0, today_midnight)
+    } else {
+        (view.podcast_daily_count, view.podcast_daily_count_reset_at)
+    };
+    let (chatbot_used, chatbot_reset) = if view.chatbot_daily_count_reset_at < today_midnight {
+        (0, today_midnight)
+    } else {
+        (view.chatbot_daily_count, view.chatbot_daily_count_reset_at)
+    };
+    let (file_upload_used, file_upload_reset) =
+        if view.file_upload_daily_count_reset_at < today_midnight {
+            (0, today_midnight)
+        } else {
+            (
+                view.file_upload_daily_count,
+                view.file_upload_daily_count_reset_at,
+            )
+        };
+
+    Ok(Ok(GetRateLimitsOutput {
+        podcast: RateLimitItem {
+            used: podcast_used,
+            limit: super::domain::PODCAST_DAILY_LIMIT,
+            reset_at: podcast_reset,
+        },
+        chatbot: RateLimitItem {
+            used: chatbot_used,
+            limit: super::domain::CHATBOT_DAILY_LIMIT,
+            reset_at: chatbot_reset,
+        },
+        file_upload: RateLimitItem {
+            used: file_upload_used,
+            limit: super::domain::FILE_UPLOAD_DAILY_LIMIT,
+            reset_at: file_upload_reset,
+        },
+    }))
+}
+
 #[cfg(test)]
 mod tests {}

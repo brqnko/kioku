@@ -7,8 +7,6 @@ services:
       - "3000"
     env_file:
       - .env
-    volumes:
-      - hf-cache:/opt/huggingface
     secrets:
       - jwt-private
       - jwt-public
@@ -28,7 +26,6 @@ volumes:
   frontend-dist:
     external: true
     name: kioku-frontend-dist
-  hf-cache:
 
 secrets:
   jwt-private:

@@ -9,6 +9,8 @@ pub struct CreatePodcastBody {
     used_file_ids: Vec<uuid::Uuid>,
     /// One of: F1, F2, F3, F4, F5, M1, M2, M3, M4, M5
     voice_style: String,
+    /// One of: short, normal, long
+    length: String,
 }
 
 #[derive(serde::Serialize, utoipa::ToSchema)]
@@ -46,6 +48,7 @@ pub async fn create_podcast(
         description: body.description,
         used_file_ids: body.used_file_ids,
         voice_style: body.voice_style,
+        length: body.length,
     };
     let output = super::usecase::create_podcast(&app, input).await;
 

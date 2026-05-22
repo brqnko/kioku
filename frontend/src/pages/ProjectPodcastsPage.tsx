@@ -24,7 +24,10 @@ function formatPodcastDate(iso: string, locale: string): string {
 
 export default function ProjectPodcastsPage() {
   const { t, i18n } = useTranslation();
-  useDocumentHead({ title: "Project podcasts — kioku", robots: "noindex,nofollow" });
+  useDocumentHead({
+    title: "Project podcasts — kioku",
+    robots: "noindex,nofollow",
+  });
   const route = useRoute();
   const projectId = route.params.projectId;
 
@@ -39,9 +42,12 @@ export default function ProjectPodcastsPage() {
     refresh,
   } = usePodcasts(projectId);
 
-  const [editTarget, setEditTarget] = useState<ListPodcasts200ItemsItem | null>(null);
+  const [editTarget, setEditTarget] = useState<ListPodcasts200ItemsItem | null>(
+    null,
+  );
   const [editOpen, setEditOpen] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<ListPodcasts200ItemsItem | null>(null);
+  const [deleteTarget, setDeleteTarget] =
+    useState<ListPodcasts200ItemsItem | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
   const openEdit = (podcast: ListPodcasts200ItemsItem) => {
@@ -54,8 +60,7 @@ export default function ProjectPodcastsPage() {
     setDeleteOpen(true);
   };
 
-  const detailHref = (id: string) =>
-    `/projects/${projectId}/podcasts/${id}`;
+  const detailHref = (id: string) => `/projects/${projectId}/podcasts/${id}`;
 
   return (
     <div class="min-h-screen bg-background-dark text-text-primary">
@@ -97,14 +102,10 @@ export default function ProjectPodcastsPage() {
           </header>
 
           {projectError && (
-            <p class="text-sm text-danger mb-4">
-              {t("project.errors.load")}
-            </p>
+            <p class="text-sm text-danger mb-4">{t("project.errors.load")}</p>
           )}
           {listError && (
-            <p class="text-sm text-danger mb-4">
-              {t("podcast.errors.load")}
-            </p>
+            <p class="text-sm text-danger mb-4">{t("podcast.errors.load")}</p>
           )}
 
           {isLoading && items.length === 0 && (
@@ -147,8 +148,7 @@ export default function ProjectPodcastsPage() {
                       {podcast.name}
                     </h3>
                     <p class="text-sm text-text-secondary line-clamp-2 mb-auto">
-                      {podcast.description ||
-                        t("podcast.list.noDescription")}
+                      {podcast.description || t("podcast.list.noDescription")}
                     </p>
                     <p class="text-xs text-text-disabled">
                       {t("podcast.list.createdOn", {
@@ -161,7 +161,9 @@ export default function ProjectPodcastsPage() {
                   </a>
                   <div class="absolute top-2 right-2 z-10">
                     <RowActionMenu
-                      ariaLabel={t("podcast.list.menuLabel", { name: podcast.name })}
+                      ariaLabel={t("podcast.list.menuLabel", {
+                        name: podcast.name,
+                      })}
                       icon="more_vert"
                       onEdit={() => openEdit(podcast)}
                       onDelete={() => openDelete(podcast)}

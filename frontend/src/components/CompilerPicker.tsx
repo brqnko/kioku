@@ -171,9 +171,7 @@ export function CompilerPicker({
                         }}
                         onMouseEnter={() => setActiveIdx(idx)}
                         class={`w-full text-left px-4 py-2 cursor-pointer flex items-center gap-2 border-none bg-transparent ${
-                          active
-                            ? "bg-overlay-soft"
-                            : "hover:bg-overlay-faint"
+                          active ? "bg-overlay-soft" : "hover:bg-overlay-faint"
                         }`}
                       >
                         <span class="flex-1 min-w-0">

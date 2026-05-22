@@ -89,10 +89,7 @@ impl Chat {
         if self.messages.len() >= MAX_MESSAGES_PER_CHAT {
             return Err(crate::domain::DomainError::new(
                 "chat_messages_per_chat_quota_exceeded",
-                format!(
-                    "chat can have at most {} messages",
-                    MAX_MESSAGES_PER_CHAT
-                ),
+                format!("chat can have at most {} messages", MAX_MESSAGES_PER_CHAT),
                 crate::domain::DomainErrorKind::BadInput,
             ));
         }

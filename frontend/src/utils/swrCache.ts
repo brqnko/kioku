@@ -3,9 +3,7 @@ import { unstable_serialize } from "swr/infinite";
 import { LIBRARY_CACHE_KEY } from "../hooks/useLibrary";
 import { DASHBOARD_KEY } from "../api/keys";
 
-function makeInfiniteKey(
-  marker: string,
-): string {
+function makeInfiniteKey(marker: string): string {
   return unstable_serialize(() => [marker, null] as const);
 }
 

@@ -334,20 +334,18 @@ export default function LandingPage() {
                   <PodcastMock t={t} />
                 );
               const mockBlock = (
-                <div class={`relative max-w-2xl ${key === "library" ? "mr-auto" : "mx-auto"}`}>
+                <div
+                  class={`relative w-full max-w-2xl ${key === "library" ? "mr-auto" : "mx-auto"}`}
+                >
                   <div
                     aria-hidden="true"
-                    class="pointer-events-none absolute inset-0 flex items-center justify-center"
+                    class="pointer-events-none absolute inset-0 flex items-center justify-center -z-10"
                   >
                     <div
-                      class={`w-[750px] h-[450px] rounded-[100%] blur-3xl ${blurClass}`}
+                      class={`w-[120%] max-w-[750px] aspect-[5/3] rounded-[100%] blur-3xl ${blurClass}`}
                     />
                   </div>
-                  <div class="relative w-full overflow-x-clip">
-                    <div class="w-[178%] [zoom:0.56] tablet:w-[133%] tablet:[zoom:0.75] md:w-[111%] md:[zoom:0.9]">
-                      {mockNode}
-                    </div>
-                  </div>
+                  <div class="relative w-full">{mockNode}</div>
                 </div>
               );
 
@@ -413,7 +411,9 @@ export default function LandingPage() {
               <p class="whitespace-pre-line text-xl md:text-3xl font-bold text-charcoal dark:text-white max-w-2xl mx-auto leading-snug">
                 <Trans
                   i18nKey="cta.description"
-                  components={{ b: <strong class="font-extrabold text-primary" /> }}
+                  components={{
+                    b: <strong class="font-extrabold text-primary" />,
+                  }}
                 />
               </p>
               <div class="flex justify-center">

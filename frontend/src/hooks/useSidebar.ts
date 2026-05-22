@@ -15,11 +15,18 @@ function readIsMobile(): boolean {
   return window.matchMedia(MOBILE_QUERY).matches;
 }
 
-function syncDom(isMobile: boolean, dockedCollapsed: boolean, overlayOpen: boolean) {
+function syncDom(
+  isMobile: boolean,
+  dockedCollapsed: boolean,
+  overlayOpen: boolean,
+) {
   if (typeof document === "undefined") return;
   const root = document.documentElement;
   root.setAttribute("data-sidebar-mode", isMobile ? "overlay" : "docked");
-  root.setAttribute("data-sidebar-open", String(isMobile ? overlayOpen : !dockedCollapsed));
+  root.setAttribute(
+    "data-sidebar-open",
+    String(isMobile ? overlayOpen : !dockedCollapsed),
+  );
   const width = isMobile || dockedCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
   root.style.setProperty("--sidebar-width", width);
 }

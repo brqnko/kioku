@@ -1,5 +1,9 @@
 use std::ops::Add as _;
 
+pub const PODCAST_DAILY_LIMIT: u32 = 10;
+pub const CHATBOT_DAILY_LIMIT: u32 = 100;
+pub const FILE_UPLOAD_DAILY_LIMIT: u32 = 50;
+
 pub struct DisplayName(pub String);
 
 impl DisplayName {
@@ -92,6 +96,12 @@ pub struct User {
     pub recent_seen_file_ids: Vec<uuid::Uuid>,
     pub ai_learning_summary: String,
     pub ai_learning_summary_updated_at: chrono::DateTime<chrono::Utc>,
+    pub podcast_daily_count: u32,
+    pub podcast_daily_count_reset_at: chrono::DateTime<chrono::Utc>,
+    pub chatbot_daily_count: u32,
+    pub chatbot_daily_count_reset_at: chrono::DateTime<chrono::Utc>,
+    pub file_upload_daily_count: u32,
+    pub file_upload_daily_count_reset_at: chrono::DateTime<chrono::Utc>,
 }
 
 #[derive(Default)]
@@ -101,6 +111,12 @@ pub struct UserOption {
     pub recent_seen_file_ids: Option<Vec<uuid::Uuid>>,
     pub ai_learning_summary: Option<String>,
     pub ai_learning_summary_updated_at: Option<chrono::DateTime<chrono::Utc>>,
+    pub podcast_daily_count: Option<u32>,
+    pub podcast_daily_count_reset_at: Option<chrono::DateTime<chrono::Utc>>,
+    pub chatbot_daily_count: Option<u32>,
+    pub chatbot_daily_count_reset_at: Option<chrono::DateTime<chrono::Utc>>,
+    pub file_upload_daily_count: Option<u32>,
+    pub file_upload_daily_count_reset_at: Option<chrono::DateTime<chrono::Utc>>,
 }
 
 impl User {
@@ -168,6 +184,18 @@ impl User {
             ai_learning_summary_updated_at: option
                 .ai_learning_summary_updated_at
                 .unwrap_or(chrono::Utc::now()),
+            podcast_daily_count: option.podcast_daily_count.unwrap_or(0),
+            podcast_daily_count_reset_at: option
+                .podcast_daily_count_reset_at
+                .unwrap_or(crate::util::datetime::today_utc_midnight()?),
+            chatbot_daily_count: option.chatbot_daily_count.unwrap_or(0),
+            chatbot_daily_count_reset_at: option
+                .chatbot_daily_count_reset_at
+                .unwrap_or(crate::util::datetime::today_utc_midnight()?),
+            file_upload_daily_count: option.file_upload_daily_count.unwrap_or(0),
+            file_upload_daily_count_reset_at: option
+                .file_upload_daily_count_reset_at
+                .unwrap_or(crate::util::datetime::today_utc_midnight()?),
         }))
     }
 
@@ -209,6 +237,72 @@ impl User {
         self.ai_learning_summary = summary;
 
         Ok(())
+    }
+
+    pub fn check_podcast_daily_quota(
+        &mut self,
+    ) -> Result<Result<(), crate::domain::DomainError>, anyhow::Error> {
+        let today_midnight = crate::util::datetime::today_utc_midnight()?;
+        if self.podcast_daily_count_reset_at < today_midnight {
+            self.podcast_daily_count = 0;
+            self.podcast_daily_count_reset_at = today_midnight;
+        }
+        if self.podcast_daily_count >= PODCAST_DAILY_LIMIT {
+            return Ok(Err(crate::domain::DomainError::new(
+                "podcast_daily_limit_exceeded",
+                format!("daily limit of {PODCAST_DAILY_LIMIT} exceeded"),
+                crate::domain::DomainErrorKind::BadInput,
+            )));
+        }
+        Ok(Ok(()))
+    }
+
+    pub fn consume_podcast_daily_quota(&mut self) {
+        self.podcast_daily_count += 1;
+    }
+
+    pub fn check_chatbot_daily_quota(
+        &mut self,
+    ) -> Result<Result<(), crate::domain::DomainError>, anyhow::Error> {
+        let today_midnight = crate::util::datetime::today_utc_midnight()?;
+        if self.chatbot_daily_count_reset_at < today_midnight {
+            self.chatbot_daily_count = 0;
+            self.chatbot_daily_count_reset_at = today_midnight;
+        }
+        if self.chatbot_daily_count >= CHATBOT_DAILY_LIMIT {
+            return Ok(Err(crate::domain::DomainError::new(
+                "chatbot_daily_limit_exceeded",
+                format!("daily limit of {CHATBOT_DAILY_LIMIT} exceeded"),
+                crate::domain::DomainErrorKind::BadInput,
+            )));
+        }
+        Ok(Ok(()))
+    }
+
+    pub fn consume_chatbot_daily_quota(&mut self) {
+        self.chatbot_daily_count += 1;
+    }
+
+    pub fn check_file_upload_daily_quota(
+        &mut self,
+    ) -> Result<Result<(), crate::domain::DomainError>, anyhow::Error> {
+        let today_midnight = crate::util::datetime::today_utc_midnight()?;
+        if self.file_upload_daily_count_reset_at < today_midnight {
+            self.file_upload_daily_count = 0;
+            self.file_upload_daily_count_reset_at = today_midnight;
+        }
+        if self.file_upload_daily_count >= FILE_UPLOAD_DAILY_LIMIT {
+            return Ok(Err(crate::domain::DomainError::new(
+                "file_upload_daily_limit_exceeded",
+                format!("daily limit of {FILE_UPLOAD_DAILY_LIMIT} exceeded"),
+                crate::domain::DomainErrorKind::BadInput,
+            )));
+        }
+        Ok(Ok(()))
+    }
+
+    pub fn consume_file_upload_daily_quota(&mut self) {
+        self.file_upload_daily_count += 1;
     }
 }
 
@@ -437,6 +531,114 @@ mod tests {
             .copied()
             .collect::<Vec<_>>();
         assert_eq!(user.recent_seen_file_ids, expected);
+    }
+
+    #[test]
+    fn check_podcast_daily_quota_under_limit_passes() {
+        let mut user = make_user();
+        user.podcast_daily_count = PODCAST_DAILY_LIMIT - 1;
+        assert!(user.check_podcast_daily_quota().unwrap().is_ok());
+        assert_eq!(user.podcast_daily_count, PODCAST_DAILY_LIMIT - 1);
+    }
+
+    #[test]
+    fn check_podcast_daily_quota_at_limit_fails() {
+        let mut user = make_user();
+        user.podcast_daily_count = PODCAST_DAILY_LIMIT;
+        assert!(user.check_podcast_daily_quota().unwrap().is_err());
+    }
+
+    #[test]
+    fn check_podcast_daily_quota_resets_when_reset_at_is_stale() {
+        let mut user = make_user();
+        user.podcast_daily_count = PODCAST_DAILY_LIMIT * 10;
+        user.podcast_daily_count_reset_at = chrono::Utc::now() - chrono::Duration::days(2);
+        assert!(user.check_podcast_daily_quota().unwrap().is_ok());
+        assert_eq!(user.podcast_daily_count, 0);
+        assert_eq!(
+            user.podcast_daily_count_reset_at,
+            crate::util::datetime::today_utc_midnight().unwrap()
+        );
+    }
+
+    #[test]
+    fn consume_podcast_daily_quota_increments() {
+        let mut user = make_user();
+        user.podcast_daily_count = 5;
+        user.consume_podcast_daily_quota();
+        assert_eq!(user.podcast_daily_count, 6);
+    }
+
+    #[test]
+    fn check_chatbot_daily_quota_under_limit_passes() {
+        let mut user = make_user();
+        user.chatbot_daily_count = CHATBOT_DAILY_LIMIT - 1;
+        assert!(user.check_chatbot_daily_quota().unwrap().is_ok());
+        assert_eq!(user.chatbot_daily_count, CHATBOT_DAILY_LIMIT - 1);
+    }
+
+    #[test]
+    fn check_chatbot_daily_quota_at_limit_fails() {
+        let mut user = make_user();
+        user.chatbot_daily_count = CHATBOT_DAILY_LIMIT;
+        assert!(user.check_chatbot_daily_quota().unwrap().is_err());
+    }
+
+    #[test]
+    fn check_chatbot_daily_quota_resets_when_reset_at_is_stale() {
+        let mut user = make_user();
+        user.chatbot_daily_count = CHATBOT_DAILY_LIMIT * 10;
+        user.chatbot_daily_count_reset_at = chrono::Utc::now() - chrono::Duration::days(2);
+        assert!(user.check_chatbot_daily_quota().unwrap().is_ok());
+        assert_eq!(user.chatbot_daily_count, 0);
+        assert_eq!(
+            user.chatbot_daily_count_reset_at,
+            crate::util::datetime::today_utc_midnight().unwrap()
+        );
+    }
+
+    #[test]
+    fn consume_chatbot_daily_quota_increments() {
+        let mut user = make_user();
+        user.chatbot_daily_count = 5;
+        user.consume_chatbot_daily_quota();
+        assert_eq!(user.chatbot_daily_count, 6);
+    }
+
+    #[test]
+    fn check_file_upload_daily_quota_under_limit_passes() {
+        let mut user = make_user();
+        user.file_upload_daily_count = FILE_UPLOAD_DAILY_LIMIT - 1;
+        assert!(user.check_file_upload_daily_quota().unwrap().is_ok());
+        assert_eq!(user.file_upload_daily_count, FILE_UPLOAD_DAILY_LIMIT - 1);
+    }
+
+    #[test]
+    fn check_file_upload_daily_quota_at_limit_fails() {
+        let mut user = make_user();
+        user.file_upload_daily_count = FILE_UPLOAD_DAILY_LIMIT;
+        assert!(user.check_file_upload_daily_quota().unwrap().is_err());
+    }
+
+    #[test]
+    fn check_file_upload_daily_quota_resets_when_reset_at_is_stale() {
+        let mut user = make_user();
+        user.file_upload_daily_count = FILE_UPLOAD_DAILY_LIMIT * 10;
+        user.file_upload_daily_count_reset_at = chrono::Utc::now() - chrono::Duration::days(2);
+        assert!(user.check_file_upload_daily_quota().unwrap().is_ok());
+        assert_eq!(user.file_upload_daily_count, 0);
+        assert_eq!(
+            user.file_upload_daily_count_reset_at,
+            crate::util::datetime::today_utc_midnight().unwrap()
+        );
+    }
+
+    #[test]
+    fn consume_file_upload_daily_quota_increments() {
+        let mut user = make_user();
+        user.file_upload_daily_count = 5;
+        user.consume_file_upload_daily_quota();
+        assert_eq!(user.file_upload_daily_count, 6);
     }
 
     fn make_refresh_token() -> RefreshToken {

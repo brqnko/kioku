@@ -14,7 +14,10 @@ interface CreateProjectDialogProps {
   onClose: () => void;
 }
 
-export function CreateProjectDialog({ open, onClose }: CreateProjectDialogProps) {
+export function CreateProjectDialog({
+  open,
+  onClose,
+}: CreateProjectDialogProps) {
   const { t } = useTranslation();
   const { mutate } = useSWRConfig();
   const [name, setName] = useState("");
@@ -123,7 +126,9 @@ export function CreateProjectDialog({ open, onClose }: CreateProjectDialogProps)
             {t("createProject.cancel")}
           </button>
           <button type="submit" disabled={submitting} class="btn-primary">
-            {submitting ? t("createProject.submitting") : t("createProject.submit")}
+            {submitting
+              ? t("createProject.submitting")
+              : t("createProject.submit")}
           </button>
         </div>
       </form>

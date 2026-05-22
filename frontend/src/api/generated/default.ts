@@ -23,6 +23,7 @@ import type {
   GetFolderAncestors200,
   GetPodcast200,
   GetProject200,
+  GetRateLimits200,
   GetUserProfile200,
   ListChats200,
   ListChatsParams,
@@ -434,6 +435,14 @@ const logout = (
  ) => {
       return customInstance<GetDashboard200>(
       {url: `/users/me/dashboard`, method: 'GET'
+    },
+      );
+    }
+  const getRateLimits = (
+
+ ) => {
+      return customInstance<GetRateLimits200>(
+      {url: `/users/me/rate-limits`, method: 'GET'
     },
       );
     }

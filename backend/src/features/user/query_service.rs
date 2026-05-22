@@ -29,6 +29,15 @@ pub struct GetDashboardView {
     pub recent_seen_files: Vec<GetDashboardRecentFileView>,
 }
 
+pub struct GetRateLimitsView {
+    pub podcast_daily_count: u32,
+    pub podcast_daily_count_reset_at: chrono::DateTime<chrono::Utc>,
+    pub chatbot_daily_count: u32,
+    pub chatbot_daily_count_reset_at: chrono::DateTime<chrono::Utc>,
+    pub file_upload_daily_count: u32,
+    pub file_upload_daily_count_reset_at: chrono::DateTime<chrono::Utc>,
+}
+
 #[async_trait::async_trait]
 pub trait QueryService: Send + Sync {
     async fn get_user_profile(
@@ -45,6 +54,10 @@ pub trait QueryService: Send + Sync {
         &self,
         user_id: uuid::Uuid,
     ) -> Result<Option<GetDashboardView>, anyhow::Error>;
+    async fn get_rate_limits(
+        &self,
+        user_id: uuid::Uuid,
+    ) -> Result<Option<GetRateLimitsView>, anyhow::Error>;
 }
 
 pub struct QueryServiceImpl {
@@ -224,5 +237,39 @@ impl QueryService for QueryServiceImpl {
             ai_learning_summary_updated_at: user_row.ai_learning_summary_updated_at.and_utc(),
             recent_seen_files,
         }))
+    }
+
+    async fn get_rate_limits(
+        &self,
+        user_id: uuid::Uuid,
+    ) -> Result<Option<GetRateLimitsView>, anyhow::Error> {
+        let row = sqlx::query!(
+            r#"
+            SELECT
+                podcast_daily_count,
+                podcast_daily_count_reset_at,
+                chatbot_daily_count,
+                chatbot_daily_count_reset_at,
+                file_upload_daily_count,
+                file_upload_daily_count_reset_at
+            FROM user
+            WHERE user_id = ?
+            "#,
+            user_id.as_bytes().as_slice(),
+        )
+        .fetch_optional(&self.pool)
+        .await?;
+
+        match row {
+            Some(r) => Ok(Some(GetRateLimitsView {
+                podcast_daily_count: r.podcast_daily_count,
+                podcast_daily_count_reset_at: r.podcast_daily_count_reset_at.and_utc(),
+                chatbot_daily_count: r.chatbot_daily_count,
+                chatbot_daily_count_reset_at: r.chatbot_daily_count_reset_at.and_utc(),
+                file_upload_daily_count: r.file_upload_daily_count,
+                file_upload_daily_count_reset_at: r.file_upload_daily_count_reset_at.and_utc(),
+            })),
+            None => Ok(None),
+        }
     }
 }

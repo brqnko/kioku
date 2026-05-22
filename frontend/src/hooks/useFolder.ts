@@ -14,9 +14,8 @@ const PAGE_SIZE = 32;
 type FolderChildCursor = NonNullable<ListFolderChildren200["next_cursor"]>;
 
 export function useFolder(folderId: string | undefined) {
-  return useSWR<GetFolder200>(
-    folderId ? folderKey(folderId) : null,
-    () => kyInstance.get(`folders/${folderId}`).json<GetFolder200>(),
+  return useSWR<GetFolder200>(folderId ? folderKey(folderId) : null, () =>
+    kyInstance.get(`folders/${folderId}`).json<GetFolder200>(),
   );
 }
 
@@ -31,9 +30,11 @@ export function useFolderChildren(folderId: string | undefined) {
     return ["folder-children", folderId, prev!.next_cursor!] as const;
   };
 
-  const fetcher = async (
-    [, id, cursor]: readonly [string, string, FolderChildCursor | null],
-  ) => {
+  const fetcher = async ([, id, cursor]: readonly [
+    string,
+    string,
+    FolderChildCursor | null,
+  ]) => {
     const searchParams: Record<string, string | number> = { limit: PAGE_SIZE };
     if (cursor) {
       searchParams.cursor_phase = cursor.phase;
@@ -50,9 +51,8 @@ export function useFolderChildren(folderId: string | undefined) {
 
   const pages = data ?? [];
   const items = pages.flatMap((p) => p.items);
-  const hasMore = pages.length > 0
-    ? Boolean(pages[pages.length - 1]?.next_cursor)
-    : false;
+  const hasMore =
+    pages.length > 0 ? Boolean(pages[pages.length - 1]?.next_cursor) : false;
   const loadingMore = isValidating && pages.length > 0 && pages.length < size;
 
   const loadMore = () => setSize((s) => s + 1);

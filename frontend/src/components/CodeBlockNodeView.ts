@@ -1,6 +1,9 @@
 import { render, h } from "preact";
 import type { Node as ProseNode } from "@milkdown/prose/model";
-import type { EditorView as PMEditorView, NodeView } from "@milkdown/prose/view";
+import type {
+  EditorView as PMEditorView,
+  NodeView,
+} from "@milkdown/prose/view";
 import { TextSelection } from "@milkdown/prose/state";
 import {
   EditorState as CMState,
@@ -13,10 +16,7 @@ import {
   type KeyBinding,
 } from "@codemirror/view";
 import { kyInstance } from "../api/mutator";
-import type {
-  RunCode200,
-  RunCodeBody,
-} from "../api/generated/backend.schemas";
+import type { RunCode200, RunCodeBody } from "../api/generated/backend.schemas";
 import type { Compiler } from "../hooks/useCompilers";
 import { pickCompiler } from "../utils/codeRunner";
 import {
@@ -131,9 +131,8 @@ export class CodeBlockView implements NodeView {
     });
 
     this.themeUnsub = onThemeChange((m) => this.applyTheme(m));
-    this.compilersUnsub = this.subscribeCompilers?.(() =>
-      this.refreshCompilers(),
-    ) ?? null;
+    this.compilersUnsub =
+      this.subscribeCompilers?.(() => this.refreshCompilers()) ?? null;
     this.applyLanguage(language);
 
     this.outsideMouseDown = (e) => {
@@ -174,8 +173,7 @@ export class CodeBlockView implements NodeView {
     if (this.destroyed) return;
     const list = this.getCompilers();
     const stillValid =
-      this.state.compiler &&
-      list.some((c) => c.name === this.state.compiler);
+      this.state.compiler && list.some((c) => c.name === this.state.compiler);
     this.setState({
       compiler: stillValid
         ? this.state.compiler
@@ -216,10 +214,7 @@ export class CodeBlockView implements NodeView {
     }
 
     tr = tr.setSelection(
-      TextSelection.near(
-        tr.doc.resolve(cursorAt),
-        side === "before" ? -1 : 1,
-      ),
+      TextSelection.near(tr.doc.resolve(cursorAt), side === "before" ? -1 : 1),
     );
     tr.scrollIntoView();
     this.pmView.dispatch(tr);

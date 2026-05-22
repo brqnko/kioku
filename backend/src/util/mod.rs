@@ -1,6 +1,6 @@
 pub mod ad_lock;
-pub mod audio;
 pub mod code_runner;
+pub mod datetime;
 pub mod dialect;
 pub mod embedding;
 pub mod jti_blacklist;
@@ -11,4 +11,3 @@ pub mod pdf2md;
 pub mod podcast_request;
 pub mod random;
 pub mod storage;
-pub mod tts;

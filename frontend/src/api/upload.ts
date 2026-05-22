@@ -54,9 +54,7 @@ export async function uploadFile(opts: UploadOptions): Promise<CreateFile200> {
     storage_id: presigned.storage_id,
   };
 
-  return kyInstance
-    .post("files", { json: createBody })
-    .json<CreateFile200>();
+  return kyInstance.post("files", { json: createBody }).json<CreateFile200>();
 }
 
 interface CreateTextFileOptions {

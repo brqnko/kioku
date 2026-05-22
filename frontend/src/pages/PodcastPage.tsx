@@ -54,7 +54,8 @@ export default function PodcastPage() {
                 {project.name}
               </h3>
               <p class="text-sm text-text-secondary line-clamp-2 mb-auto">
-                {project.description || t("podcast.selectProject.noDescription")}
+                {project.description ||
+                  t("podcast.selectProject.noDescription")}
               </p>
               <div class="mt-4 pt-2 border-t border-border-subtle flex items-center justify-between">
                 <span class="text-xs text-text-disabled flex items-center gap-1">

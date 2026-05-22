@@ -48,6 +48,7 @@ mod docs {
             revoke_session,
             revoke_all_sessions,
             get_dashboard,
+            get_rate_limits,
             create_project,
             list_projects,
             get_project,

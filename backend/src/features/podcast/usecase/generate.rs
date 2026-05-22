@@ -79,11 +79,14 @@ pub async fn generate_podcast(
 
     let is_japanese = user_lang.starts_with("ja");
 
+    let length = crate::features::podcast::domain::PodcastLength::new(&request.length)
+        .unwrap_or(crate::features::podcast::domain::PodcastLength::Normal);
     let (system, user_msg) = build_script_prompt(
         &podcast_intermediate.name.0,
         &podcast_intermediate.description.0,
         &user_lang,
         &source,
+        length,
     );
 
     let script_raw = app
@@ -116,18 +119,7 @@ pub async fn generate_podcast(
 
     let lang_prefix = if is_japanese { "ja" } else { "en" };
     let tts_voice = format!("{}:{}", lang_prefix, request.voice_style);
-    let tts_result = app
-        .tts_client
-        .synthesize_dialogue(crate::util::tts::SynthesizeDialogueInput {
-            script: tts_script,
-            voice: tts_voice,
-        })
-        .await?;
-    let wav = crate::util::tts::wrap_pcm_as_wav(&tts_result.audio, tts_result.sample_rate);
-    let opus = crate::util::audio::wav_to_opus(wav, 32).await?;
-    app.storage_service
-        .put_object(audio_storage_id, "audio/ogg", opus)
-        .await?;
+    synthesize_via_sgi(app, audio_storage_id, &tts_script, &tts_voice).await?;
 
     let podcast = match crate::features::podcast::domain::Podcast::new(
         podcast_intermediate.name.0,
@@ -241,10 +233,12 @@ fn parse_script(script: &str) -> Vec<crate::features::podcast::domain::PodcastSc
         .split("\n\n")
         .map(|para| para.trim().replace('\n', " "))
         .filter(|para| !para.is_empty())
-        .map(|para| crate::features::podcast::domain::PodcastScriptEntry {
-            speaker: String::new(),
-            text: strip_audio_tags(&para),
-        })
+        .map(
+            |para| crate::features::podcast::domain::PodcastScriptEntry {
+                speaker: String::new(),
+                text: strip_audio_tags(&para),
+            },
+        )
         .collect()
 }
 
@@ -275,28 +269,174 @@ fn strip_audio_tags(text: &str) -> String {
     out.trim().to_string()
 }
 
+const SGI_POLL_INTERVAL_MS: u64 = 1000;
+const SGI_POLL_TIMEOUT_SECS: u64 = 1800;
+const SGI_REQUEST_TIMEOUT_SECS: u64 = 180;
+const PRESIGN_EXPIRES_SECS: u64 = SGI_POLL_TIMEOUT_SECS + 300;
+
+async fn synthesize_via_sgi(
+    app: &crate::app::App,
+    audio_storage_id: uuid::Uuid,
+    script: &str,
+    voice: &str,
+) -> Result<(), anyhow::Error> {
+    use anyhow::Context as _;
+
+    #[derive(serde::Serialize)]
+    struct CreateJobRequest {
+        lines: Vec<DialogueLine>,
+        format: &'static str,
+        upload: UploadTarget,
+    }
+
+    #[derive(serde::Serialize)]
+    struct DialogueLine {
+        voice: String,
+        text: String,
+    }
+
+    #[derive(serde::Serialize)]
+    struct UploadTarget {
+        method: String,
+        url: String,
+        content_type: String,
+    }
+
+    #[derive(serde::Deserialize)]
+    struct CreateJobResponse {
+        job_id: uuid::Uuid,
+    }
+
+    let presigned = app
+        .storage_service
+        .presign_put(
+            audio_storage_id,
+            "audio/ogg",
+            None,
+            std::time::Duration::from_secs(PRESIGN_EXPIRES_SECS),
+        )
+        .await?;
+
+    let lines: Vec<DialogueLine> = script
+        .split("\n\n")
+        .map(str::trim)
+        .filter(|p| !p.is_empty())
+        .map(|p| DialogueLine {
+            voice: voice.to_string(),
+            text: p.to_string(),
+        })
+        .collect();
+    anyhow::ensure!(!lines.is_empty(), "podcast script is empty");
+
+    let http_client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(SGI_REQUEST_TIMEOUT_SECS))
+        .build()?;
+    let base_url = app.sgi_url.trim_end_matches('/');
+
+    let health_resp = http_client
+        .get(format!("{base_url}/health"))
+        .bearer_auth(&app.sgi_token)
+        .send()
+        .await
+        .context("sgi: failed to send health request")?;
+    if !health_resp.status().is_success() {
+        let s = health_resp.status();
+        let body = health_resp.text().await.unwrap_or_default();
+        anyhow::bail!("sgi: health responded with {s}: {body}");
+    }
+
+    let create_resp = http_client
+        .post(format!("{base_url}/jobs"))
+        .bearer_auth(&app.sgi_token)
+        .json(&CreateJobRequest {
+            lines,
+            format: "opus",
+            upload: UploadTarget {
+                method: presigned.method,
+                url: presigned.url,
+                content_type: presigned.content_type,
+            },
+        })
+        .send()
+        .await
+        .context("sgi: failed to send create-job request")?;
+
+    let status = create_resp.status();
+    if !status.is_success() {
+        let body = create_resp.text().await.unwrap_or_default();
+        anyhow::bail!("sgi: create-job responded with {status}: {body}");
+    }
+    let job: CreateJobResponse = create_resp
+        .json()
+        .await
+        .context("sgi: failed to parse create-job response")?;
+    tracing::info!(target: "tts", job_id = %job.job_id, "sgi job created");
+
+    let job_url = format!("{base_url}/jobs/{}", job.job_id);
+    let deadline =
+        std::time::Instant::now() + std::time::Duration::from_secs(SGI_POLL_TIMEOUT_SECS);
+
+    loop {
+        if std::time::Instant::now() >= deadline {
+            anyhow::bail!("sgi: polling timed out for job {}", job.job_id);
+        }
+        tokio::time::sleep(std::time::Duration::from_millis(SGI_POLL_INTERVAL_MS)).await;
+
+        let resp = http_client
+            .get(&job_url)
+            .bearer_auth(&app.sgi_token)
+            .send()
+            .await
+            .context("sgi: failed to send get-job request")?;
+        let s = resp.status();
+        if s == reqwest::StatusCode::NOT_FOUND {
+            tracing::info!(target: "tts", job_id = %job.job_id, "sgi job completed");
+            return Ok(());
+        }
+        if !s.is_success() {
+            let body = resp.text().await.unwrap_or_default();
+            anyhow::bail!("sgi: get-job responded with {s}: {body}");
+        }
+    }
+}
+
 pub fn build_script_prompt(
     name: &str,
     description: &str,
     lang: &str,
     source: &str,
+    length: crate::features::podcast::domain::PodcastLength,
 ) -> (String, String) {
+    use crate::features::podcast::domain::PodcastLength;
+
     let system = if lang.starts_with("ja") {
+        let length_directive = match length {
+            PodcastLength::Short => "簡潔に書くこと。",
+            PodcastLength::Normal => "",
+            PodcastLength::Long => "現在ある内容を端折らず、必要な分だけ長さを惜しまずに書くこと。",
+        };
         format!(
             "あなたはポッドキャストのナレーターです。\
             「{name}」（{description}）の完全なナレーションスクリプトを書いてください。\
             一人のナレーターによるモノローグ形式で段落ごとに書き、段落間は空行で区切ること。\
             自然な話し言葉で書き、タグや記号は含めないこと。すべて日本語で書くこと。\
-            内容を端折らず、必要な分だけ長さを惜しまずに書くこと。",
+            {length_directive}",
         )
     } else {
+        let length_directive = match length {
+            PodcastLength::Short => "Keep it concise.",
+            PodcastLength::Normal => "",
+            PodcastLength::Long => {
+                "Do not cut corners — write as much length as the material warrants."
+            }
+        };
         format!(
             "You are a podcast narrator. \
             Write a complete narration script for \"{name}\" ({description}). \
             Single narrator monologue, paragraphs separated by blank lines. \
             Natural spoken language only, no tags or non-speech symbols. \
             Write entirely in BCP-47 \"{lang}\". \
-            Do not cut corners — write as much length as the material warrants.",
+            {length_directive}",
         )
     };
     (system, source.to_string())

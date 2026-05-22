@@ -32,14 +32,15 @@ export function usePodcasts(projectId: string | undefined) {
   ): readonly [string, string, Cursor | null] | null => {
     if (!projectId) return null;
     if (prev && !prev.next_cursor) return null;
-    if (pageIndex === 0)
-      return ["project-podcasts", projectId, null] as const;
+    if (pageIndex === 0) return ["project-podcasts", projectId, null] as const;
     return ["project-podcasts", projectId, prev!.next_cursor!] as const;
   };
 
-  const fetcher = async (
-    [, id, cursor]: readonly [string, string, Cursor | null],
-  ) => {
+  const fetcher = async ([, id, cursor]: readonly [
+    string,
+    string,
+    Cursor | null,
+  ]) => {
     const searchParams: Record<string, string | number> = { limit: PAGE_SIZE };
     if (cursor) {
       searchParams.cursor_created_at = cursor.created_at;
@@ -55,9 +56,8 @@ export function usePodcasts(projectId: string | undefined) {
 
   const pages = data ?? [];
   const items = pages.flatMap((p) => p.items);
-  const hasMore = pages.length > 0
-    ? Boolean(pages[pages.length - 1]?.next_cursor)
-    : false;
+  const hasMore =
+    pages.length > 0 ? Boolean(pages[pages.length - 1]?.next_cursor) : false;
   const loadingMore = isValidating && pages.length > 0 && pages.length < size;
 
   const loadMore = () => setSize((s) => s + 1);

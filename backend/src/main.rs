@@ -15,6 +15,8 @@ struct Config {
     s3_temporary_bucket: String,
     redis_url: String,
     github_token: String,
+    sgi_url: String,
+    sgi_token: String,
 }
 
 impl Config {
@@ -45,6 +47,8 @@ impl Config {
             s3_temporary_bucket: require("S3_TEMPORARY_BUCKET")?,
             redis_url: require("REDIS_URL")?,
             github_token: require("GITHUB_TOKEN")?,
+            sgi_url: require("SGI_URL")?,
+            sgi_token: require("SGI_TOKEN")?,
         })
     }
 }
@@ -137,9 +141,6 @@ async fn main() -> anyhow::Result<()> {
     let llm_client: Arc<dyn backend::util::llm::LLMClient> =
         Arc::new(backend::util::llm::CopilotImpl::new(config.github_token)?);
 
-    let tts_client: Arc<dyn backend::util::tts::TTSClient> =
-        Arc::new(backend::util::tts::SupertonicTtsImpl::new()?);
-
     let pdf2md_service: Arc<dyn backend::util::pdf2md::Pdf2MdService> =
         Arc::new(backend::util::pdf2md::Pdf2MdServiceImpl::new());
 
@@ -160,7 +161,6 @@ async fn main() -> anyhow::Result<()> {
         jti_blacklist_service,
         embedding_client,
         llm_client,
-        tts_client,
         pdf2md_service,
         podcast_request_service,
         code_runner_client,
@@ -168,6 +168,8 @@ async fn main() -> anyhow::Result<()> {
         access_token_duration: chrono::Duration::hours(1),
         refresh_token_duration: chrono::Duration::days(7),
         frontend_url: config.frontend_url,
+        sgi_url: config.sgi_url,
+        sgi_token: config.sgi_token,
     }));
 
     let bind_addr = format!("0.0.0.0:{}", config.port);
@@ -179,10 +181,7 @@ async fn main() -> anyhow::Result<()> {
 
     tracing::info!("graceful shutdown complete");
 
-    // otel_guard.shutdown() の内部で reqwest-blocking が async コンテキストと
-    // 衝突するか、後続の Drop で ort/onnxruntime の静的状態と解放順が衝突して
-    // SIGSEGV になる。Rust デストラクタを走らせずに終了することで回避する。
-    std::process::exit(0);
+    Ok(())
 }
 
 async fn shutdown_signal() {

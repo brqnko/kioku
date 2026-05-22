@@ -55,28 +55,37 @@
 
 ```css
 /* 本文（実測値） */
-font-family: NotionInter, Inter, -apple-system, "system-ui", "Segoe UI",
-  Helvetica, "Apple Color Emoji", Arial, sans-serif;
+font-family:
+  NotionInter,
+  Inter,
+  -apple-system,
+  "system-ui",
+  "Segoe UI",
+  Helvetica,
+  "Apple Color Emoji",
+  Arial,
+  sans-serif;
 
 /* 等幅（アプリ内コードブロック） */
 font-family: SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
 ```
 
 **フォールバックの考え方**:
+
 - NotionInter（カスタム Inter）を最優先に配置し、欧文の品質を確保
 - 和文フォントは明示的に指定せず、OS のシステムフォントスタックに委ねている
 - `"Apple Color Emoji"` を含めて絵文字表示に対応
 
 ### 3.4 文字サイズ・ウェイト階層
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | 備考 |
-|------|------|------|--------|-------------|----------------|------|
-| Display | NotionInter | 64px | 700 | 64px (1.0) | normal | ランディングページ大見出し |
-| Heading 1 | NotionInter | 54px | 700 | 56px (≈1.04) | normal | セクション見出し |
-| Heading 2 | NotionInter | 22px | 700 | 28px (≈1.27) | normal | サブ見出し |
-| Body | NotionInter | 16px | 400 | 24px (1.5) | normal | 本文 |
-| Caption | NotionInter | 14px | 400 | 20px (≈1.43) | normal | 補足、注釈 |
-| Small | NotionInter | 12px | 400 | 16px (≈1.33) | normal | 最小テキスト |
+| Role      | Font        | Size | Weight | Line Height  | Letter Spacing | 備考                       |
+| --------- | ----------- | ---- | ------ | ------------ | -------------- | -------------------------- |
+| Display   | NotionInter | 64px | 700    | 64px (1.0)   | normal         | ランディングページ大見出し |
+| Heading 1 | NotionInter | 54px | 700    | 56px (≈1.04) | normal         | セクション見出し           |
+| Heading 2 | NotionInter | 22px | 700    | 28px (≈1.27) | normal         | サブ見出し                 |
+| Body      | NotionInter | 16px | 400    | 24px (1.5)   | normal         | 本文                       |
+| Caption   | NotionInter | 14px | 400    | 20px (≈1.43) | normal         | 補足、注釈                 |
+| Small     | NotionInter | 12px | 400    | 16px (≈1.33) | normal         | 最小テキスト               |
 
 ### 3.5 行間・字間
 
@@ -86,6 +95,7 @@ font-family: SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
 - **見出しの字間**: normal（0）
 
 **ガイドライン**:
+
 - Notion は letter-spacing を明示的に広げていない。代わりに font-feature-settings で数字の lining figures を有効化
 - 行間は本文 1.5 で標準的。大見出しは line-height: 1.0 でタイトに詰めている
 
@@ -98,13 +108,16 @@ overflow-wrap: break-word;
 ```
 
 **禁則対象**:
+
 - 行頭禁止: `）」』】〕〉》」】、。，．・：；？！`
 - 行末禁止: `（「『【〔〈《「【`
 
 ### 3.7 OpenType 機能
 
 ```css
-font-feature-settings: "lnum", "locl" 0;
+font-feature-settings:
+  "lnum",
+  "locl" 0;
 ```
 
 - **lnum**: Lining Figures — 数字をベースラインに揃えた等高の形にする。表やデータ表示で数字が揃う
@@ -121,6 +134,7 @@ font-feature-settings: "lnum", "locl" 0;
 ### Buttons
 
 **Primary（ダーク背景上の白ボタン）**
+
 - Background: `#FFFFFF`
 - Text: `#191918`
 - Padding: 8px 16px
@@ -129,6 +143,7 @@ font-feature-settings: "lnum", "locl" 0;
 - Font Weight: 500
 
 **Secondary（ゴースト / アウトライン）**
+
 - Background: `transparent`
 - Text: `rgba(255,255,255,0.95)`
 - Border: 1px solid `rgba(255,255,255,0.2)`
@@ -160,13 +175,13 @@ font-feature-settings: "lnum", "locl" 0;
 ### Spacing Scale
 
 | Token | Value |
-|-------|-------|
-| XS | 4px |
-| S | 8px |
-| M | 16px |
-| L | 24px |
-| XL | 32px |
-| XXL | 64px |
+| ----- | ----- |
+| XS    | 4px   |
+| S     | 8px   |
+| M     | 16px  |
+| L     | 24px  |
+| XL    | 32px  |
+| XXL   | 64px  |
 
 ### Container
 
@@ -182,12 +197,12 @@ font-feature-settings: "lnum", "locl" 0;
 
 ## 6. Depth & Elevation
 
-| Level | Shadow | 用途 |
-|-------|--------|------|
-| 0 | none | フラットな要素 |
-| 1 | `0 1px 3px rgba(0,0,0,0.1)` | カード、リスト項目 |
-| 2 | `0 4px 12px rgba(0,0,0,0.15)` | ドロップダウン、ポップオーバー |
-| 3 | `0 8px 24px rgba(0,0,0,0.2)` | モーダル、ダイアログ |
+| Level | Shadow                        | 用途                           |
+| ----- | ----------------------------- | ------------------------------ |
+| 0     | none                          | フラットな要素                 |
+| 1     | `0 1px 3px rgba(0,0,0,0.1)`   | カード、リスト項目             |
+| 2     | `0 4px 12px rgba(0,0,0,0.15)` | ドロップダウン、ポップオーバー |
+| 3     | `0 8px 24px rgba(0,0,0,0.2)`  | モーダル、ダイアログ           |
 
 ---
 
@@ -214,10 +229,10 @@ font-feature-settings: "lnum", "locl" 0;
 
 ### Breakpoints
 
-| Name | Width | 説明 |
-|------|-------|------|
-| Mobile | ≤ 768px | モバイルレイアウト |
-| Tablet | ≤ 1024px | タブレットレイアウト |
+| Name    | Width    | 説明                   |
+| ------- | -------- | ---------------------- |
+| Mobile  | ≤ 768px  | モバイルレイアウト     |
+| Tablet  | ≤ 1024px | タブレットレイアウト   |
 | Desktop | > 1024px | デスクトップレイアウト |
 
 ### タッチターゲット
@@ -267,8 +282,8 @@ Notion は 408 件以上の CSS Custom Properties を使用した独自のトー
 --notion-font-family: NotionInter, Inter, ...;
 --notion-font-size: 16px;
 --notion-line-height: 24px;
---notion-text-color: rgba(0,0,0,0.95);  /* ライトモード */
---notion-bg-color: #FFFFFF;             /* ライトモード */
+--notion-text-color: rgba(0, 0, 0, 0.95); /* ライトモード */
+--notion-bg-color: #ffffff; /* ライトモード */
 ```
 
 > 注: 408 件の CSS vars はアプリケーション内部で動的に管理されており、全量の公開ドキュメントは存在しない。上記は実測に基づく代表値。

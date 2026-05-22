@@ -25,9 +25,7 @@ export default function LibraryPage() {
           <p class="text-body text-text-secondary">{t("library.subtitle")}</p>
         </header>
 
-        {error && (
-          <p class="text-sm text-danger mb-4">{t("library.error")}</p>
-        )}
+        {error && <p class="text-sm text-danger mb-4">{t("library.error")}</p>}
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           <CreateProjectTile labelKey="library.newProject" />

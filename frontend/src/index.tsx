@@ -15,7 +15,9 @@ const FilePage = lazy(() => import("./pages/FilePage.jsx"));
 const PodcastPage = lazy(() => import("./pages/PodcastPage.jsx"));
 const ChatPage = lazy(() => import("./pages/ChatPage.jsx"));
 const ProjectChatPage = lazy(() => import("./pages/ProjectChatPage.jsx"));
-const ProjectPodcastsPage = lazy(() => import("./pages/ProjectPodcastsPage.jsx"));
+const ProjectPodcastsPage = lazy(
+  () => import("./pages/ProjectPodcastsPage.jsx"),
+);
 const PodcastNewPage = lazy(() => import("./pages/PodcastNewPage.jsx"));
 const PodcastDetailPage = lazy(() => import("./pages/PodcastDetailPage.jsx"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage.jsx"));
@@ -115,8 +117,7 @@ const ROUTE_META: Record<string, RouteHead> = {
   },
   "/privacy": {
     title: "Privacy Policy — kioku",
-    description:
-      "How kioku handles your account data and uploaded materials.",
+    description: "How kioku handles your account data and uploaded materials.",
     canonical: "/privacy",
     robots: "index,follow",
   },

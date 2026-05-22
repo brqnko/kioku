@@ -143,8 +143,8 @@ export function MarkdownEditor({
           event.preventDefault();
 
           let pos =
-            view.posAtCoords({ left: event.clientX, top: event.clientY })?.pos ??
-            view.state.selection.from;
+            view.posAtCoords({ left: event.clientX, top: event.clientY })
+              ?.pos ?? view.state.selection.from;
           const $pos = view.state.doc.resolve(pos);
           if ($pos.parent.type.name === "code_block") {
             pos = $pos.after($pos.depth);

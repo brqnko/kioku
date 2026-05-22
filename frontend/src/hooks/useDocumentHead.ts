@@ -27,7 +27,12 @@ function absoluteUrl(value: string): string {
   return `${SITE_URL}${value.startsWith("/") ? value : `/${value}`}`;
 }
 
-function upsertMeta(selector: string, attrName: string, attrValue: string, content: string) {
+function upsertMeta(
+  selector: string,
+  attrName: string,
+  attrValue: string,
+  content: string,
+) {
   let el = document.head.querySelector<HTMLMetaElement>(selector);
   if (!el) {
     el = document.createElement("meta");
@@ -55,7 +60,12 @@ export function useDocumentHead(opts: DocumentHeadOptions): void {
 
     if (opts.title) document.title = opts.title;
     if (opts.description) {
-      upsertMeta('meta[name="description"]', "name", "description", opts.description);
+      upsertMeta(
+        'meta[name="description"]',
+        "name",
+        "description",
+        opts.description,
+      );
     }
     if (opts.canonical) {
       upsertLink("canonical", absoluteUrl(opts.canonical));
@@ -64,8 +74,18 @@ export function useDocumentHead(opts: DocumentHeadOptions): void {
       upsertMeta('meta[name="robots"]', "name", "robots", opts.robots);
     }
     if (opts.ogTitle) {
-      upsertMeta('meta[property="og:title"]', "property", "og:title", opts.ogTitle);
-      upsertMeta('meta[name="twitter:title"]', "name", "twitter:title", opts.ogTitle);
+      upsertMeta(
+        'meta[property="og:title"]',
+        "property",
+        "og:title",
+        opts.ogTitle,
+      );
+      upsertMeta(
+        'meta[name="twitter:title"]',
+        "name",
+        "twitter:title",
+        opts.ogTitle,
+      );
     }
     if (opts.ogDescription) {
       upsertMeta(
@@ -82,7 +102,12 @@ export function useDocumentHead(opts: DocumentHeadOptions): void {
       );
     }
     if (opts.ogUrl) {
-      upsertMeta('meta[property="og:url"]', "property", "og:url", absoluteUrl(opts.ogUrl));
+      upsertMeta(
+        'meta[property="og:url"]',
+        "property",
+        "og:url",
+        absoluteUrl(opts.ogUrl),
+      );
     }
 
     return () => {
