@@ -1,4 +1,4 @@
-import { useState } from "preact/hooks";
+import { useState, useEffect } from "preact/hooks";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "preact-iso";
 import { CreateProjectDialog } from "./CreateProjectDialog";
@@ -20,6 +20,28 @@ const navItems: NavItem[] = [
   { href: "/chat", icon: "smart_toy", labelKey: "nav.chat" },
 ];
 
+function isLibraryPath(p: string): boolean {
+  return (
+    p === "/library" ||
+    (p.startsWith("/projects/") && !p.includes("/podcasts") && !p.includes("/chat")) ||
+    p.startsWith("/folders/")
+  );
+}
+
+function isPodcastPath(p: string): boolean {
+  return (
+    p === "/podcast" ||
+    (p.startsWith("/projects/") && p.includes("/podcasts"))
+  );
+}
+
+function isChatPath(p: string): boolean {
+  return (
+    p === "/chat" ||
+    (p.startsWith("/projects/") && p.includes("/chat"))
+  );
+}
+
 export default function SideNavBar() {
   const { t } = useTranslation();
   const { path } = useLocation();
@@ -27,6 +49,39 @@ export default function SideNavBar() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const { data: dashboard } = useDashboard();
   const recentFiles = (dashboard?.recent_seen_files ?? []).slice(0, 10);
+
+  const [lastProjectId, setLastProjectId] = useState<string | null>(() => {
+    try { return sessionStorage.getItem("lastProjectId"); }
+    catch { return null; }
+  });
+
+  useEffect(() => {
+    if (currentProjectId) {
+      sessionStorage.setItem("lastProjectId", currentProjectId);
+      setLastProjectId(currentProjectId);
+    } else if (path === "/library" || path === "/podcast" || path === "/chat") {
+      sessionStorage.removeItem("lastProjectId");
+      setLastProjectId(null);
+    }
+  }, [currentProjectId, path]);
+
+  const projectId = currentProjectId ?? lastProjectId;
+
+  const resolveItem = (item: NavItem): { href: string; active: boolean } => {
+    if (item.href === "/library") return {
+      href: projectId ? `/projects/${projectId}` : "/library",
+      active: isLibraryPath(path),
+    };
+    if (item.href === "/podcast") return {
+      href: projectId ? `/projects/${projectId}/podcasts` : "/podcast",
+      active: isPodcastPath(path),
+    };
+    if (item.href === "/chat") return {
+      href: projectId ? `/projects/${projectId}/chat` : "/chat",
+      active: isChatPath(path),
+    };
+    return { href: item.href, active: path === item.href };
+  };
 
   const navItemClass = (active: boolean) =>
     `flex items-center gap-3 px-3 py-2.5 tablet:py-2 rounded-lg no-underline cursor-pointer ${
@@ -72,11 +127,11 @@ export default function SideNavBar() {
           </div>
           <div class="flex flex-col gap-1 p-2 tablet:pt-4">
             {navItems.map((item) => {
-              const active = path === item.href;
+              const { href: resolvedHref, active } = resolveItem(item);
               return (
                 <a
                   key={item.href}
-                  href={item.href}
+                  href={resolvedHref}
                   class={navItemClass(active)}
                   aria-current={active ? "page" : undefined}
                   onClick={handleLinkClick}
