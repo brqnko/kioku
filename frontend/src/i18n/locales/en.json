@@ -411,8 +411,18 @@
       "settings": {
         "title": "Podcast details"
       },
+      "speakers": {
+        "title": "Speakers",
+        "hint": "Choose a single narrator or a two-person dialogue.",
+        "options": {
+          "1": { "label": "1 person", "desc": "Narration" },
+          "2": { "label": "2 people", "desc": "Dialogue" }
+        }
+      },
       "voice": {
         "title": "Voice",
+        "titleSpeaker1": "Voice for Speaker 1",
+        "titleSpeaker2": "Voice for Speaker 2",
         "hint": "Listen to a sample before choosing.",
         "play": "Play sample for {{name}}",
         "stop": "Stop sample for {{name}}",
@@ -424,11 +434,13 @@
           "F3": "F3 — Calm",
           "F4": "F4 — Crisp",
           "F5": "F5 — Soft",
+          "moka": "moka",
           "M1": "M1 — Steady",
           "M2": "M2 — Rich",
           "M3": "M3 — Clear",
           "M4": "M4 — Mellow",
-          "M5": "M5 — Bold"
+          "M5": "M5 — Bold",
+          "keld": "keld"
         }
       },
       "length": {

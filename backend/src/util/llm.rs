@@ -55,6 +55,7 @@ pub struct CopilotImpl {
 impl CopilotImpl {
     pub const MODEL_GEMINI_3_1_PRO: &'static str = "gemini-3.1-pro-preview";
     pub const MODEL_GPT_5: &'static str = "gpt-5.2";
+    pub const MODEL_GPT_5_CODEX: &'static str = "gpt-5.2-codex";
     pub const MODEL_GPT_5_MINI: &'static str = "gpt-5-mini";
     pub const MODEL_GPT_5_4_MINI: &'static str = "gpt-5.4-mini";
 
@@ -152,9 +153,14 @@ impl CopilotImpl {
     }
 }
 
-#[async_trait::async_trait]
-impl LLMClient for CopilotImpl {
-    async fn complete(
+impl CopilotImpl {
+    fn supports_responses_api(model: &str) -> bool {
+        // Models known to be Responses-API only or that we prefer to route there.
+        // Gemini (and other non-OpenAI Copilot models) only support Chat Completions.
+        !matches!(model, Self::MODEL_GEMINI_3_1_PRO)
+    }
+
+    async fn complete_chat(
         &self,
         model: &'static str,
         input: CompletionInput,
@@ -210,6 +216,7 @@ impl LLMClient for CopilotImpl {
             .await?;
 
         if let Err(e) = raw.error_for_status_ref() {
+            let status = raw.status();
             let retry_after = raw
                 .headers()
                 .get("retry-after")
@@ -217,7 +224,16 @@ impl LLMClient for CopilotImpl {
                 .and_then(|v| v.to_str().ok())
                 .map(|s| format!(", retry after: {s}"))
                 .unwrap_or_default();
-            return Err(anyhow::anyhow!("{e}{retry_after}"));
+            let body = raw.text().await.unwrap_or_default();
+            tracing::error!(
+                target: "llm",
+                %status,
+                model,
+                message_count = req.messages.len(),
+                body = %body,
+                "copilot chat/completions error",
+            );
+            return Err(anyhow::anyhow!("{e}{retry_after}: {body}"));
         }
 
         let content = raw
@@ -231,5 +247,140 @@ impl LLMClient for CopilotImpl {
             .content;
 
         Ok(CompletionOutput { content })
+    }
+
+    async fn complete_responses(
+        &self,
+        model: &'static str,
+        input: CompletionInput,
+    ) -> Result<CompletionOutput, anyhow::Error> {
+        #[derive(serde::Serialize)]
+        struct InputItem<'a> {
+            role: &'a str,
+            content: &'a str,
+        }
+        #[derive(serde::Serialize)]
+        struct ResponsesRequest<'a> {
+            model: &'a str,
+            input: Vec<InputItem<'a>>,
+            stream: bool,
+        }
+
+        #[derive(serde::Deserialize)]
+        struct ResponsesResponse {
+            #[serde(default)]
+            output_text: Option<String>,
+            #[serde(default)]
+            output: Vec<ResponsesOutputItem>,
+        }
+        #[derive(serde::Deserialize)]
+        struct ResponsesOutputItem {
+            #[serde(default)]
+            content: Vec<ResponsesOutputContent>,
+        }
+        #[derive(serde::Deserialize)]
+        struct ResponsesOutputContent {
+            #[serde(default)]
+            text: Option<String>,
+        }
+
+        let items = input
+            .messages
+            .iter()
+            .map(|m| InputItem {
+                role: m.role.as_str(),
+                content: &m.content,
+            })
+            .collect::<Vec<_>>();
+        let req = ResponsesRequest {
+            model,
+            input: items,
+            stream: false,
+        };
+
+        let headers = self.build_headers().await?;
+        let raw = self
+            .http_client
+            .post("https://api.githubcopilot.com/responses")
+            .headers(headers)
+            .header(reqwest::header::CONTENT_TYPE, "application/json")
+            .json(&req)
+            .send()
+            .await?;
+
+        if let Err(e) = raw.error_for_status_ref() {
+            let status = raw.status();
+            let retry_after = raw
+                .headers()
+                .get("retry-after")
+                .or_else(|| raw.headers().get("x-ratelimit-reset-requests"))
+                .and_then(|v| v.to_str().ok())
+                .map(|s| format!(", retry after: {s}"))
+                .unwrap_or_default();
+            let body = raw.text().await.unwrap_or_default();
+            tracing::error!(
+                target: "llm",
+                %status,
+                model,
+                message_count = req.input.len(),
+                body = %body,
+                "copilot responses error",
+            );
+            return Err(anyhow::anyhow!("{e}{retry_after}: {body}"));
+        }
+
+        let body_text = raw.text().await?;
+        let parsed: ResponsesResponse = serde_json::from_str(&body_text).map_err(|e| {
+            tracing::error!(
+                target: "llm",
+                model,
+                error = %e,
+                body = %body_text,
+                "copilot responses: failed to parse response body",
+            );
+            anyhow::anyhow!("copilot responses: failed to parse: {e}")
+        })?;
+
+        if let Some(text) = parsed.output_text
+            && !text.is_empty()
+        {
+            return Ok(CompletionOutput { content: text });
+        }
+
+        let mut content = String::new();
+        for item in parsed.output {
+            for piece in item.content {
+                if let Some(text) = piece.text {
+                    content.push_str(&text);
+                }
+            }
+        }
+
+        if content.is_empty() {
+            tracing::error!(
+                target: "llm",
+                model,
+                body = %body_text,
+                "copilot responses: empty content",
+            );
+            return Err(anyhow::anyhow!("copilot responses: empty content"));
+        }
+
+        Ok(CompletionOutput { content })
+    }
+}
+
+#[async_trait::async_trait]
+impl LLMClient for CopilotImpl {
+    async fn complete(
+        &self,
+        model: &'static str,
+        input: CompletionInput,
+    ) -> Result<CompletionOutput, anyhow::Error> {
+        if Self::supports_responses_api(model) {
+            self.complete_responses(model, input).await
+        } else {
+            self.complete_chat(model, input).await
+        }
     }
 }

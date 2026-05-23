@@ -732,6 +732,11 @@ export type CreatePodcastBody = {
   used_file_ids: string[];
   /** One of: F1, F2, F3, F4, F5, M1, M2, M3, M4, M5 */
   voice_style: string;
+  /**
+     * Optional second voice. When provided, the podcast is generated as a two-speaker dialogue.
+     * @nullable
+     */
+  voice_style_2?: string | null;
 };
 
 export type CreatePodcast200 = {

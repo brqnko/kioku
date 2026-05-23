@@ -8,6 +8,8 @@ pub struct PodcastRequest {
     pub used_file_ids: Vec<uuid::Uuid>,
     pub started_at: chrono::DateTime<chrono::Utc>,
     pub voice_style: String,
+    #[serde(default)]
+    pub voice_style_2: Option<String>,
     pub length: String,
 }
 

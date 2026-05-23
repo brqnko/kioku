@@ -1,8 +1,6 @@
 import { useEffect, useState } from "preact/hooks";
 
 const STORAGE_KEY = "sidebar-collapsed";
-const EXPANDED_WIDTH = "16rem";
-const COLLAPSED_WIDTH = "0px";
 const MOBILE_QUERY = "(max-width: 767.98px)";
 
 function readStored(): boolean {
@@ -27,7 +25,7 @@ function syncDom(
     "data-sidebar-open",
     String(isMobile ? overlayOpen : !dockedCollapsed),
   );
-  const width = isMobile || dockedCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
+  const width = isMobile || dockedCollapsed ? "0px" : "16rem";
   root.style.setProperty("--sidebar-width", width);
 }
 

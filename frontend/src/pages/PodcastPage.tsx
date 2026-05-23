@@ -2,15 +2,15 @@ import { useTranslation } from "react-i18next";
 import SideNavBar from "../components/SideNavBar";
 import TopAppBar from "../components/TopAppBar";
 import { CreateProjectTile } from "../components/CreateProjectTile";
+import { ProjectCard } from "../components/ProjectCard";
 import { useLibrary } from "../hooks/useLibrary";
 import { useDocumentHead } from "../hooks/useDocumentHead";
-import { formatRelative } from "../utils/datetime";
 import type { ListProjects200ItemsItem } from "../api/generated/backend.schemas";
 
 export default function PodcastPage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   useDocumentHead({ title: "Podcast — kioku", robots: "noindex,nofollow" });
-  const { items, error, isLoading, hasMore, loadingMore, loadMore } =
+  const { items, error, isLoading, hasMore, loadingMore, loadMore, mutate } =
     useLibrary();
 
   const projects = items;
@@ -45,29 +45,14 @@ export default function PodcastPage() {
           )}
 
           {projects.map((project: ListProjects200ItemsItem) => (
-            <a
+            <ProjectCard
               key={project.id}
+              project={project}
               href={`/projects/${project.id}/podcasts`}
-              class="flex flex-col min-h-[160px] p-6 rounded-[12px] border border-border-subtle bg-surface-dark hover:border-text-disabled shadow-[0_1px_3px_rgba(0,0,0,0.1)] no-underline text-inherit"
-            >
-              <h3 class="text-base font-medium text-text-primary mb-1 line-clamp-1">
-                {project.name}
-              </h3>
-              <p class="text-sm text-text-secondary line-clamp-2 mb-auto">
-                {project.description ||
-                  t("podcast.selectProject.noDescription")}
-              </p>
-              <div class="mt-4 pt-2 border-t border-border-subtle flex items-center justify-between">
-                <span class="text-xs text-text-disabled flex items-center gap-1">
-                  <span class="material-symbols-outlined text-[14px]">
-                    update
-                  </span>
-                  {t("podcast.selectProject.lastUpdated", {
-                    time: formatRelative(project.last_seen_at, i18n.language),
-                  })}
-                </span>
-              </div>
-            </a>
+              noDescriptionKey="podcast.selectProject.noDescription"
+              lastUpdatedKey="podcast.selectProject.lastUpdated"
+              onRefresh={() => mutate()}
+            />
           ))}
         </div>
 

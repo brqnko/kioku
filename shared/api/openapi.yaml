@@ -2699,7 +2699,12 @@ paths:
                     format: uuid
                 voice_style:
                   type: string
-                  description: 'One of: F1, F2, F3, F4, F5, M1, M2, M3, M4, M5'
+                  description: 'One of: F1, F2, F3, F4, F5, moka, M1, M2, M3, M4, M5, keld'
+                voice_style_2:
+                  type:
+                  - string
+                  - 'null'
+                  description: Optional second voice. When provided, the podcast is generated as a two-speaker dialogue.
         required: true
       responses:
         '200':

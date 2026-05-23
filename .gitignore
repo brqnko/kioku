@@ -29,6 +29,7 @@ dist/
 *.pdf
 backend/src/features/podcast/usecase/script_*.txt
 backend/src/features/podcast/usecase/prompt_*.txt
+backend/examples/
 
 # Core dumps
 core

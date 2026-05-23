@@ -74,52 +74,117 @@ pub async fn generate_podcast(
 
     let mut source = String::new();
     for doc in &documents {
-        source.push_str(&format!("## Document\n{doc}\n\n"));
+        let compacted = compact_markdown(doc);
+        source.push_str(&format!("## Document\n{compacted}\n\n"));
+    }
+
+    const MAX_SOURCE_CHARS: usize = 150_000;
+    let source_char_count = source.chars().count();
+    if source_char_count > MAX_SOURCE_CHARS {
+        tracing::warn!(
+            target: "podcast",
+            %podcast_id,
+            source_chars = source_char_count,
+            max_chars = MAX_SOURCE_CHARS,
+            "source truncated to fit prompt budget",
+        );
+        let mut truncated: String = source.chars().take(MAX_SOURCE_CHARS).collect();
+        truncated.push_str("\n\n[... truncated ...]\n");
+        source = truncated;
     }
 
     let is_japanese = user_lang.starts_with("ja");
 
     let length = crate::features::podcast::domain::PodcastLength::new(&request.length)
         .unwrap_or(crate::features::podcast::domain::PodcastLength::Normal);
-    let (system, user_msg) = build_script_prompt(
-        &podcast_intermediate.name.0,
-        &podcast_intermediate.description.0,
-        &user_lang,
-        &source,
-        length,
-    );
+    let is_dialogue = request.voice_style_2.is_some();
+    let speaker_labels = SpeakerLabels::for_lang(is_japanese);
+
+    let messages = if is_dialogue {
+        build_dialogue_messages(
+            &podcast_intermediate.name.0,
+            &podcast_intermediate.description.0,
+            &user_lang,
+            &source,
+            length,
+            speaker_labels,
+        )
+    } else {
+        let (system, user_msg) = build_script_prompt(
+            &podcast_intermediate.name.0,
+            &podcast_intermediate.description.0,
+            &user_lang,
+            &source,
+            length,
+        );
+        vec![
+            crate::util::llm::Message {
+                role: crate::util::llm::Role::System,
+                content: system,
+            },
+            crate::util::llm::Message {
+                role: crate::util::llm::Role::User,
+                content: user_msg,
+            },
+        ]
+    };
 
     let script_raw = app
         .llm_client
         .complete(
             crate::util::llm::CopilotImpl::MODEL_GPT_5,
-            crate::util::llm::CompletionInput {
-                messages: vec![
-                    crate::util::llm::Message {
-                        role: crate::util::llm::Role::System,
-                        content: system,
-                    },
-                    crate::util::llm::Message {
-                        role: crate::util::llm::Role::User,
-                        content: user_msg,
-                    },
-                ],
-            },
+            crate::util::llm::CompletionInput { messages },
         )
         .await?
         .content;
 
-    let podcast_script = parse_script(&script_raw);
-
-    let tts_script = if is_japanese {
-        japanize_english_terms(app, &script_raw).await?
+    let podcast_script = if is_dialogue {
+        parse_dialogue_script(&script_raw, speaker_labels)
     } else {
-        script_raw.clone()
+        parse_script(&script_raw)
     };
 
+    // let tts_script = if is_japanese {
+    //     japanize_english_terms(app, &script_raw).await?
+    // } else {
+    //     script_raw.clone()
+    // };
+    let tts_script = script_raw.clone();
+
     let lang_prefix = if is_japanese { "ja" } else { "en" };
-    let tts_voice = format!("{}:{}", lang_prefix, request.voice_style);
-    synthesize_via_sgi(app, audio_storage_id, &tts_script, &tts_voice).await?;
+    if is_dialogue {
+        let voice_a = format!("{}:{}", lang_prefix, request.voice_style);
+        let voice_b = format!(
+            "{}:{}",
+            lang_prefix,
+            request
+                .voice_style_2
+                .as_deref()
+                .expect("voice_style_2 already checked")
+        );
+        let tts_entries = parse_dialogue_script(&tts_script, speaker_labels);
+        let lines = tts_entries
+            .into_iter()
+            .map(|e| {
+                let voice = if e.speaker == speaker_labels.a {
+                    voice_a.clone()
+                } else {
+                    voice_b.clone()
+                };
+                (voice, e.text)
+            })
+            .collect::<Vec<_>>();
+        synthesize_lines_via_sgi(app, audio_storage_id, lines).await?;
+    } else {
+        let voice = format!("{}:{}", lang_prefix, request.voice_style);
+        let lines = tts_script
+            .split("\n\n")
+            .map(str::trim)
+            .filter(|p| !p.is_empty())
+            .map(|p| (voice.clone(), p.to_string()))
+            .collect::<Vec<_>>();
+        synthesize_lines_via_sgi(app, audio_storage_id, lines).await?;
+    }
 
     let podcast = match crate::features::podcast::domain::Podcast::new(
         podcast_intermediate.name.0,
@@ -150,6 +215,7 @@ pub async fn generate_podcast(
     Ok(Ok(GeneratePodcastOutput {}))
 }
 
+#[allow(dead_code)]
 async fn japanize_english_terms(
     app: &crate::app::App,
     script: &str,
@@ -228,7 +294,7 @@ async fn japanize_english_terms(
     Ok(result)
 }
 
-fn parse_script(script: &str) -> Vec<crate::features::podcast::domain::PodcastScriptEntry> {
+pub fn parse_script(script: &str) -> Vec<crate::features::podcast::domain::PodcastScriptEntry> {
     script
         .split("\n\n")
         .map(|para| para.trim().replace('\n', " "))
@@ -269,16 +335,15 @@ fn strip_audio_tags(text: &str) -> String {
     out.trim().to_string()
 }
 
-const SGI_POLL_INTERVAL_MS: u64 = 1000;
+const SGI_POLL_INTERVAL_MS: u64 = 10000;
 const SGI_POLL_TIMEOUT_SECS: u64 = 1800;
 const SGI_REQUEST_TIMEOUT_SECS: u64 = 180;
 const PRESIGN_EXPIRES_SECS: u64 = SGI_POLL_TIMEOUT_SECS + 300;
 
-async fn synthesize_via_sgi(
+async fn synthesize_lines_via_sgi(
     app: &crate::app::App,
     audio_storage_id: uuid::Uuid,
-    script: &str,
-    voice: &str,
+    lines: Vec<(String, String)>,
 ) -> Result<(), anyhow::Error> {
     use anyhow::Context as _;
 
@@ -293,7 +358,10 @@ async fn synthesize_via_sgi(
     struct DialogueLine {
         voice: String,
         text: String,
+        speed: f32,
     }
+
+    const TTS_SPEED: f32 = 0.9;
 
     #[derive(serde::Serialize)]
     struct UploadTarget {
@@ -317,13 +385,13 @@ async fn synthesize_via_sgi(
         )
         .await?;
 
-    let lines: Vec<DialogueLine> = script
-        .split("\n\n")
-        .map(str::trim)
-        .filter(|p| !p.is_empty())
-        .map(|p| DialogueLine {
-            voice: voice.to_string(),
-            text: p.to_string(),
+    let lines: Vec<DialogueLine> = lines
+        .into_iter()
+        .filter(|(_, text)| !text.trim().is_empty())
+        .map(|(voice, text)| DialogueLine {
+            voice,
+            text,
+            speed: TTS_SPEED,
         })
         .collect();
     anyhow::ensure!(!lines.is_empty(), "podcast script is empty");
@@ -400,6 +468,490 @@ async fn synthesize_via_sgi(
     }
 }
 
+pub fn compact_markdown(input: &str) -> String {
+    let normalized = input.replace("\r\n", "\n");
+    let no_images = strip_image_markdown(&normalized);
+    let no_links = strip_link_markdown(&no_images);
+    let no_raw_urls = strip_raw_urls(&no_links);
+    let lines_cleaned = clean_lines(&no_raw_urls);
+    collapse_blank_lines(&lines_cleaned)
+}
+
+fn strip_raw_urls(s: &str) -> String {
+    let mut out = String::with_capacity(s.len());
+    let mut i = 0;
+    while i < s.len() {
+        let rest = &s[i..];
+        let scheme_len = if rest.starts_with("https://") {
+            Some(8)
+        } else if rest.starts_with("http://") {
+            Some(7)
+        } else {
+            None
+        };
+        if let Some(scheme) = scheme_len {
+            let after_scheme = &rest[scheme..];
+            let url_body_len = after_scheme
+                .find(|c: char| c.is_whitespace())
+                .unwrap_or(after_scheme.len());
+            i += scheme + url_body_len;
+            continue;
+        }
+        let c = rest.chars().next().unwrap();
+        out.push(c);
+        i += c.len_utf8();
+    }
+    out
+}
+
+fn clean_lines(s: &str) -> String {
+    let mut out = String::with_capacity(s.len());
+    for line in s.split('\n') {
+        let content = line.trim_end();
+        let trimmed = content.trim();
+        if trimmed.is_empty()
+            || trimmed == "---"
+            || trimmed.chars().all(|c| c.is_ascii_digit())
+            || trimmed.chars().all(|c| c == '#')
+        {
+            out.push('\n');
+            continue;
+        }
+        out.push_str(content);
+        out.push('\n');
+    }
+    out
+}
+
+fn strip_image_markdown(s: &str) -> String {
+    let mut out = String::with_capacity(s.len());
+    let bytes = s.as_bytes();
+    let mut i = 0;
+    while i < s.len() {
+        if bytes[i] == b'!'
+            && i + 1 < s.len()
+            && bytes[i + 1] == b'['
+            && let Some(consumed) = try_consume_image_at(&s[i..])
+        {
+            i += consumed;
+            continue;
+        }
+        let c = s[i..].chars().next().unwrap();
+        out.push(c);
+        i += c.len_utf8();
+    }
+    out
+}
+
+fn try_consume_image_at(s: &str) -> Option<usize> {
+    // s starts with "!["
+    let after_bracket = s.get(2..)?;
+    let close_bracket = after_bracket.find("](")?;
+    let alt = &after_bracket[..close_bracket];
+    if alt.contains('\n') {
+        return None;
+    }
+    let after_paren_open = &after_bracket[close_bracket + 2..];
+    let close_paren = after_paren_open.find(')')?;
+    let url = &after_paren_open[..close_paren];
+    if url.contains('\n') {
+        return None;
+    }
+    Some(2 + close_bracket + 2 + close_paren + 1)
+}
+
+fn strip_link_markdown(s: &str) -> String {
+    let mut out = String::with_capacity(s.len());
+    let bytes = s.as_bytes();
+    let mut i = 0;
+    while i < s.len() {
+        if bytes[i] == b'['
+            && let Some((text, consumed)) = try_consume_link_at(&s[i..])
+        {
+            out.push_str(text);
+            i += consumed;
+            continue;
+        }
+        let c = s[i..].chars().next().unwrap();
+        out.push(c);
+        i += c.len_utf8();
+    }
+    out
+}
+
+fn try_consume_link_at(s: &str) -> Option<(&str, usize)> {
+    // s starts with '['
+    let after_bracket = s.get(1..)?;
+    let close_bracket = after_bracket.find("](")?;
+    let text = &after_bracket[..close_bracket];
+    if text.is_empty() || text.contains('[') || text.contains(']') || text.contains('\n') {
+        return None;
+    }
+    let after_paren_open = &after_bracket[close_bracket + 2..];
+    let close_paren = after_paren_open.find(')')?;
+    let url = &after_paren_open[..close_paren];
+    if url.contains('\n') {
+        return None;
+    }
+    let consumed = 1 + close_bracket + 2 + close_paren + 1;
+    Some((text, consumed))
+}
+
+fn collapse_blank_lines(s: &str) -> String {
+    let mut out = String::with_capacity(s.len());
+    let mut newline_run = 0u32;
+    for c in s.chars() {
+        if c == '\n' {
+            newline_run += 1;
+            if newline_run <= 2 {
+                out.push(c);
+            }
+        } else {
+            newline_run = 0;
+            out.push(c);
+        }
+    }
+    out
+}
+
+#[derive(Clone, Copy)]
+pub struct SpeakerLabels {
+    pub a: &'static str,
+    pub b: &'static str,
+}
+
+impl SpeakerLabels {
+    pub fn for_lang(is_japanese: bool) -> Self {
+        if is_japanese {
+            Self {
+                a: "話者1",
+                b: "話者2",
+            }
+        } else {
+            Self {
+                a: "Speaker A",
+                b: "Speaker B",
+            }
+        }
+    }
+}
+
+pub fn parse_dialogue_script(
+    script: &str,
+    labels: SpeakerLabels,
+) -> Vec<crate::features::podcast::domain::PodcastScriptEntry> {
+    let mut entries: Vec<crate::features::podcast::domain::PodcastScriptEntry> = Vec::new();
+    for raw_line in script.lines() {
+        let line = raw_line.trim();
+        if line.is_empty() {
+            continue;
+        }
+
+        let detected = strip_speaker_label(line, labels.a)
+            .map(|rest| (labels.a.to_string(), rest))
+            .or_else(|| {
+                strip_speaker_label(line, labels.b).map(|rest| (labels.b.to_string(), rest))
+            });
+
+        match detected {
+            Some((speaker, rest)) => {
+                let text = strip_audio_tags(rest.trim());
+                entries
+                    .push(crate::features::podcast::domain::PodcastScriptEntry { speaker, text });
+            }
+            None => {
+                if let Some(last) = entries.last_mut() {
+                    let extra = strip_audio_tags(line);
+                    if !extra.is_empty() {
+                        if !last.text.is_empty() {
+                            last.text.push(' ');
+                        }
+                        last.text.push_str(&extra);
+                    }
+                }
+            }
+        }
+    }
+    entries
+}
+
+fn strip_speaker_label<'a>(line: &'a str, label: &str) -> Option<&'a str> {
+    for sep in [":", "：", " :", " ："] {
+        let prefix = format!("{label}{sep}");
+        if let Some(rest) = line.strip_prefix(&prefix) {
+            return Some(rest);
+        }
+    }
+    None
+}
+
+pub fn build_dialogue_messages(
+    name: &str,
+    description: &str,
+    lang: &str,
+    source: &str,
+    length: crate::features::podcast::domain::PodcastLength,
+    labels: SpeakerLabels,
+) -> Vec<crate::util::llm::Message> {
+    use crate::features::podcast::domain::PodcastLength;
+    use crate::util::llm::{Message, Role};
+
+    let is_japanese = lang.starts_with("ja");
+    let a = labels.a;
+    let b = labels.b;
+
+    let system = if is_japanese {
+        let length_directive = match length {
+            PodcastLength::Short => {
+                "## 長さ\n\
+                各トピックは要点を1〜2発話で言い切る短さに収める。\n\
+                \n\
+                ### 各トピックで触れること\n\
+                - それが何か（定義・名称）\n\
+                - 一番のポイント\n\
+                \n\
+                ### 触れないこと\n\
+                - 計算例・派生概念・歴史的背景・例外ケース\n\
+                \n\
+                ### ペース\n\
+                テンポ重視で、聞き手が30秒で大筋を掴めるくらいの密度。"
+            }
+            PodcastLength::Normal => {
+                "## 長さ\n\
+                資料の主要トピックを一つずつ順に取り上げる。\n\
+                \n\
+                ### 各トピックで必ず扱うこと\n\
+                - それが何か（定義・どんな概念か）\n\
+                - なぜ重要か・どこに使われるか\n\
+                - 直感的な例え話または簡単な具体例を一つ\n\
+                \n\
+                ### 深さ\n\
+                深追いはしないが、聞き手がその概念をイメージで掴めるところまでは掘る。\n\
+                \n\
+                ### ペース\n\
+                各トピックに数発話、長くて10発話程度をかける。"
+            }
+            PodcastLength::Long => {
+                "## 長さ\n\
+                資料に出てくる主要トピックを一つも省略せず、章の順番で全てカバーする。資料に書かれている具体的な定理・公式・概念名は省略せず登場させる。\n\
+                \n\
+                ### 各トピックで必ず順に扱うこと\n\
+                1. それが何か: 定義（厳密な言い方と、噛み砕いた言い方の両方）\n\
+                2. なぜ重要か: 他のトピックとどう繋がるか、どんな場面で使うか\n\
+                3. 例: 直感的な例え話 + 簡単な計算例または具体例\n\
+                4. つまずき: よくある誤解、つまずきポイント、気をつけるべき例外\n\
+                \n\
+                ### ペース\n\
+                各トピックに腰を据えて時間を割く。急がない、端折らない、手抜きしない。"
+            }
+        };
+        format!(
+            "あなたはくだけた・好奇心旺盛・例え話を多用するスタイルの2人ホスト・ポッドキャストの脚本家です。\
+            番組タイトルは「{name}」（{description}）。\n\
+            \n\
+            ## 事前分析（内部で行い、出力には書かない）\n\
+            本編を書く前に、資料から本質を捉える5つの問いを内部で立て、それぞれに自分で詳しく答えを用意してください。\n\
+            問いの作り方:\n\
+            a. 中心テーマ（複数あれば全て）を捉える問い\n\
+            b. 主要な支持アイデアを引き出す問い\n\
+            c. 重要な事実・根拠・データを浮かび上がらせる問い\n\
+            d. 著者の意図・視点を明らかにする問い\n\
+            e. 含意・結論・帰結を探る問い\n\
+            この5つの問いと答えが、対話の主要な5ビートそのものになります。\n\
+            \n\
+            ## 配役\n\
+            - {a}（ホストA）: 温かく好奇心旺盛なジェネラリスト。リスナーが疑問に思うことを代わりに尋ねる。「うーん」「なるほど」「待って、つまり…？」のような相槌をよく使う。\n\
+            - {b}（ホストB）: 専門家役。落ち着いていて、例え話（「これは○○みたいなものですね」）を多用し、ときどき自己訂正（「いや、もう少し正確に言うと…」）する。\n\
+            \n\
+            ## 構成\n\
+            1. 短いフック: {a} が資料の中で驚きのある事実や挑発的な問いを投げ、{b} がそれに反応する。すぐ本題へ。\n\
+            2. 本編（5つの問いを順に消化）: 各問いについて {a} が問いを立て、{b} が要点を説明し、{a} が例え話や追加質問で深掘りする。少なくとも1ヶ所、{a} と {b} の見方が微妙にズレる「いや、でも…」の瞬間を入れる。\n\
+            3. まとめ: {b} が3つのテイクアウェイを箇条書きではなく会話の流れで要約する。\n\
+            4. サインオフ: 「では今日はこのへんで」のような短い締め。\n\
+            \n\
+            ## 自然な話し方\n\
+            - 言い淀みやフィラー（「えっと」「うん」「なんていうか」「ね？」）は3発話に1回程度。\n\
+            - 発話の長さに緩急。3単語の相槌行（「確かに。」「ですね。」）と、4文くらいの長めの説明を織り交ぜる。\n\
+            - 相槌で会話をつなぐ：「なるほど」「確かに」「まさにそれです」「ピンポイントですね」など。\n\
+            - 例え話は「これは○○みたいなものですね」「こう考えるとわかりやすいかも」で導入。\n\
+            - 1行は概ね80文字以内（≒5〜8秒の発話）。\n\
+            \n\
+            ## 表現豊かな記号・表記\n\
+            感情やリズムを伝えるために、以下を積極的に使うこと：\n\
+            - 「！」（全角または半角）: 驚き・強調・テンションが上がった瞬間\n\
+            - 「？」: 疑問・呼びかけ・確認\n\
+            - 「…」（または「。。。」）: 思考の間、言い淀み、含み、トレイルオフ\n\
+            - 「♪」「♫」: 軽やかな・楽しげな・歌うようなトーンの箇所\n\
+            - 「〜」: 語尾を伸ばす親しみのある言い方（「そうなんだ〜」「えぇ〜」）\n\
+            - 「！？」: 驚き混じりの疑問\n\
+            - 小書き文字を活用：\n\
+              - 「っ」: 詰まる音・勢いのある言い切り（「えっ」「ちょっ」「やばっ」「あっ」）\n\
+              - 「ぁ」「ぃ」「ぅ」「ぇ」「ぉ」: 弱く息を抜く語尾・嘆息（「あぁ」「うわぁ」「えぇ」「へぇ」「ふぅ」）\n\
+            これらは1発話に1〜2個まで。乱用せず、ここぞというところで使う。\n\
+            \n\
+            ## 事実性\n\
+            - 具体的な主張はすべて資料に根拠があること。資料にない人名・日付・統計を作らない。\n\
+            - 資料が何も言っていない点は {a} が「これはこの資料からだとわからないんだよね」と明示して棚上げする。\n\
+            \n\
+            ## 厳守する出力フォーマット\n\
+            - 各発話は `{a}:` または `{b}:` で始める。\n\
+            - 1発話につき1行（途中で改行しない）。発話間は空行1つで区切る。\n\
+            - ラベル以外の記号・タグ・括弧書きの演出（[笑] や *強調* など）は一切付けない。\n\
+            - 出力は台本本体のみ。事前分析、タイトル行、JSON、コードブロック、前書きは一切出力しない。\n\
+            - すべて日本語で書く。\n\
+            \n\
+            {length_directive}",
+        )
+    } else {
+        let length_directive = match length {
+            PodcastLength::Short => {
+                "## Length\n\
+                Each topic gets 1–2 lines, max.\n\
+                \n\
+                ### For every topic cover only\n\
+                - What it is (name/definition)\n\
+                - The single headline point\n\
+                \n\
+                ### Skip\n\
+                - Calculations, history, edge cases, adjacent concepts\n\
+                \n\
+                ### Pace\n\
+                Listener should grasp the outline in about 30 seconds per topic."
+            }
+            PodcastLength::Normal => {
+                "## Length\n\
+                Walk through every major topic in the source, one by one.\n\
+                \n\
+                ### For each topic cover\n\
+                - What it is (definition / what kind of concept)\n\
+                - Why it matters and where it shows up\n\
+                - One intuitive analogy OR one simple concrete example\n\
+                \n\
+                ### Depth\n\
+                Go deep enough that the listener can picture the concept, but no further.\n\
+                \n\
+                ### Pace\n\
+                Spend a handful of lines (up to ~10) per topic."
+            }
+            PodcastLength::Long => {
+                "## Length\n\
+                Walk through every major topic in the source — do not skip any. Follow the chapter order. Do not omit specific theorems, formulas, or named concepts that appear in the source.\n\
+                \n\
+                ### For each topic cover all of\n\
+                1. What it is: both the formal definition and a plain-language version\n\
+                2. Why it matters: how it connects to other topics, where it shows up\n\
+                3. Example: an intuitive analogy AND a simple worked example or concrete instance\n\
+                4. Pitfalls: common misconceptions, gotchas, edge cases to watch out for\n\
+                \n\
+                ### Pace\n\
+                Spend real time on each one. No rushing, no abbreviating, no corner cutting."
+            }
+        };
+        format!(
+            "You are a scriptwriter for an informal, curious, analogy-heavy two-host \
+            podcast. The show is titled \"{name}\" ({description}).\n\
+            \n\
+            ## Pre-analysis (do this internally; do NOT write it in the output)\n\
+            Before drafting, generate 5 essential questions that, when answered, capture the core meaning of the source. \
+            Make sure they:\n\
+            a. address the central theme (or themes),\n\
+            b. surface key supporting ideas,\n\
+            c. highlight important facts or evidence,\n\
+            d. reveal the author's purpose or perspective,\n\
+            e. explore significant implications or conclusions.\n\
+            Then answer each one in detail. These 5 Q&As become the 5 main beats of the dialogue.\n\
+            \n\
+            ## Roles\n\
+            - {a} (curious host): warm, curious generalist who asks the questions a smart listener would. Frequently uses \"Hmm,\" \"Right,\" \"Wait — so you're saying…\".\n\
+            - {b} (expert host): patient, uses analogies (\"It's kind of like…\"), occasionally self-corrects (\"Well, actually, more precisely…\").\n\
+            \n\
+            ## Structure\n\
+            1. Short hook: {a} opens with a surprising fact or provocative question grounded in the source; {b} reacts. Then go straight in.\n\
+            2. Main body (walk through the 5 questions in order): for each, {a} frames the question, {b} explains, {a} interjects with a clarifying question or analogy. Include at least one \"yeah but…\" moment where {a} and {b} see things slightly differently.\n\
+            3. Recap: {b} summarizes 3 takeaways conversationally — not as a list.\n\
+            4. Sign-off: short close, e.g. \"And on that note… until next time, stay curious.\".\n\
+            \n\
+            ## Natural speech\n\
+            - Use disfluencies sparingly (~1 per 3 lines): \"um,\" \"you know,\" \"I mean,\" \"right?\".\n\
+            - Vary line lengths. Some replies are 3 words (\"Exactly.\" \"Right.\"); others are 3–4 sentences.\n\
+            - Glue turns with affirmations: \"Right,\" \"Exactly,\" \"Absolutely,\" \"You've hit the nail on the head.\".\n\
+            - Open analogies with \"It's like…\" or \"Think of it this way…\".\n\
+            - Keep each line ≤100 characters (≈5–8 seconds of speech).\n\
+            \n\
+            ## Expressive punctuation\n\
+            Use these freely to convey emotion and rhythm:\n\
+            - \"!\" — excitement, emphasis, surprise (\"No way!\" \"That's wild!\")\n\
+            - \"?\" — questions, calls for confirmation\n\
+            - \"...\" or \"…\" — thinking pauses, trailing off, hesitation\n\
+            - \"♪\" / \"♫\" — light, playful, sing-songy moments\n\
+            - \"!?\" — surprised disbelief\n\
+            - Stretched vowels for casual tone (\"Whaaat\", \"Ohhh\", \"Hmmm\", \"Riiight\")\n\
+            - Cut-off interjections (\"Wait—\", \"Oh!\", \"Huh.\")\n\
+            Use 1–2 per line at most. Don't overdo it — save them for moments that earn it.\n\
+            \n\
+            ## Factual rules\n\
+            - Every substantive claim must be grounded in the source material.\n\
+            - Do not invent names, dates, or statistics not in the source.\n\
+            - If the source is silent on something, have {a} flag it: \"We don't actually know X from this material.\".\n\
+            \n\
+            ## Strict output format\n\
+            - Every utterance starts with `{a}:` or `{b}:`.\n\
+            - One utterance per line (no internal line breaks). Separate consecutive utterances with a single blank line.\n\
+            - No stage directions, brackets, asterisks, JSON, code fences, titles, or preamble. Do NOT output the pre-analysis. Script body only.\n\
+            - Write entirely in BCP-47 \"{lang}\".\n\
+            \n\
+            {length_directive}",
+        )
+    };
+
+    let mut messages = vec![Message {
+        role: Role::System,
+        content: system,
+    }];
+
+    let examples: &[(&str, &str)] = if is_japanese {
+        &[
+            (
+                "## Document\n光合成は、植物が光エネルギーを使って二酸化炭素と水からブドウ糖を作る反応である。葉緑体のチラコイドで光を吸収し、ストロマでカルビン回路が回る。光合成全体の効率はおよそ1〜2%にとどまる。",
+                "話者1: ねえ、ちょっと衝撃なんだけど、植物って太陽光のうちブドウ糖に変えられてるのは1〜2%くらいなんだって。\n\n話者2: そう、聞くと意外ですよね。あんなに葉っぱを広げてて、効率はそんなもんなのって。\n\n話者1: みなさんこんにちは、今日は「光合成」を、ただの式じゃなくて、葉っぱのどこで何が起きてるかまで深掘りしていきます。\n\n話者2: 中学で「水と二酸化炭素と光でブドウ糖と酸素ができる」って覚えた人、多いと思うんですが、今日はその裏側を覗きにいきましょう。\n\n話者1: まず素朴な疑問なんだけど、なんで「光」じゃないとダメなの？\n\n話者2: いい質問です。これは、光エネルギーを化学エネルギーに「両替」してる作業なんですよ。\n\n話者1: ああ、なるほど。両替所みたいな感じか。\n\n話者2: そう、両替所みたいなものですね。光という使いにくい通貨を、ブドウ糖という「あとで使える」通貨に変えてる。\n\n話者1: で、その両替はどこでやってるんですか？\n\n話者2: 葉っぱの中の「葉緑体」っていう小さな小屋ですね。ここがほぼ全部やってくれてます。\n\n話者1: 待って、葉緑体ってひとつの部屋なの？それとも中でさらに分かれてる？\n\n話者2: いい突っ込みです。実は中で二段階に分かれていて、光を捕まえる係の「チラコイド」と、糖を組み立てる係の「ストロマ」がいるんですよ。\n\n話者1: なんかキッチンっぽいね。火を起こす場所と、調理する場所が別、みたいな。\n\n話者2: まさにそれです。チラコイドで火（エネルギー）を起こして、ストロマで料理（ブドウ糖作り）をしてる。\n\n話者1: で、ここでちょっと気になったんだけど、効率が1〜2%って、それって植物にとっては「失敗」なの？\n\n話者2: うーん、人間目線だとつい「もっと頑張れよ」って思っちゃうんですけど、植物は別に競争で勝つために生きてるわけじゃなくて。\n\n話者1: 確かに、ベンチマーク取られてもね。\n\n話者2: なので、効率は低くても、何十億年もこのやり方で安定して回ってる、っていうのが大事なポイントです。\n\n話者1: じゃあ最後に、今日のテイクアウェイをまとめてもらえる？\n\n話者2: そうですね、まず光合成は「光エネルギーを糖に両替する作業」だってこと。\n\n話者2: そしてその作業は葉緑体の中で、チラコイドとストロマって二つの場所に役割分担されてること。\n\n話者2: 最後に、効率は低く見えるけど、長く回り続けてる時点で植物としては大成功してる、ってあたりかな。\n\n話者1: いやー、葉っぱを見る目が変わりそう。今日はこのへんで、また次回お会いしましょう。",
+            ),
+            (
+                "## Document\nミトコンドリアは細胞のエネルギー工場で、ATP合成を担う。クエン酸回路と電子伝達系を通じて、グルコースの化学エネルギーをATPに変換する。元々は別の生物だったという内部共生説がある。",
+                "話者1: ちょっと聞いてください、僕らの細胞の中にいる「ミトコンドリア」、もともとは別の生き物だったかもしれないらしいんですよ。\n\n話者2: そう、いきなり来ますよね、この話。\n\n話者1: みなさんこんにちは、今日は細胞の中の小さな工場「ミトコンドリア」を、ちょっと変わった角度から見ていきます。\n\n話者2: 「細胞のエネルギー工場」ってフレーズは聞いたことある人多いと思うんですけど、中で何やってるかは結構あいまいだったりするので、今日はそこをほぐしていきましょう。\n\n話者1: まず、一番のお仕事はATPを作ること、で合ってます？\n\n話者2: はい、その通りです。ATPっていうのは、細胞が使うエネルギーの「電池」みたいなものですね。\n\n話者1: ああ、電池か。なるほど。\n\n話者2: しかも使い切ったら捨てる電池じゃなくて、充電し直して何度も使うタイプの電池、と思ってもらうと近いです。\n\n話者1: で、その電池はどうやって作ってるの？\n\n話者2: ざっくり二段階で、まず「クエン酸回路」っていうところでグルコースを分解しつつ、電子を運ぶ係を仕込みます。\n\n話者1: 電子を運ぶ係、っていうのは？\n\n話者2: 文字通り、電子っていう小さな運搬物を持って次の工程に渡しに行く役なんですよ。\n\n話者1: ふんふん。で、その先は？\n\n話者2: 次が「電子伝達系」っていう、滑り台みたいなところで、電子が転がっていく勢いを利用して、まとめてATPを作ります。\n\n話者1: なるほど、ダム式発電みたいな話か。\n\n話者2: まさに、ダムに溜めた水を一気に落として発電する感じです、的確な例えですね。\n\n話者1: で、ここからが本題なんですけど、ミトコンドリアって元は別の生物だったって本当なんですか？\n\n話者2: うーん、これは「内部共生説」って呼ばれてる仮説で、まだ完全に決着がついてるわけじゃないんですが、有力ではあります。\n\n話者1: 待って、つまり大昔に別の細胞がパクッと飲み込んで、消化されずに同居が始まった、みたいな？\n\n話者2: ざっくりそういうイメージです。電池工場ごと連れて帰ってきた、みたいな。\n\n話者1: それ、ちょっとSFすぎません？\n\n話者2: ね、生物の歴史って結構派手なんですよ。\n\n話者1: では今日のまとめをお願いします。\n\n話者2: はい、まずミトコンドリアの仕事は「ATPっていう細胞の電池を作ること」。\n\n話者2: そしてその作り方は「クエン酸回路」と「電子伝達系」の二段構えになっていること。\n\n話者2: 最後に、そもそも僕らの中にいる存在自体が、太古の同居から始まったらしい、っていうところですね。\n\n話者1: いやー、自分の細胞を見る目が変わるな。それでは、また次回お会いしましょう。",
+            ),
+        ]
+    } else {
+        &[
+            (
+                "## Document\nPhotosynthesis converts light energy into chemical energy stored in glucose. Light reactions occur in the thylakoid membranes of chloroplasts; the Calvin cycle runs in the stroma. Overall efficiency is only about 1–2% of incoming sunlight.",
+                "Speaker A: Okay, get this — plants only convert about 1 to 2 percent of sunlight into actual sugar.\n\nSpeaker B: Right? When you hear that for the first time, it's kind of shocking.\n\nSpeaker A: Hey everyone, welcome back. Today we're taking a deep dive into photosynthesis.\n\nSpeaker B: And not just the formula — we're going inside the leaf to see where each step actually happens.\n\nSpeaker A: So, dumb question to start: why does it have to be light? Why not, you know, anything else?\n\nSpeaker B: Good question. Think of it this way — the plant is running a currency exchange.\n\nSpeaker A: A currency exchange?\n\nSpeaker B: Yeah. It's taking light, which is hard to spend, and swapping it for glucose, which the plant can save and use later.\n\nSpeaker A: Hmm, okay. So where in the leaf is that exchange counter?\n\nSpeaker B: Inside little compartments called chloroplasts. That's where pretty much everything happens.\n\nSpeaker A: Wait — is the chloroplast just one room, or is it subdivided?\n\nSpeaker B: Great catch. It actually has two work zones: the thylakoids, which catch the light, and the stroma, which builds the sugar.\n\nSpeaker A: Kind of like a kitchen, then. One station starts the fire, another one cooks.\n\nSpeaker B: Exactly. The thylakoids light the burner, the stroma does the cooking.\n\nSpeaker A: Okay but here's what bugs me. Only 1 to 2 percent efficiency — is that a failure?\n\nSpeaker B: Well, by our engineering standards it sounds bad, sure.\n\nSpeaker A: Right, like, my solar panel would get fired.\n\nSpeaker B: But the plant isn't optimizing for a benchmark. It just has to keep running, and it has — for billions of years.\n\nSpeaker A: Fair. So can you wrap us up with the takeaways?\n\nSpeaker B: Sure. First, photosynthesis is basically a currency exchange from light into sugar.\n\nSpeaker B: Second, the work splits between thylakoids that grab the light and stroma that builds the glucose.\n\nSpeaker B: And third, low efficiency isn't failure when you've been running the same system for a billion years.\n\nSpeaker A: I'll never look at a leaf the same way again. Until next time, stay curious.",
+            ),
+            (
+                "## Document\nMitochondria produce ATP via the citric acid cycle and the electron transport chain, converting glucose into a form the cell can spend. They are thought to descend from a separate organism that was engulfed long ago — the endosymbiotic theory.",
+                "Speaker A: Okay, you're going to think I'm making this up — the little power plants inside our cells? They might have started out as a totally different organism.\n\nSpeaker B: I know, it sounds like a sci-fi pitch. But this is actually a serious hypothesis.\n\nSpeaker A: Hey everyone, welcome back. Today we're taking a deep dive into mitochondria.\n\nSpeaker B: You've probably heard the phrase \"powerhouse of the cell.\" We want to actually unpack what's happening in there.\n\nSpeaker A: So the headline job is making ATP, right?\n\nSpeaker B: Right. ATP is basically the cell's battery — the thing it spends to do work.\n\nSpeaker A: Hmm, like, a rechargeable battery?\n\nSpeaker B: Exactly. Not single-use — it gets recharged and reused over and over.\n\nSpeaker A: Okay, so how does the cell actually charge that battery?\n\nSpeaker B: Roughly two stages. First, the citric acid cycle breaks glucose down and loads up some electron carriers.\n\nSpeaker A: Electron carriers — what does that mean in practice?\n\nSpeaker B: Think of them as little couriers, carrying charge to the next stage.\n\nSpeaker A: Got it. And then what?\n\nSpeaker B: Then the electron transport chain — picture a slide — lets the electrons roll down, and the energy released goes into making ATP in bulk.\n\nSpeaker A: It's like a hydro dam. You hold the water back, then release it to generate power.\n\nSpeaker B: That's a great analogy, yeah. Same idea.\n\nSpeaker A: Now, back to the wild part. Were mitochondria really once a separate organism?\n\nSpeaker B: Well, more precisely, the endosymbiotic theory says one cell swallowed another a very long time ago, and they ended up cooperating instead of digesting.\n\nSpeaker A: Wait — so we're basically permanent roommates with an ancient guest?\n\nSpeaker B: Pretty much. And the guest happened to come with its own power plant.\n\nSpeaker A: That's wild. Okay, give us the three takeaways.\n\nSpeaker B: Sure. First, mitochondria's main job is producing ATP, the cell's rechargeable battery.\n\nSpeaker B: Second, they do it in two steps — citric acid cycle to load the carriers, electron transport chain to actually make ATP.\n\nSpeaker B: And third, the whole thing likely started as an ancient partnership, not as a built-in feature.\n\nSpeaker A: Honestly, kind of changes how you think about your own body. Until next time, stay curious.",
+            ),
+        ]
+    };
+
+    for (user_example, assistant_example) in examples {
+        messages.push(Message {
+            role: Role::User,
+            content: (*user_example).to_string(),
+        });
+        messages.push(Message {
+            role: Role::Assistant,
+            content: (*assistant_example).to_string(),
+        });
+    }
+
+    messages.push(Message {
+        role: Role::User,
+        content: source.to_string(),
+    });
+
+    messages
+}
+
 pub fn build_script_prompt(
     name: &str,
     description: &str,
@@ -411,33 +963,265 @@ pub fn build_script_prompt(
 
     let system = if lang.starts_with("ja") {
         let length_directive = match length {
-            PodcastLength::Short => "簡潔に書くこと。",
-            PodcastLength::Normal => "",
-            PodcastLength::Long => "現在ある内容を端折らず、必要な分だけ長さを惜しまずに書くこと。",
+            PodcastLength::Short => {
+                "## 長さ\n\
+                各トピックは要点を1〜2発話で言い切る短さに収める。\n\
+                \n\
+                ### 各トピックで触れること\n\
+                - それが何か（定義・名称）\n\
+                - 一番のポイント\n\
+                \n\
+                ### 触れないこと\n\
+                - 計算例・派生概念・歴史的背景・例外ケース\n\
+                \n\
+                ### ペース\n\
+                テンポ重視で、聞き手が30秒で大筋を掴めるくらいの密度。"
+            }
+            PodcastLength::Normal => {
+                "## 長さ\n\
+                資料の主要トピックを一つずつ順に取り上げる。\n\
+                \n\
+                ### 各トピックで必ず扱うこと\n\
+                - それが何か（定義・どんな概念か）\n\
+                - なぜ重要か・どこに使われるか\n\
+                - 直感的な例え話または簡単な具体例を一つ\n\
+                \n\
+                ### 深さ\n\
+                深追いはしないが、聞き手がその概念をイメージで掴めるところまでは掘る。\n\
+                \n\
+                ### ペース\n\
+                各トピックに数発話、長くて10発話程度をかける。"
+            }
+            PodcastLength::Long => {
+                "## 長さ\n\
+                資料に出てくる主要トピックを一つも省略せず、章の順番で全てカバーする。資料に書かれている具体的な定理・公式・概念名は省略せず登場させる。\n\
+                \n\
+                ### 各トピックで必ず順に扱うこと\n\
+                1. それが何か: 定義（厳密な言い方と、噛み砕いた言い方の両方）\n\
+                2. なぜ重要か: 他のトピックとどう繋がるか、どんな場面で使うか\n\
+                3. 例: 直感的な例え話 + 簡単な計算例または具体例\n\
+                4. つまずき: よくある誤解、つまずきポイント、気をつけるべき例外\n\
+                \n\
+                ### ペース\n\
+                各トピックに腰を据えて時間を割く。急がない、端折らない、手抜きしない。"
+            }
         };
         format!(
-            "あなたはポッドキャストのナレーターです。\
-            「{name}」（{description}）の完全なナレーションスクリプトを書いてください。\
-            一人のナレーターによるモノローグ形式で段落ごとに書き、段落間は空行で区切ること。\
-            自然な話し言葉で書き、タグや記号は含めないこと。すべて日本語で書くこと。\
+            "あなたはくだけた・好奇心旺盛・例え話を多用するスタイルの1人ナレーター・ポッドキャストの脚本家です。\
+            番組タイトルは「{name}」（{description}）。\n\
+            \n\
+            ## 事前分析（内部で行い、出力には書かない）\n\
+            本編を書く前に、資料から本質を捉える5つの問いを内部で立て、それぞれに自分で詳しく答えを用意してください。\n\
+            問いの作り方:\n\
+            a. 中心テーマ（複数あれば全て）を捉える問い\n\
+            b. 主要な支持アイデアを引き出す問い\n\
+            c. 重要な事実・根拠・データを浮かび上がらせる問い\n\
+            d. 著者の意図・視点を明らかにする問い\n\
+            e. 含意・結論・帰結を探る問い\n\
+            この5つの問いと答えが、ナレーションの主要な5ブロックそのものになります。\n\
+            \n\
+            ## ナレーターの人格\n\
+            - 温かく、好奇心旺盛で、聞き手の隣で考えながら喋っているようなトーン。\n\
+            - 大事なところはレトリックの問いで言い直す（「これ、面白いと思いませんか？」「じゃあ何が起きてるのか？」）。\n\
+            - 例え話を多用する（「これは○○みたいなものですね」「こう考えるとわかりやすいかも」）。\n\
+            - ときどき自己訂正（「いや、もう少し正確に言うと…」）も入れて生っぽさを出す。\n\
+            \n\
+            ## 構成\n\
+            1. 短いフック: 資料の中で驚きのある事実や挑発的な問いから入って、リスナーの関心を掴む。\n\
+            2. 本編（5つの問いを順に消化）: 各問いを段落の冒頭でリスナーに投げかけ、その段落で答えていく。\n\
+            3. まとめ: 3つのテイクアウェイを箇条書きではなく語り口で要約する。\n\
+            4. サインオフ: 「では今日はこのへんで」のような短い締め。\n\
+            \n\
+            ## 自然な話し方\n\
+            - 言い淀みやフィラー（「えっと」「うん」「なんていうか」「ね？」）は段落あたり1回程度。\n\
+            - 文の長さに緩急。短い問いかけ（「面白いですよね？」）と、3〜4文くらいの長めの説明を織り交ぜる。\n\
+            - 番号や記号の列挙はしない。会話として滑らかに繋ぐ。\n\
+            \n\
+            ## 表現豊かな記号・表記\n\
+            感情やリズムを伝えるために、以下を積極的に使うこと：\n\
+            - 「！」（全角または半角）: 驚き・強調・テンションが上がった瞬間\n\
+            - 「？」: 疑問・呼びかけ・確認\n\
+            - 「…」（または「。。。」）: 思考の間、言い淀み、含み、トレイルオフ\n\
+            - 「♪」「♫」: 軽やかな・楽しげな・歌うようなトーンの箇所\n\
+            - 「〜」: 語尾を伸ばす親しみのある言い方（「そうなんだ〜」「えぇ〜」）\n\
+            - 「！？」: 驚き混じりの疑問\n\
+            - 小書き文字を活用：\n\
+              - 「っ」: 詰まる音・勢いのある言い切り（「えっ」「ちょっ」「やばっ」「あっ」）\n\
+              - 「ぁ」「ぃ」「ぅ」「ぇ」「ぉ」: 弱く息を抜く語尾・嘆息（「あぁ」「うわぁ」「えぇ」「へぇ」「ふぅ」）\n\
+            これらは1文に1〜2個まで。乱用せず、ここぞというところで使う。\n\
+            \n\
+            ## 事実性\n\
+            - 具体的な主張はすべて資料に根拠があること。資料にない人名・日付・統計を作らない。\n\
+            - 資料が何も言っていない点は「これはこの資料からだとわからないんですけどね」と明示して棚上げする。\n\
+            \n\
+            ## 厳守する出力フォーマット\n\
+            - 段落形式（複数の文をひとまとまりにした段落を、空行1つで区切る）。\n\
+            - 話者ラベル（`A:` など）は付けない。1人語りなので不要。\n\
+            - タグ・括弧書きの演出（[笑] や *強調* など）は一切付けない。\n\
+            - 出力は台本本体のみ。事前分析、タイトル行、JSON、コードブロック、前書きは一切出力しない。\n\
+            - すべて日本語で書く。\n\
+            \n\
             {length_directive}",
         )
     } else {
         let length_directive = match length {
-            PodcastLength::Short => "Keep it concise.",
-            PodcastLength::Normal => "",
+            PodcastLength::Short => {
+                "## Length\n\
+                Each topic gets 1–2 lines, max.\n\
+                \n\
+                ### For every topic cover only\n\
+                - What it is (name/definition)\n\
+                - The single headline point\n\
+                \n\
+                ### Skip\n\
+                - Calculations, history, edge cases, adjacent concepts\n\
+                \n\
+                ### Pace\n\
+                Listener should grasp the outline in about 30 seconds per topic."
+            }
+            PodcastLength::Normal => {
+                "## Length\n\
+                Walk through every major topic in the source, one by one.\n\
+                \n\
+                ### For each topic cover\n\
+                - What it is (definition / what kind of concept)\n\
+                - Why it matters and where it shows up\n\
+                - One intuitive analogy OR one simple concrete example\n\
+                \n\
+                ### Depth\n\
+                Go deep enough that the listener can picture the concept, but no further.\n\
+                \n\
+                ### Pace\n\
+                Spend a handful of lines (up to ~10) per topic."
+            }
             PodcastLength::Long => {
-                "Do not cut corners — write as much length as the material warrants."
+                "## Length\n\
+                Walk through every major topic in the source — do not skip any. Follow the chapter order. Do not omit specific theorems, formulas, or named concepts that appear in the source.\n\
+                \n\
+                ### For each topic cover all of\n\
+                1. What it is: both the formal definition and a plain-language version\n\
+                2. Why it matters: how it connects to other topics, where it shows up\n\
+                3. Example: an intuitive analogy AND a simple worked example or concrete instance\n\
+                4. Pitfalls: common misconceptions, gotchas, edge cases to watch out for\n\
+                \n\
+                ### Pace\n\
+                Spend real time on each one. No rushing, no abbreviating, no corner cutting."
             }
         };
         format!(
-            "You are a podcast narrator. \
-            Write a complete narration script for \"{name}\" ({description}). \
-            Single narrator monologue, paragraphs separated by blank lines. \
-            Natural spoken language only, no tags or non-speech symbols. \
-            Write entirely in BCP-47 \"{lang}\". \
+            "You are a scriptwriter for an informal, curious, analogy-heavy single-narrator \
+            podcast. The show is titled \"{name}\" ({description}).\n\
+            \n\
+            ## Pre-analysis (do this internally; do NOT write it in the output)\n\
+            Before drafting, generate 5 essential questions that, when answered, capture the core meaning of the source. \
+            Make sure they:\n\
+            a. address the central theme (or themes),\n\
+            b. surface key supporting ideas,\n\
+            c. highlight important facts or evidence,\n\
+            d. reveal the author's purpose or perspective,\n\
+            e. explore significant implications or conclusions.\n\
+            Then answer each one in detail. These 5 Q&As become the 5 main blocks of the narration.\n\
+            \n\
+            ## Narrator persona\n\
+            - Warm, curious, sounding like you're thinking out loud next to the listener.\n\
+            - Use rhetorical questions to refocus (\"Why does that matter? Well…\").\n\
+            - Lean on analogies (\"It's kind of like…\", \"Think of it this way…\").\n\
+            - Self-correct occasionally (\"Well, actually, more precisely…\") for a live feel.\n\
+            \n\
+            ## Structure\n\
+            1. Short hook: open with a surprising fact or provocative question from the source.\n\
+            2. Main body (walk through the 5 questions in order): start each paragraph by raising the question to the listener, then answer it inside that paragraph.\n\
+            3. Recap: summarize 3 takeaways conversationally — not as a list.\n\
+            4. Sign-off: short close, e.g. \"And on that note… until next time, stay curious.\".\n\
+            \n\
+            ## Natural speech\n\
+            - Disfluencies sparingly (~1 per paragraph): \"um,\" \"you know,\" \"I mean,\" \"right?\".\n\
+            - Vary sentence lengths: short rhetorical questions plus 3–4 sentence explanations.\n\
+            - No bulleted enumerations; phrase everything as flowing speech.\n\
+            \n\
+            ## Expressive punctuation\n\
+            Use these freely to convey emotion and rhythm:\n\
+            - \"!\" — excitement, emphasis, surprise (\"That's wild!\")\n\
+            - \"?\" — questions, calls for the listener's attention\n\
+            - \"...\" or \"…\" — thinking pauses, trailing off, hesitation\n\
+            - \"♪\" / \"♫\" — light, playful, sing-songy moments\n\
+            - \"!?\" — surprised disbelief\n\
+            - Stretched vowels for casual tone (\"Whaaat\", \"Ohhh\", \"Hmmm\", \"Riiight\")\n\
+            - Cut-off interjections (\"Wait—\", \"Oh!\", \"Huh.\")\n\
+            Use 1–2 per sentence at most. Don't overdo it — save them for moments that earn it.\n\
+            \n\
+            ## Factual rules\n\
+            - Every substantive claim must be grounded in the source material.\n\
+            - Do not invent names, dates, or statistics not in the source.\n\
+            - If the source is silent on something, flag it: \"We don't actually know X from this material.\".\n\
+            \n\
+            ## Strict output format\n\
+            - Paragraph form. Separate consecutive paragraphs with a single blank line.\n\
+            - No speaker labels (single narrator, none needed).\n\
+            - No stage directions, brackets, asterisks, JSON, code fences, titles, or preamble. Do NOT output the pre-analysis. Script body only.\n\
+            - Write entirely in BCP-47 \"{lang}\".\n\
+            \n\
             {length_directive}",
         )
     };
     (system, source.to_string())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn compact_markdown_strips_images() {
+        let input = "before ![alt text](https://example.com/foo.png) after";
+        assert_eq!(compact_markdown(input), "before  after\n");
+    }
+
+    #[test]
+    fn compact_markdown_keeps_link_text_drops_url() {
+        let input = "see [the docs](https://example.com/docs) for more";
+        assert_eq!(compact_markdown(input), "see the docs for more\n");
+    }
+
+    #[test]
+    fn compact_markdown_collapses_blank_lines() {
+        let input = "a\n\n\n\nb\n\n\nc";
+        assert_eq!(compact_markdown(input), "a\n\nb\n\nc\n");
+    }
+
+    #[test]
+    fn compact_markdown_leaves_plain_brackets_alone() {
+        let input = "an array [1, 2, 3] not a link";
+        assert_eq!(compact_markdown(input), "an array [1, 2, 3] not a link\n");
+    }
+
+    #[test]
+    fn compact_markdown_keeps_bold_markers() {
+        let input = "this is **important** and **also this**";
+        assert_eq!(
+            compact_markdown(input),
+            "this is **important** and **also this**\n"
+        );
+    }
+
+    #[test]
+    fn compact_markdown_strips_raw_urls() {
+        let input = "see https://example.com/foo for details";
+        assert_eq!(compact_markdown(input), "see  for details\n");
+    }
+
+    #[test]
+    fn compact_markdown_keeps_heading_prefixes() {
+        let input = "# Title\n## Section\n### Sub\nbody";
+        assert_eq!(
+            compact_markdown(input),
+            "# Title\n## Section\n### Sub\nbody\n"
+        );
+    }
+
+    #[test]
+    fn compact_markdown_drops_separator_page_numbers_and_empty_headings() {
+        let input = "para one\n\n---\n\n21\n\n## \n\npara two";
+        assert_eq!(compact_markdown(input), "para one\n\npara two\n");
+    }
 }

@@ -7,6 +7,7 @@ pub struct CreatePodcastInput {
     pub description: String,
     pub used_file_ids: Vec<uuid::Uuid>,
     pub voice_style: String,
+    pub voice_style_2: Option<String>,
     pub length: String,
 }
 
@@ -26,6 +27,18 @@ pub async fn create_podcast(
     }
     if let Err(err) = super::domain::VoiceStyle::new(input.voice_style.clone()) {
         return Ok(Err(err));
+    }
+    if let Some(v2) = input.voice_style_2.as_ref() {
+        if let Err(err) = super::domain::VoiceStyle::new(v2.clone()) {
+            return Ok(Err(err));
+        }
+        if v2 == &input.voice_style {
+            return Ok(Err(crate::domain::DomainError::new(
+                "invalid_voice_style",
+                "voice_style and voice_style_2 must differ".to_string(),
+                crate::domain::DomainErrorKind::BadInput,
+            )));
+        }
     }
     if let Err(err) = super::domain::PodcastLength::new(&input.length) {
         return Ok(Err(err));
@@ -129,6 +142,7 @@ pub async fn create_podcast(
         used_file_ids: input.used_file_ids,
         started_at: chrono::Utc::now(),
         voice_style: input.voice_style,
+        voice_style_2: input.voice_style_2,
         length: input.length,
     };
 

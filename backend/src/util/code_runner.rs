@@ -54,8 +54,6 @@ pub trait CodeRunnerClient: Send + Sync {
     async fn list_compilers(&self) -> Result<Vec<CompilerSummary>, CodeRunnerError>;
 }
 
-const WANDBOX_URL: &str = "https://wandbox.org/api/compile.json";
-const WANDBOX_LIST_URL: &str = "https://wandbox.org/api/list.json";
 const REQUEST_TIMEOUT_SECS: u64 = 600;
 const COMPILER_LIST_TTL_SECS: u64 = 24 * 60 * 60;
 
@@ -78,7 +76,7 @@ impl WandboxClient {
     async fn fetch_compilers(&self) -> Result<Vec<CompilerSummary>, anyhow::Error> {
         let resp = self
             .http_client
-            .get(WANDBOX_LIST_URL)
+            .get("https://wandbox.org/api/list.json")
             .header(reqwest::header::ACCEPT, "application/json")
             .send()
             .await?;
@@ -176,7 +174,7 @@ impl CodeRunnerClient for WandboxClient {
 
         let resp = self
             .http_client
-            .post(WANDBOX_URL)
+            .post("https://wandbox.org/api/compile.json")
             .header(reqwest::header::CONTENT_TYPE, "application/json")
             .header(reqwest::header::ACCEPT, "application/json")
             .json(&body)

@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import useSWR from "swr";
 import { kyInstance } from "../../api/mutator";
 import { RATE_LIMITS_KEY } from "../../api/keys";
-import { formatRelative } from "../../utils/datetime";
+import { formatDateTime } from "../../utils/datetime";
 import type { GetRateLimits200 } from "../../api/generated/backend.schemas";
 
 const fetcher = (path: string) => kyInstance.get(path).json<GetRateLimits200>();
@@ -139,7 +139,7 @@ function UsageRow({
         </span>
         <span>
           {t("profile.usage.resetAt", {
-            time: formatRelative(nextResetIso(resetAt), locale),
+            time: formatDateTime(nextResetIso(resetAt), locale),
           })}
         </span>
       </div>

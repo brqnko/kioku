@@ -27,17 +27,26 @@ type VoiceStyle =
   | "F3"
   | "F4"
   | "F5"
+  | "moka"
   | "M1"
   | "M2"
   | "M3"
   | "M4"
-  | "M5";
+  | "M5"
+  | "keld";
 
-const FEMALE_VOICES: VoiceStyle[] = ["F1", "F2", "F3", "F4", "F5"];
-const MALE_VOICES: VoiceStyle[] = ["M1", "M2", "M3", "M4", "M5"];
-const DEFAULT_VOICE: VoiceStyle = "M2";
+const FEMALE_VOICES: VoiceStyle[] = ["F1", "F2", "F3", "F4", "F5", "moka"];
+const MALE_VOICES: VoiceStyle[] = ["M1", "M2", "M3", "M4", "M5", "keld"];
+const DEFAULT_VOICE: VoiceStyle = "moka";
+const DEFAULT_VOICE_2: VoiceStyle = "keld";
 const VOICE_STORAGE_KEY = "podcast.voiceStyle";
+const VOICE_2_STORAGE_KEY = "podcast.voiceStyle2";
 const ALL_VOICES: VoiceStyle[] = [...FEMALE_VOICES, ...MALE_VOICES];
+
+type SpeakerCount = 1 | 2;
+const SPEAKER_COUNTS: SpeakerCount[] = [1, 2];
+const DEFAULT_SPEAKER_COUNT: SpeakerCount = 2;
+const SPEAKER_COUNT_STORAGE_KEY = "podcast.speakerCount";
 
 type PodcastLength = "short" | "normal" | "long";
 const LENGTHS: PodcastLength[] = ["short", "normal", "long"];
@@ -68,11 +77,39 @@ const loadStoredVoice = (): VoiceStyle => {
   return DEFAULT_VOICE;
 };
 
+const loadStoredVoice2 = (): VoiceStyle => {
+  try {
+    const saved = localStorage.getItem(VOICE_2_STORAGE_KEY);
+    if (saved && (ALL_VOICES as string[]).includes(saved)) {
+      return saved as VoiceStyle;
+    }
+  } catch {
+    // ignore (SSR / private mode)
+  }
+  return DEFAULT_VOICE_2;
+};
+
+const loadStoredSpeakerCount = (): SpeakerCount => {
+  try {
+    const saved = localStorage.getItem(SPEAKER_COUNT_STORAGE_KEY);
+    const parsed = saved ? Number(saved) : NaN;
+    if (parsed === 1 || parsed === 2) {
+      return parsed;
+    }
+  } catch {
+    // ignore (SSR / private mode)
+  }
+  return DEFAULT_SPEAKER_COUNT;
+};
+
 interface VoicePickerProps {
   value: VoiceStyle;
   onChange: (v: VoiceStyle) => void;
   playing: VoiceStyle | null;
   onPreview: (v: VoiceStyle) => void;
+  titleKey?: string;
+  hintKey?: string;
+  disabledVoice?: VoiceStyle;
 }
 
 function VoicePicker({
@@ -80,6 +117,9 @@ function VoicePicker({
   onChange,
   playing,
   onPreview,
+  titleKey,
+  hintKey,
+  disabledVoice,
 }: VoicePickerProps) {
   const { t } = useTranslation();
 
@@ -92,20 +132,24 @@ function VoicePicker({
         {items.map((v) => {
           const selected = value === v;
           const isPlaying = playing === v;
+          const isDisabled = disabledVoice === v && !selected;
           return (
             <div
               key={v}
               class={`flex items-center gap-1 rounded-md border pl-2.5 pr-1 transition-colors ${
                 selected
                   ? "border-accent-blue bg-overlay-faint"
-                  : "border-border-subtle hover:bg-overlay-faint"
+                  : isDisabled
+                    ? "border-border-subtle opacity-40"
+                    : "border-border-subtle hover:bg-overlay-faint"
               }`}
             >
               <button
                 type="button"
-                onClick={() => onChange(v)}
+                onClick={() => !isDisabled && onChange(v)}
+                disabled={isDisabled}
                 aria-pressed={selected}
-                class="flex flex-1 min-w-0 items-center gap-2 bg-transparent border-none p-0 py-1.5 text-left cursor-pointer"
+                class="flex flex-1 min-w-0 items-center gap-2 bg-transparent border-none p-0 py-1.5 text-left cursor-pointer disabled:cursor-not-allowed"
               >
                 <span
                   aria-hidden
@@ -149,10 +193,10 @@ function VoicePicker({
     <div class="flex flex-col gap-3">
       <div class="flex flex-col gap-1">
         <label class="text-xs font-bold uppercase tracking-widest text-text-secondary">
-          {t("podcast.create.voice.title")}
+          {t(titleKey ?? "podcast.create.voice.title")}
         </label>
         <span class="text-[11px] text-text-disabled leading-snug">
-          {t("podcast.create.voice.hint")}
+          {t(hintKey ?? "podcast.create.voice.hint")}
         </span>
       </div>
       {renderGroup(t("podcast.create.voice.female"), FEMALE_VOICES)}
@@ -203,6 +247,57 @@ function LengthPicker({ value, onChange }: LengthPickerProps) {
               </span>
               <span class="text-[10px] leading-tight text-text-disabled">
                 {t(`podcast.create.length.options.${v}.desc`)}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+interface SpeakerCountPickerProps {
+  value: SpeakerCount;
+  onChange: (v: SpeakerCount) => void;
+}
+
+function SpeakerCountPicker({ value, onChange }: SpeakerCountPickerProps) {
+  const { t } = useTranslation();
+  return (
+    <div class="flex flex-col gap-3">
+      <div class="flex flex-col gap-1">
+        <label class="text-xs font-bold uppercase tracking-widest text-text-secondary">
+          {t("podcast.create.speakers.title")}
+        </label>
+        <span class="text-[11px] text-text-disabled leading-snug">
+          {t("podcast.create.speakers.hint")}
+        </span>
+      </div>
+      <div role="radiogroup" class="grid grid-cols-2 gap-1.5">
+        {SPEAKER_COUNTS.map((v) => {
+          const selected = value === v;
+          return (
+            <button
+              key={v}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              onClick={() => onChange(v)}
+              class={`flex flex-col items-center justify-center gap-0.5 rounded-md border px-2 py-2 text-center transition-colors cursor-pointer bg-transparent ${
+                selected
+                  ? "border-accent-blue bg-overlay-faint"
+                  : "border-border-subtle hover:bg-overlay-faint"
+              }`}
+            >
+              <span
+                class={`text-[13px] leading-tight font-medium ${
+                  selected ? "text-text-primary" : "text-text-secondary"
+                }`}
+              >
+                {t(`podcast.create.speakers.options.${v}.label`)}
+              </span>
+              <span class="text-[10px] leading-tight text-text-disabled">
+                {t(`podcast.create.speakers.options.${v}.desc`)}
               </span>
             </button>
           );
@@ -350,6 +445,10 @@ export default function PodcastNewPage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [voiceStyle, setVoiceStyle] = useState<VoiceStyle>(loadStoredVoice);
+  const [voiceStyle2, setVoiceStyle2] = useState<VoiceStyle>(loadStoredVoice2);
+  const [speakerCount, setSpeakerCount] = useState<SpeakerCount>(
+    loadStoredSpeakerCount,
+  );
   const [length, setLength] = useState<PodcastLength>(loadStoredLength);
 
   useEffect(() => {
@@ -359,6 +458,29 @@ export default function PodcastNewPage() {
       // ignore (private mode / quota)
     }
   }, [voiceStyle]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(VOICE_2_STORAGE_KEY, voiceStyle2);
+    } catch {
+      // ignore (private mode / quota)
+    }
+  }, [voiceStyle2]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(SPEAKER_COUNT_STORAGE_KEY, String(speakerCount));
+    } catch {
+      // ignore (private mode / quota)
+    }
+  }, [speakerCount]);
+
+  useEffect(() => {
+    if (speakerCount === 2 && voiceStyle === voiceStyle2) {
+      const fallback = ALL_VOICES.find((v) => v !== voiceStyle);
+      if (fallback) setVoiceStyle2(fallback);
+    }
+  }, [speakerCount, voiceStyle, voiceStyle2]);
 
   useEffect(() => {
     try {
@@ -430,6 +552,7 @@ export default function PodcastNewPage() {
         description: description.trim(),
         used_file_ids: Array.from(selected.keys()),
         voice_style: voiceStyle,
+        voice_style_2: speakerCount === 2 ? voiceStyle2 : null,
         length,
       };
       await kyInstance
@@ -581,12 +704,34 @@ export default function PodcastNewPage() {
                 />
               </div>
 
+              <SpeakerCountPicker
+                value={speakerCount}
+                onChange={(v) => setSpeakerCount(v)}
+              />
+
               <VoicePicker
                 value={voiceStyle}
                 onChange={(v) => setVoiceStyle(v)}
                 playing={playingVoice}
                 onPreview={previewVoice}
+                titleKey={
+                  speakerCount === 2
+                    ? "podcast.create.voice.titleSpeaker1"
+                    : "podcast.create.voice.title"
+                }
+                disabledVoice={speakerCount === 2 ? voiceStyle2 : undefined}
               />
+
+              {speakerCount === 2 && (
+                <VoicePicker
+                  value={voiceStyle2}
+                  onChange={(v) => setVoiceStyle2(v)}
+                  playing={playingVoice}
+                  onPreview={previewVoice}
+                  titleKey="podcast.create.voice.titleSpeaker2"
+                  disabledVoice={voiceStyle}
+                />
+              )}
 
               <LengthPicker value={length} onChange={(v) => setLength(v)} />
             </div>

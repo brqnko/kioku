@@ -4,9 +4,6 @@ import {
   type Highlighter,
 } from "shiki";
 
-const LIGHT_THEME = "github-light";
-const DARK_THEME = "github-dark";
-
 const ALIAS_TO_SHIKI: Record<string, BundledLanguage> = {
   py: "python",
   python: "python",
@@ -88,7 +85,7 @@ function ensureHighlighter(): Promise<Highlighter> {
   if (highlighter) return Promise.resolve(highlighter);
   if (highlighterPromise) return highlighterPromise;
   highlighterPromise = createHighlighter({
-    themes: [LIGHT_THEME, DARK_THEME],
+    themes: ["github-light", "github-dark"],
     langs: HOT_LANGS,
   }).then((h) => {
     highlighter = h;
@@ -129,7 +126,7 @@ export async function highlightToHtml(
   }
   return h.codeToHtml(code, {
     lang: (target || "text") as BundledLanguage,
-    themes: { light: LIGHT_THEME, dark: DARK_THEME },
+    themes: { light: "github-light", dark: "github-dark" },
     defaultColor: false,
   });
 }

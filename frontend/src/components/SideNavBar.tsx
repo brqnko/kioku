@@ -23,23 +23,21 @@ const navItems: NavItem[] = [
 function isLibraryPath(p: string): boolean {
   return (
     p === "/library" ||
-    (p.startsWith("/projects/") && !p.includes("/podcasts") && !p.includes("/chat")) ||
+    (p.startsWith("/projects/") &&
+      !p.includes("/podcasts") &&
+      !p.includes("/chat")) ||
     p.startsWith("/folders/")
   );
 }
 
 function isPodcastPath(p: string): boolean {
   return (
-    p === "/podcast" ||
-    (p.startsWith("/projects/") && p.includes("/podcasts"))
+    p === "/podcast" || (p.startsWith("/projects/") && p.includes("/podcasts"))
   );
 }
 
 function isChatPath(p: string): boolean {
-  return (
-    p === "/chat" ||
-    (p.startsWith("/projects/") && p.includes("/chat"))
-  );
+  return p === "/chat" || (p.startsWith("/projects/") && p.includes("/chat"));
 }
 
 export default function SideNavBar() {
@@ -52,8 +50,11 @@ export default function SideNavBar() {
   const recentFiles = (dashboard?.recent_seen_files ?? []).slice(0, 10);
 
   const [lastProjectId, setLastProjectId] = useState<string | null>(() => {
-    try { return sessionStorage.getItem("lastProjectId"); }
-    catch { return null; }
+    try {
+      return sessionStorage.getItem("lastProjectId");
+    } catch {
+      return null;
+    }
   });
 
   useEffect(() => {
@@ -69,18 +70,21 @@ export default function SideNavBar() {
   const projectId = currentProjectId ?? lastProjectId;
 
   const resolveItem = (item: NavItem): { href: string; active: boolean } => {
-    if (item.href === "/library") return {
-      href: projectId ? `/projects/${projectId}` : "/library",
-      active: isLibraryPath(path),
-    };
-    if (item.href === "/podcast") return {
-      href: projectId ? `/projects/${projectId}/podcasts` : "/podcast",
-      active: isPodcastPath(path),
-    };
-    if (item.href === "/chat") return {
-      href: projectId ? `/projects/${projectId}/chat` : "/chat",
-      active: isChatPath(path),
-    };
+    if (item.href === "/library")
+      return {
+        href: projectId ? `/projects/${projectId}` : "/library",
+        active: isLibraryPath(path),
+      };
+    if (item.href === "/podcast")
+      return {
+        href: projectId ? `/projects/${projectId}/podcasts` : "/podcast",
+        active: isPodcastPath(path),
+      };
+    if (item.href === "/chat")
+      return {
+        href: projectId ? `/projects/${projectId}/chat` : "/chat",
+        active: isChatPath(path),
+      };
     return { href: item.href, active: path === item.href };
   };
 

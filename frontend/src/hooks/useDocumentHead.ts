@@ -19,9 +19,6 @@ export interface DocumentHeadOptions {
   ogUrl?: string;
 }
 
-const MANAGED_ATTR = "data-managed";
-const MANAGED_VAL = "useDocumentHead";
-
 function absoluteUrl(value: string): string {
   if (/^https?:\/\//i.test(value)) return value;
   return `${SITE_URL}${value.startsWith("/") ? value : `/${value}`}`;
@@ -37,7 +34,7 @@ function upsertMeta(
   if (!el) {
     el = document.createElement("meta");
     el.setAttribute(attrName, attrValue);
-    el.setAttribute(MANAGED_ATTR, MANAGED_VAL);
+    el.setAttribute("data-managed", "useDocumentHead");
     document.head.appendChild(el);
   }
   el.setAttribute("content", content);
@@ -48,7 +45,7 @@ function upsertLink(rel: string, href: string) {
   if (!el) {
     el = document.createElement("link");
     el.setAttribute("rel", rel);
-    el.setAttribute(MANAGED_ATTR, MANAGED_VAL);
+    el.setAttribute("data-managed", "useDocumentHead");
     document.head.appendChild(el);
   }
   el.setAttribute("href", href);
