@@ -1,11 +1,11 @@
 {
   "db_name": "MySQL",
-  "query": "\n            SELECT refresh_token_id, user_id, token_hash, generation, ip_address, user_agent,\n                   access_token_jti, activated_at, last_used_at, expires_at\n            FROM refresh_token\n            WHERE token_hash = ?\n            FOR UPDATE\n            ",
+  "query": "\n            SELECT folder_id, parent_id, parent_kind, depth,\n                   name, description, user_id,\n                   uploaded_at, changed_at\n            FROM folder\n            WHERE folder_id = ?\n            LIMIT 1\n            FOR UPDATE\n            ",
   "describe": {
     "columns": [
       {
         "ordinal": 0,
-        "name": "refresh_token_id",
+        "name": "folder_id",
         "type_info": {
           "type": "VarString",
           "flags": "NOT_NULL | PRIMARY_KEY | BINARY | NO_DEFAULT_VALUE",
@@ -14,52 +14,52 @@
       },
       {
         "ordinal": 1,
-        "name": "user_id",
+        "name": "parent_id",
         "type_info": {
           "type": "VarString",
-          "flags": "NOT_NULL | MULTIPLE_KEY | BINARY | NO_DEFAULT_VALUE",
+          "flags": "NOT_NULL | BINARY | NO_DEFAULT_VALUE",
           "max_size": 16
         }
       },
       {
         "ordinal": 2,
-        "name": "token_hash",
+        "name": "parent_kind",
         "type_info": {
-          "type": "VarString",
-          "flags": "NOT_NULL | UNIQUE_KEY | NO_DEFAULT_VALUE",
-          "max_size": 1024
+          "type": "Tiny",
+          "flags": "NOT_NULL | MULTIPLE_KEY | UNSIGNED | NO_DEFAULT_VALUE",
+          "max_size": 3
         }
       },
       {
         "ordinal": 3,
-        "name": "generation",
+        "name": "depth",
         "type_info": {
-          "type": "Long",
-          "flags": "NOT_NULL | NO_DEFAULT_VALUE",
-          "max_size": 11
+          "type": "Tiny",
+          "flags": "NOT_NULL | UNSIGNED | NO_DEFAULT_VALUE",
+          "max_size": 3
         }
       },
       {
         "ordinal": 4,
-        "name": "ip_address",
+        "name": "name",
         "type_info": {
           "type": "VarString",
           "flags": "NOT_NULL | NO_DEFAULT_VALUE",
-          "max_size": 256
+          "max_size": 1024
         }
       },
       {
         "ordinal": 5,
-        "name": "user_agent",
+        "name": "description",
         "type_info": {
           "type": "VarString",
           "flags": "NOT_NULL | NO_DEFAULT_VALUE",
-          "max_size": 2048
+          "max_size": 4096
         }
       },
       {
         "ordinal": 6,
-        "name": "access_token_jti",
+        "name": "user_id",
         "type_info": {
           "type": "VarString",
           "flags": "NOT_NULL | BINARY | NO_DEFAULT_VALUE",
@@ -68,7 +68,7 @@
       },
       {
         "ordinal": 7,
-        "name": "activated_at",
+        "name": "uploaded_at",
         "type_info": {
           "type": "Datetime",
           "flags": "NOT_NULL | BINARY | NO_DEFAULT_VALUE",
@@ -77,16 +77,7 @@
       },
       {
         "ordinal": 8,
-        "name": "last_used_at",
-        "type_info": {
-          "type": "Datetime",
-          "flags": "NOT_NULL | BINARY | NO_DEFAULT_VALUE",
-          "max_size": 19
-        }
-      },
-      {
-        "ordinal": 9,
-        "name": "expires_at",
+        "name": "changed_at",
         "type_info": {
           "type": "Datetime",
           "flags": "NOT_NULL | BINARY | NO_DEFAULT_VALUE",
@@ -106,9 +97,8 @@
       false,
       false,
       false,
-      false,
       false
     ]
   },
-  "hash": "7f8c018ac89aa732516fefb31575059eca52dfc3a9bb9437de4c8cf8d97b5feb"
+  "hash": "c857eb0af2f94aa5efece9e0be23d27a86bacf6a712de6726925afa262e090c5"
 }

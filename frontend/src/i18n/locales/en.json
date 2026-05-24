@@ -117,9 +117,6 @@
       "title": "Daily usage",
       "subtitle": "Your current consumption of daily quotas. Counters reset at 00:00 UTC.",
       "error": "Failed to load usage.",
-      "exhausted": "Limit reached",
-      "remaining_one": "{{count}} remaining",
-      "remaining_other": "{{count}} remaining",
       "resetAt": "Resets {{time}}",
       "items": {
         "podcast": "Podcast generation",

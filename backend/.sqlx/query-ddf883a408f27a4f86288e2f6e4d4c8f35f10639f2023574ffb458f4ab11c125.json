@@ -1,6 +1,6 @@
 {
   "db_name": "MySQL",
-  "query": "\n            SELECT project_id, created_by, name, description,\n                   indexed_at, last_seen_at, last_seen_file_id\n            FROM project\n            WHERE project_id = ?\n            FOR UPDATE\n            ",
+  "query": "\n            SELECT project_id, created_by, name, description,\n                   indexed_at, last_seen_at, last_seen_file_id\n            FROM project\n            WHERE project_id = ?\n            LIMIT 1\n            FOR UPDATE\n            ",
   "describe": {
     "columns": [
       {
@@ -80,5 +80,5 @@
       false
     ]
   },
-  "hash": "2e33ba1b74f46746efead2f711730d50bc5bee98cf461a67c142d320fa4718b8"
+  "hash": "ddf883a408f27a4f86288e2f6e4d4c8f35f10639f2023574ffb458f4ab11c125"
 }

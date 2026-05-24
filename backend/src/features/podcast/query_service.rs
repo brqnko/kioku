@@ -64,6 +64,7 @@ impl QueryService for QueryServiceImpl {
                    podcast_created_at
             FROM podcast
             WHERE podcast_id = ?
+            LIMIT 1
             "#,
             podcast_id.as_bytes().as_slice(),
         )

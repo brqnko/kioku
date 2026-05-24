@@ -1,6 +1,6 @@
 {
   "db_name": "MySQL",
-  "query": "\n            SELECT\n                user_id,\n                display_name,\n                language_code,\n                joined_at,\n                iss,\n                sub,\n                recent_seen_file_ids as \"recent_seen_file_ids: sqlx::types::Json<Vec<uuid::Uuid>>\",\n                ai_learning_summary,\n                ai_learning_summary_updated_at,\n                podcast_daily_count,\n                podcast_daily_count_reset_at,\n                chatbot_daily_count,\n                chatbot_daily_count_reset_at,\n                file_upload_daily_count,\n                file_upload_daily_count_reset_at\n            FROM user\n            WHERE user_id = ?\n            FOR UPDATE\n            ",
+  "query": "\n            SELECT\n                user_id,\n                display_name,\n                language_code,\n                joined_at,\n                iss,\n                sub,\n                recent_seen_file_ids as \"recent_seen_file_ids: sqlx::types::Json<Vec<uuid::Uuid>>\",\n                ai_learning_summary,\n                ai_learning_summary_updated_at,\n                podcast_daily_count,\n                podcast_daily_count_reset_at,\n                chatbot_daily_count,\n                chatbot_daily_count_reset_at,\n                file_upload_daily_count,\n                file_upload_daily_count_reset_at\n            FROM user\n            WHERE user_id = ?\n            LIMIT 1\n            FOR UPDATE\n            ",
   "describe": {
     "columns": [
       {
@@ -160,5 +160,5 @@
       false
     ]
   },
-  "hash": "c9e980966c98dbce210a7af5f88bd160a8b4d74b042934828d344eb387ef645b"
+  "hash": "9df1ecfc0b594c63fcc3e9035b3520558ecfbd551928f922326297fd6a402bd4"
 }

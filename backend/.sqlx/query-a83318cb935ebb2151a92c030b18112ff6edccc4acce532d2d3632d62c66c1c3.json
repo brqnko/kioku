@@ -1,6 +1,6 @@
 {
   "db_name": "MySQL",
-  "query": "\n            SELECT\n                ai_learning_summary,\n                ai_learning_summary_updated_at,\n                recent_seen_file_ids as \"recent_seen_file_ids: sqlx::types::Json<Vec<uuid::Uuid>>\"\n            FROM user\n            WHERE user_id = ?\n            ",
+  "query": "\n            SELECT\n                ai_learning_summary,\n                ai_learning_summary_updated_at,\n                recent_seen_file_ids as \"recent_seen_file_ids: sqlx::types::Json<Vec<uuid::Uuid>>\"\n            FROM user\n            WHERE user_id = ?\n            LIMIT 1\n            ",
   "describe": {
     "columns": [
       {
@@ -40,5 +40,5 @@
       false
     ]
   },
-  "hash": "131ddeef9433068fb9aecc46404ecbe0235431050b291a353b30b8208007b76f"
+  "hash": "a83318cb935ebb2151a92c030b18112ff6edccc4acce532d2d3632d62c66c1c3"
 }

@@ -44,6 +44,7 @@ impl ProjectRepository<sqlx::MySqlConnection> for ProjectRepositoryImpl {
                    indexed_at, last_seen_at, last_seen_file_id
             FROM project
             WHERE project_id = ?
+            LIMIT 1
             FOR UPDATE
             "#,
             id.as_bytes().as_slice(),

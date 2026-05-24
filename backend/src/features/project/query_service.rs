@@ -186,6 +186,7 @@ impl QueryService for QueryServiceImpl {
             SELECT 1 AS hit
             FROM project
             WHERE project_id = ? AND created_by = ?
+            LIMIT 1
             "#,
             project_id.as_bytes().as_slice(),
             user_id.as_bytes().as_slice(),

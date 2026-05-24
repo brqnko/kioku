@@ -1,6 +1,6 @@
 {
   "db_name": "MySQL",
-  "query": "\n            SELECT user_id, display_name, language_code, joined_at\n            FROM user\n            WHERE user_id = ?\n            ",
+  "query": "\n            SELECT user_id, display_name, language_code, joined_at\n            FROM user\n            WHERE user_id = ?\n            LIMIT 1\n            ",
   "describe": {
     "columns": [
       {
@@ -50,5 +50,5 @@
       false
     ]
   },
-  "hash": "71374b63859f8ff2410f2b122199a3a05da0c5fc1ea32e5ca0b1ac23a2539326"
+  "hash": "75f8f8b04228abab5b4a793da3b173b5b5573e7c8aef6a7bf6d68f1f68885f93"
 }

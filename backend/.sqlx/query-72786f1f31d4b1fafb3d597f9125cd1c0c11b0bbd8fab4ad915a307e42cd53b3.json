@@ -1,6 +1,6 @@
 {
   "db_name": "MySQL",
-  "query": "\n            SELECT 1 AS hit\n            FROM project\n            WHERE project_id = ? AND created_by = ?\n            ",
+  "query": "\n            SELECT 1 AS hit\n            FROM project\n            WHERE project_id = ? AND created_by = ?\n            LIMIT 1\n            ",
   "describe": {
     "columns": [
       {
@@ -20,5 +20,5 @@
       false
     ]
   },
-  "hash": "b257187353f47194b2b19e856db5d5005a178a314d3a66eb7bfc1bbd56f46862"
+  "hash": "72786f1f31d4b1fafb3d597f9125cd1c0c11b0bbd8fab4ad915a307e42cd53b3"
 }

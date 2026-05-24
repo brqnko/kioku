@@ -47,6 +47,7 @@ impl PodcastRepository<sqlx::MySqlConnection> for PodcastRepositoryImpl {
                    podcast_created_at
             FROM podcast
             WHERE podcast_id = ?
+            LIMIT 1
             FOR UPDATE
             "#,
             id.as_bytes().as_slice(),

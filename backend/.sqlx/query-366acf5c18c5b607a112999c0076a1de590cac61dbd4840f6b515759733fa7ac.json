@@ -1,11 +1,11 @@
 {
   "db_name": "MySQL",
-  "query": "\n            SELECT podcast_id, name, description, user_id, project_id,\n                   used_file_ids AS \"used_file_ids: sqlx::types::Json<Vec<uuid::Uuid>>\",\n                   podcast_script AS \"podcast_script: sqlx::types::Json<Vec<super::domain::PodcastScriptEntry>>\",\n                   audio_storage_id,\n                   podcast_created_at\n            FROM podcast\n            WHERE podcast_id = ?\n            ",
+  "query": "\n            SELECT chat_id, name, user_id, project_id,\n                   messages AS \"messages: sqlx::types::Json<Vec<super::domain::ChatMessage>>\",\n                   started_at, last_activity_at\n            FROM chat\n            WHERE chat_id = ?\n            LIMIT 1\n            FOR UPDATE\n            ",
   "describe": {
     "columns": [
       {
         "ordinal": 0,
-        "name": "podcast_id",
+        "name": "chat_id",
         "type_info": {
           "type": "VarString",
           "flags": "NOT_NULL | PRIMARY_KEY | BINARY | NO_DEFAULT_VALUE",
@@ -23,15 +23,6 @@
       },
       {
         "ordinal": 2,
-        "name": "description",
-        "type_info": {
-          "type": "VarString",
-          "flags": "NOT_NULL | NO_DEFAULT_VALUE",
-          "max_size": 4096
-        }
-      },
-      {
-        "ordinal": 3,
         "name": "user_id",
         "type_info": {
           "type": "VarString",
@@ -40,7 +31,7 @@
         }
       },
       {
-        "ordinal": 4,
+        "ordinal": 3,
         "name": "project_id",
         "type_info": {
           "type": "VarString",
@@ -49,35 +40,26 @@
         }
       },
       {
-        "ordinal": 5,
-        "name": "used_file_ids: sqlx::types::Json<Vec<uuid::Uuid>>",
+        "ordinal": 4,
+        "name": "messages: sqlx::types::Json<Vec<super::domain::ChatMessage>>",
         "type_info": {
           "type": "Blob",
           "flags": "NOT_NULL | BLOB | BINARY | NO_DEFAULT_VALUE",
           "max_size": 4294967295
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "started_at",
+        "type_info": {
+          "type": "Datetime",
+          "flags": "NOT_NULL | BINARY | NO_DEFAULT_VALUE",
+          "max_size": 19
         }
       },
       {
         "ordinal": 6,
-        "name": "podcast_script: sqlx::types::Json<Vec<super::domain::PodcastScriptEntry>>",
-        "type_info": {
-          "type": "Blob",
-          "flags": "NOT_NULL | BLOB | BINARY | NO_DEFAULT_VALUE",
-          "max_size": 4294967295
-        }
-      },
-      {
-        "ordinal": 7,
-        "name": "audio_storage_id",
-        "type_info": {
-          "type": "VarString",
-          "flags": "NOT_NULL | BINARY | NO_DEFAULT_VALUE",
-          "max_size": 16
-        }
-      },
-      {
-        "ordinal": 8,
-        "name": "podcast_created_at",
+        "name": "last_activity_at",
         "type_info": {
           "type": "Datetime",
           "flags": "NOT_NULL | BINARY | NO_DEFAULT_VALUE",
@@ -95,10 +77,8 @@
       false,
       false,
       false,
-      false,
-      false,
       false
     ]
   },
-  "hash": "4335d3491f2917cf4bcbe98451cdfcca38752389e6bfdbe9b2466db564d25854"
+  "hash": "366acf5c18c5b607a112999c0076a1de590cac61dbd4840f6b515759733fa7ac"
 }

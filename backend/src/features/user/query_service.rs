@@ -81,6 +81,7 @@ impl QueryService for QueryServiceImpl {
             SELECT user_id, display_name, language_code, joined_at
             FROM user
             WHERE user_id = ?
+            LIMIT 1
             "#,
             user_id.as_bytes().as_slice(),
         )
@@ -176,6 +177,7 @@ impl QueryService for QueryServiceImpl {
                 recent_seen_file_ids as "recent_seen_file_ids: sqlx::types::Json<Vec<uuid::Uuid>>"
             FROM user
             WHERE user_id = ?
+            LIMIT 1
             "#,
             user_id.as_bytes().as_slice(),
         )
@@ -254,6 +256,7 @@ impl QueryService for QueryServiceImpl {
                 file_upload_daily_count_reset_at
             FROM user
             WHERE user_id = ?
+            LIMIT 1
             "#,
             user_id.as_bytes().as_slice(),
         )

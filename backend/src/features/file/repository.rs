@@ -83,6 +83,7 @@ impl FileRepository<sqlx::MySqlConnection> for FileRepositoryImpl {
                    uploaded_at, changed_at
             FROM file
             WHERE file_id = ?
+            LIMIT 1
             FOR UPDATE
             "#,
             id.as_bytes().as_slice(),
@@ -263,6 +264,7 @@ impl FolderRepository<sqlx::MySqlConnection> for FolderRepositoryImpl {
                    uploaded_at, changed_at
             FROM folder
             WHERE folder_id = ?
+            LIMIT 1
             FOR UPDATE
             "#,
             id.as_bytes().as_slice(),
@@ -393,6 +395,7 @@ impl TextStorageRepository<sqlx::MySqlConnection> for TextStorageRepositoryImpl 
             SELECT content
             FROM text_storage
             WHERE storage_id = ?
+            LIMIT 1
             FOR UPDATE
             "#,
             storage_id.as_bytes().as_slice(),

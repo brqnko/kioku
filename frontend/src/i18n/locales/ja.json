@@ -117,9 +117,6 @@
       "title": "1日の利用状況",
       "subtitle": "1日あたりのクォータの利用状況です。カウンターは毎日 UTC 00:00 にリセットされます。",
       "error": "利用状況の取得に失敗しました。",
-      "exhausted": "上限に達しました",
-      "remaining_one": "残り {{count}} 回",
-      "remaining_other": "残り {{count}} 回",
       "resetAt": "リセット: {{time}}",
       "items": {
         "podcast": "ポッドキャスト生成",

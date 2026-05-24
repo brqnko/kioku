@@ -99,7 +99,6 @@ function UsageRow({
     : warning
       ? "bg-warning"
       : "bg-accent-blue";
-  const remaining = Math.max(limit - used, 0);
 
   return (
     <div class="bg-surface-dark border border-border-subtle rounded-[12px] p-5 flex flex-col gap-3">
@@ -131,12 +130,7 @@ function UsageRow({
         />
       </div>
 
-      <div class="flex items-center justify-between text-xs text-text-muted-dark">
-        <span>
-          {exhausted
-            ? t("profile.usage.exhausted")
-            : t("profile.usage.remaining", { count: remaining })}
-        </span>
+      <div class="flex items-center justify-end text-xs text-text-muted-dark">
         <span>
           {t("profile.usage.resetAt", {
             time: formatDateTime(nextResetIso(resetAt), locale),

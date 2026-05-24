@@ -306,6 +306,7 @@ impl QueryService for QueryServiceImpl {
                    uploaded_at, changed_at
             FROM file
             WHERE file_id = ?
+            LIMIT 1
             "#,
             file_id.as_bytes().as_slice(),
         )
@@ -341,6 +342,7 @@ impl QueryService for QueryServiceImpl {
                    uploaded_at, changed_at
             FROM folder
             WHERE folder_id = ?
+            LIMIT 1
             "#,
             folder_id.as_bytes().as_slice(),
         )
@@ -389,7 +391,7 @@ impl QueryService for QueryServiceImpl {
         storage_id: uuid::Uuid,
     ) -> Result<Option<GetTextContentView>, anyhow::Error> {
         let row = sqlx::query!(
-            "SELECT content FROM text_storage WHERE storage_id = ?",
+            "SELECT content FROM text_storage WHERE storage_id = ? LIMIT 1",
             storage_id.as_bytes().as_slice(),
         )
         .fetch_optional(&self.pool)
@@ -410,6 +412,7 @@ impl QueryService for QueryServiceImpl {
                 SELECT project_id, name
                 FROM project
                 WHERE project_id = ? AND created_by = ?
+                LIMIT 1
                 "#,
                 parent_id.as_bytes().as_slice(),
                 user_id.as_bytes().as_slice(),
@@ -468,6 +471,7 @@ impl QueryService for QueryServiceImpl {
                 SELECT project_id, name
                 FROM project
                 WHERE project_id = ? AND created_by = ?
+                LIMIT 1
                 "#,
                 topmost.parent_id.as_slice(),
                 user_id.as_bytes().as_slice(),

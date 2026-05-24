@@ -1,6 +1,6 @@
 {
   "db_name": "MySQL",
-  "query": "\n            SELECT content\n            FROM text_storage\n            WHERE storage_id = ?\n            FOR UPDATE\n            ",
+  "query": "\n            SELECT content\n            FROM text_storage\n            WHERE storage_id = ?\n            LIMIT 1\n            FOR UPDATE\n            ",
   "describe": {
     "columns": [
       {
@@ -20,5 +20,5 @@
       false
     ]
   },
-  "hash": "6a7ec5f5e659da1919927a2f50463c024b3fb1f8c94cc82444bf94846703cb80"
+  "hash": "0bf83ee671da3a73313ed6888e6d43e1947c4754a0cbbb080c98a69b6be3e08e"
 }

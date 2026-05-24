@@ -45,6 +45,7 @@ impl ChatRepository<sqlx::MySqlConnection> for ChatRepositoryImpl {
                    started_at, last_activity_at
             FROM chat
             WHERE chat_id = ?
+            LIMIT 1
             FOR UPDATE
             "#,
             id.as_bytes().as_slice(),

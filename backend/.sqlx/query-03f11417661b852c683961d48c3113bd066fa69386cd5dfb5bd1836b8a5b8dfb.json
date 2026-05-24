@@ -1,6 +1,6 @@
 {
   "db_name": "MySQL",
-  "query": "SELECT content FROM text_storage WHERE storage_id = ?",
+  "query": "SELECT content FROM text_storage WHERE storage_id = ? LIMIT 1",
   "describe": {
     "columns": [
       {
@@ -20,5 +20,5 @@
       false
     ]
   },
-  "hash": "e3a9540437c25dad86201b264cff1cfea0a2caa99ca55499a000febf9db53d3f"
+  "hash": "03f11417661b852c683961d48c3113bd066fa69386cd5dfb5bd1836b8a5b8dfb"
 }

@@ -54,6 +54,7 @@ impl QueryService for QueryServiceImpl {
                    started_at, last_activity_at
             FROM chat
             WHERE chat_id = ?
+            LIMIT 1
             "#,
             chat_id.as_bytes().as_slice(),
         )

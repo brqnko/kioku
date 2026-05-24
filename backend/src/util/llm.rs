@@ -58,6 +58,7 @@ impl CopilotImpl {
     pub const MODEL_GPT_5_CODEX: &'static str = "gpt-5.2-codex";
     pub const MODEL_GPT_5_MINI: &'static str = "gpt-5-mini";
     pub const MODEL_GPT_5_4_MINI: &'static str = "gpt-5.4-mini";
+    pub const MODEL_AUTO: &'static str = "copilot-chat";
 
     pub fn new(github_token: String) -> Result<Self, anyhow::Error> {
         Ok(Self {
@@ -155,9 +156,7 @@ impl CopilotImpl {
 
 impl CopilotImpl {
     fn supports_responses_api(model: &str) -> bool {
-        // Models known to be Responses-API only or that we prefer to route there.
-        // Gemini (and other non-OpenAI Copilot models) only support Chat Completions.
-        !matches!(model, Self::MODEL_GEMINI_3_1_PRO)
+        !matches!(model, Self::MODEL_GEMINI_3_1_PRO | Self::MODEL_AUTO)
     }
 
     async fn complete_chat(
@@ -180,6 +179,8 @@ impl CopilotImpl {
         #[derive(serde::Deserialize)]
         struct ChatResponse {
             choices: Vec<ChatChoice>,
+            #[serde(default)]
+            model: Option<String>,
         }
         #[derive(serde::Deserialize)]
         struct ChatChoice {
@@ -236,9 +237,15 @@ impl CopilotImpl {
             return Err(anyhow::anyhow!("{e}{retry_after}: {body}"));
         }
 
-        let content = raw
-            .json::<ChatResponse>()
-            .await?
+        let parsed = raw.json::<ChatResponse>().await?;
+        if model == Self::MODEL_AUTO {
+            tracing::info!(
+                target: "llm",
+                resolved = parsed.model.as_deref().unwrap_or("unknown"),
+                "copilot auto resolved model",
+            );
+        }
+        let content = parsed
             .choices
             .into_iter()
             .next()

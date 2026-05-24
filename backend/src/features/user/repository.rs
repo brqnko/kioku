@@ -62,6 +62,7 @@ impl RefreshTokenRepository<sqlx::MySqlConnection> for RefreshTokenRepositoryImp
                    access_token_jti, activated_at, last_used_at, expires_at
             FROM refresh_token
             WHERE refresh_token_id = ?
+            LIMIT 1
             FOR UPDATE
             "#,
             id.as_bytes().as_slice(),
@@ -100,6 +101,7 @@ impl RefreshTokenRepository<sqlx::MySqlConnection> for RefreshTokenRepositoryImp
                    access_token_jti, activated_at, last_used_at, expires_at
             FROM refresh_token
             WHERE token_hash = ?
+            LIMIT 1
             FOR UPDATE
             "#,
             token_hash,
@@ -294,6 +296,7 @@ impl UserRepository<sqlx::MySqlConnection> for UserRepositoryImpl {
                 file_upload_daily_count_reset_at
             FROM user
             WHERE user_id = ?
+            LIMIT 1
             FOR UPDATE
             "#,
             id.as_bytes().as_slice(),
@@ -350,6 +353,7 @@ impl UserRepository<sqlx::MySqlConnection> for UserRepositoryImpl {
                 file_upload_daily_count_reset_at
             FROM user
             WHERE iss = ? AND sub = ?
+            LIMIT 1
             FOR UPDATE
             "#,
             iss,

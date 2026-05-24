@@ -1,6 +1,6 @@
 {
   "db_name": "MySQL",
-  "query": "\n            SELECT\n                podcast_daily_count,\n                podcast_daily_count_reset_at,\n                chatbot_daily_count,\n                chatbot_daily_count_reset_at,\n                file_upload_daily_count,\n                file_upload_daily_count_reset_at\n            FROM user\n            WHERE user_id = ?\n            ",
+  "query": "\n            SELECT\n                podcast_daily_count,\n                podcast_daily_count_reset_at,\n                chatbot_daily_count,\n                chatbot_daily_count_reset_at,\n                file_upload_daily_count,\n                file_upload_daily_count_reset_at\n            FROM user\n            WHERE user_id = ?\n            LIMIT 1\n            ",
   "describe": {
     "columns": [
       {
@@ -70,5 +70,5 @@
       false
     ]
   },
-  "hash": "a4920967d0292ea4f34ae255eea3fdca530b81d04438d6448d069a168a4bee6a"
+  "hash": "6aca2131433da8d44414bd086003495752bdba29640ebfa3efbfcb044d4517c4"
 }

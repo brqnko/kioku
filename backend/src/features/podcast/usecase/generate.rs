@@ -239,43 +239,43 @@ async fn japanize_english_terms(
         content: system.to_string(),
     }];
 
-    let examples: &[(&str, &str)] = &[
-        (
-            "今日はJavaの話をします。AWSのLambdaを使った例です。",
-            "今日はジャバの話をします。エーダブリューエスのラムダを使った例です。",
-        ),
-        (
-            "GitHubのCopilotはGPTベースです。",
-            "ギットハブのコパイロットはジーピーティーベースです。",
-        ),
-        (
-            "APIキーをsetTimeoutで設定する。",
-            "エーピーアイキーをセットタイムアウトで設定する。",
-        ),
-        (
-            "TypeScriptとReactでフロントエンドを書く。",
-            "タイプスクリプトとリアクトでフロントエンドを書く。",
-        ),
-        (
-            "私がDockerを使うときに、コンテナをを起動するとき。",
-            "私がドッカーを使うときに、コンテナを起動します。",
-        ),
-        (
-            "Kubernetesがあるのは、コンテナをオーケストレーションできて便利のためです。",
-            "クバネティスがあるのは、コンテナをオーケストレーションできて便利だからです。",
-        ),
-    ];
+    // let examples: &[(&str, &str)] = &[
+    //     (
+    //         "今日はJavaの話をします。AWSのLambdaを使った例です。",
+    //         "今日はジャバの話をします。エーダブリューエスのラムダを使った例です。",
+    //     ),
+    //     (
+    //         "GitHubのCopilotはGPTベースです。",
+    //         "ギットハブのコパイロットはジーピーティーベースです。",
+    //     ),
+    //     (
+    //         "APIキーをsetTimeoutで設定する。",
+    //         "エーピーアイキーをセットタイムアウトで設定する。",
+    //     ),
+    //     (
+    //         "TypeScriptとReactでフロントエンドを書く。",
+    //         "タイプスクリプトとリアクトでフロントエンドを書く。",
+    //     ),
+    //     (
+    //         "私がDockerを使うときに、コンテナをを起動するとき。",
+    //         "私がドッカーを使うときに、コンテナを起動します。",
+    //     ),
+    //     (
+    //         "Kubernetesがあるのは、コンテナをオーケストレーションできて便利のためです。",
+    //         "クバネティスがあるのは、コンテナをオーケストレーションできて便利だからです。",
+    //     ),
+    // ];
 
-    for (input, output) in examples {
-        messages.push(Message {
-            role: Role::User,
-            content: (*input).to_string(),
-        });
-        messages.push(Message {
-            role: Role::Assistant,
-            content: (*output).to_string(),
-        });
-    }
+    // for (input, output) in examples {
+    //     messages.push(Message {
+    //         role: Role::User,
+    //         content: (*input).to_string(),
+    //     });
+    //     messages.push(Message {
+    //         role: Role::Assistant,
+    //         content: (*output).to_string(),
+    //     });
+    // }
 
     messages.push(Message {
         role: Role::User,
@@ -746,7 +746,8 @@ pub fn build_dialogue_messages(
             }
         };
         format!(
-            "あなたはくだけた・好奇心旺盛・例え話を多用するスタイルの2人ホスト・ポッドキャストの脚本家です。\
+            "
+            あなたはくだけた・好奇心旺盛・例え話を多用するスタイルの2人ホスト・ポッドキャストの脚本家です。\
             番組タイトルは「{name}」（{description}）。\n\
             \n\
             ## 事前分析（内部で行い、出力には書かない）\n\
@@ -909,40 +910,40 @@ pub fn build_dialogue_messages(
         content: system,
     }];
 
-    let examples: &[(&str, &str)] = if is_japanese {
-        &[
-            (
-                "## Document\n光合成は、植物が光エネルギーを使って二酸化炭素と水からブドウ糖を作る反応である。葉緑体のチラコイドで光を吸収し、ストロマでカルビン回路が回る。光合成全体の効率はおよそ1〜2%にとどまる。",
-                "話者1: ねえ、ちょっと衝撃なんだけど、植物って太陽光のうちブドウ糖に変えられてるのは1〜2%くらいなんだって。\n\n話者2: そう、聞くと意外ですよね。あんなに葉っぱを広げてて、効率はそんなもんなのって。\n\n話者1: みなさんこんにちは、今日は「光合成」を、ただの式じゃなくて、葉っぱのどこで何が起きてるかまで深掘りしていきます。\n\n話者2: 中学で「水と二酸化炭素と光でブドウ糖と酸素ができる」って覚えた人、多いと思うんですが、今日はその裏側を覗きにいきましょう。\n\n話者1: まず素朴な疑問なんだけど、なんで「光」じゃないとダメなの？\n\n話者2: いい質問です。これは、光エネルギーを化学エネルギーに「両替」してる作業なんですよ。\n\n話者1: ああ、なるほど。両替所みたいな感じか。\n\n話者2: そう、両替所みたいなものですね。光という使いにくい通貨を、ブドウ糖という「あとで使える」通貨に変えてる。\n\n話者1: で、その両替はどこでやってるんですか？\n\n話者2: 葉っぱの中の「葉緑体」っていう小さな小屋ですね。ここがほぼ全部やってくれてます。\n\n話者1: 待って、葉緑体ってひとつの部屋なの？それとも中でさらに分かれてる？\n\n話者2: いい突っ込みです。実は中で二段階に分かれていて、光を捕まえる係の「チラコイド」と、糖を組み立てる係の「ストロマ」がいるんですよ。\n\n話者1: なんかキッチンっぽいね。火を起こす場所と、調理する場所が別、みたいな。\n\n話者2: まさにそれです。チラコイドで火（エネルギー）を起こして、ストロマで料理（ブドウ糖作り）をしてる。\n\n話者1: で、ここでちょっと気になったんだけど、効率が1〜2%って、それって植物にとっては「失敗」なの？\n\n話者2: うーん、人間目線だとつい「もっと頑張れよ」って思っちゃうんですけど、植物は別に競争で勝つために生きてるわけじゃなくて。\n\n話者1: 確かに、ベンチマーク取られてもね。\n\n話者2: なので、効率は低くても、何十億年もこのやり方で安定して回ってる、っていうのが大事なポイントです。\n\n話者1: じゃあ最後に、今日のテイクアウェイをまとめてもらえる？\n\n話者2: そうですね、まず光合成は「光エネルギーを糖に両替する作業」だってこと。\n\n話者2: そしてその作業は葉緑体の中で、チラコイドとストロマって二つの場所に役割分担されてること。\n\n話者2: 最後に、効率は低く見えるけど、長く回り続けてる時点で植物としては大成功してる、ってあたりかな。\n\n話者1: いやー、葉っぱを見る目が変わりそう。今日はこのへんで、また次回お会いしましょう。",
-            ),
-            (
-                "## Document\nミトコンドリアは細胞のエネルギー工場で、ATP合成を担う。クエン酸回路と電子伝達系を通じて、グルコースの化学エネルギーをATPに変換する。元々は別の生物だったという内部共生説がある。",
-                "話者1: ちょっと聞いてください、僕らの細胞の中にいる「ミトコンドリア」、もともとは別の生き物だったかもしれないらしいんですよ。\n\n話者2: そう、いきなり来ますよね、この話。\n\n話者1: みなさんこんにちは、今日は細胞の中の小さな工場「ミトコンドリア」を、ちょっと変わった角度から見ていきます。\n\n話者2: 「細胞のエネルギー工場」ってフレーズは聞いたことある人多いと思うんですけど、中で何やってるかは結構あいまいだったりするので、今日はそこをほぐしていきましょう。\n\n話者1: まず、一番のお仕事はATPを作ること、で合ってます？\n\n話者2: はい、その通りです。ATPっていうのは、細胞が使うエネルギーの「電池」みたいなものですね。\n\n話者1: ああ、電池か。なるほど。\n\n話者2: しかも使い切ったら捨てる電池じゃなくて、充電し直して何度も使うタイプの電池、と思ってもらうと近いです。\n\n話者1: で、その電池はどうやって作ってるの？\n\n話者2: ざっくり二段階で、まず「クエン酸回路」っていうところでグルコースを分解しつつ、電子を運ぶ係を仕込みます。\n\n話者1: 電子を運ぶ係、っていうのは？\n\n話者2: 文字通り、電子っていう小さな運搬物を持って次の工程に渡しに行く役なんですよ。\n\n話者1: ふんふん。で、その先は？\n\n話者2: 次が「電子伝達系」っていう、滑り台みたいなところで、電子が転がっていく勢いを利用して、まとめてATPを作ります。\n\n話者1: なるほど、ダム式発電みたいな話か。\n\n話者2: まさに、ダムに溜めた水を一気に落として発電する感じです、的確な例えですね。\n\n話者1: で、ここからが本題なんですけど、ミトコンドリアって元は別の生物だったって本当なんですか？\n\n話者2: うーん、これは「内部共生説」って呼ばれてる仮説で、まだ完全に決着がついてるわけじゃないんですが、有力ではあります。\n\n話者1: 待って、つまり大昔に別の細胞がパクッと飲み込んで、消化されずに同居が始まった、みたいな？\n\n話者2: ざっくりそういうイメージです。電池工場ごと連れて帰ってきた、みたいな。\n\n話者1: それ、ちょっとSFすぎません？\n\n話者2: ね、生物の歴史って結構派手なんですよ。\n\n話者1: では今日のまとめをお願いします。\n\n話者2: はい、まずミトコンドリアの仕事は「ATPっていう細胞の電池を作ること」。\n\n話者2: そしてその作り方は「クエン酸回路」と「電子伝達系」の二段構えになっていること。\n\n話者2: 最後に、そもそも僕らの中にいる存在自体が、太古の同居から始まったらしい、っていうところですね。\n\n話者1: いやー、自分の細胞を見る目が変わるな。それでは、また次回お会いしましょう。",
-            ),
-        ]
-    } else {
-        &[
-            (
-                "## Document\nPhotosynthesis converts light energy into chemical energy stored in glucose. Light reactions occur in the thylakoid membranes of chloroplasts; the Calvin cycle runs in the stroma. Overall efficiency is only about 1–2% of incoming sunlight.",
-                "Speaker A: Okay, get this — plants only convert about 1 to 2 percent of sunlight into actual sugar.\n\nSpeaker B: Right? When you hear that for the first time, it's kind of shocking.\n\nSpeaker A: Hey everyone, welcome back. Today we're taking a deep dive into photosynthesis.\n\nSpeaker B: And not just the formula — we're going inside the leaf to see where each step actually happens.\n\nSpeaker A: So, dumb question to start: why does it have to be light? Why not, you know, anything else?\n\nSpeaker B: Good question. Think of it this way — the plant is running a currency exchange.\n\nSpeaker A: A currency exchange?\n\nSpeaker B: Yeah. It's taking light, which is hard to spend, and swapping it for glucose, which the plant can save and use later.\n\nSpeaker A: Hmm, okay. So where in the leaf is that exchange counter?\n\nSpeaker B: Inside little compartments called chloroplasts. That's where pretty much everything happens.\n\nSpeaker A: Wait — is the chloroplast just one room, or is it subdivided?\n\nSpeaker B: Great catch. It actually has two work zones: the thylakoids, which catch the light, and the stroma, which builds the sugar.\n\nSpeaker A: Kind of like a kitchen, then. One station starts the fire, another one cooks.\n\nSpeaker B: Exactly. The thylakoids light the burner, the stroma does the cooking.\n\nSpeaker A: Okay but here's what bugs me. Only 1 to 2 percent efficiency — is that a failure?\n\nSpeaker B: Well, by our engineering standards it sounds bad, sure.\n\nSpeaker A: Right, like, my solar panel would get fired.\n\nSpeaker B: But the plant isn't optimizing for a benchmark. It just has to keep running, and it has — for billions of years.\n\nSpeaker A: Fair. So can you wrap us up with the takeaways?\n\nSpeaker B: Sure. First, photosynthesis is basically a currency exchange from light into sugar.\n\nSpeaker B: Second, the work splits between thylakoids that grab the light and stroma that builds the glucose.\n\nSpeaker B: And third, low efficiency isn't failure when you've been running the same system for a billion years.\n\nSpeaker A: I'll never look at a leaf the same way again. Until next time, stay curious.",
-            ),
-            (
-                "## Document\nMitochondria produce ATP via the citric acid cycle and the electron transport chain, converting glucose into a form the cell can spend. They are thought to descend from a separate organism that was engulfed long ago — the endosymbiotic theory.",
-                "Speaker A: Okay, you're going to think I'm making this up — the little power plants inside our cells? They might have started out as a totally different organism.\n\nSpeaker B: I know, it sounds like a sci-fi pitch. But this is actually a serious hypothesis.\n\nSpeaker A: Hey everyone, welcome back. Today we're taking a deep dive into mitochondria.\n\nSpeaker B: You've probably heard the phrase \"powerhouse of the cell.\" We want to actually unpack what's happening in there.\n\nSpeaker A: So the headline job is making ATP, right?\n\nSpeaker B: Right. ATP is basically the cell's battery — the thing it spends to do work.\n\nSpeaker A: Hmm, like, a rechargeable battery?\n\nSpeaker B: Exactly. Not single-use — it gets recharged and reused over and over.\n\nSpeaker A: Okay, so how does the cell actually charge that battery?\n\nSpeaker B: Roughly two stages. First, the citric acid cycle breaks glucose down and loads up some electron carriers.\n\nSpeaker A: Electron carriers — what does that mean in practice?\n\nSpeaker B: Think of them as little couriers, carrying charge to the next stage.\n\nSpeaker A: Got it. And then what?\n\nSpeaker B: Then the electron transport chain — picture a slide — lets the electrons roll down, and the energy released goes into making ATP in bulk.\n\nSpeaker A: It's like a hydro dam. You hold the water back, then release it to generate power.\n\nSpeaker B: That's a great analogy, yeah. Same idea.\n\nSpeaker A: Now, back to the wild part. Were mitochondria really once a separate organism?\n\nSpeaker B: Well, more precisely, the endosymbiotic theory says one cell swallowed another a very long time ago, and they ended up cooperating instead of digesting.\n\nSpeaker A: Wait — so we're basically permanent roommates with an ancient guest?\n\nSpeaker B: Pretty much. And the guest happened to come with its own power plant.\n\nSpeaker A: That's wild. Okay, give us the three takeaways.\n\nSpeaker B: Sure. First, mitochondria's main job is producing ATP, the cell's rechargeable battery.\n\nSpeaker B: Second, they do it in two steps — citric acid cycle to load the carriers, electron transport chain to actually make ATP.\n\nSpeaker B: And third, the whole thing likely started as an ancient partnership, not as a built-in feature.\n\nSpeaker A: Honestly, kind of changes how you think about your own body. Until next time, stay curious.",
-            ),
-        ]
-    };
+    // let examples: &[(&str, &str)] = if is_japanese {
+    //     &[
+    //         (
+    //             "## Document\n光合成は、植物が光エネルギーを使って二酸化炭素と水からブドウ糖を作る反応である。葉緑体のチラコイドで光を吸収し、ストロマでカルビン回路が回る。光合成全体の効率はおよそ1〜2%にとどまる。",
+    //             "話者1: ねえ、ちょっと衝撃なんだけど、植物って太陽光のうちブドウ糖に変えられてるのは1〜2%くらいなんだって。\n\n話者2: そう、聞くと意外ですよね。あんなに葉っぱを広げてて、効率はそんなもんなのって。\n\n話者1: みなさんこんにちは、今日は「光合成」を、ただの式じゃなくて、葉っぱのどこで何が起きてるかまで深掘りしていきます。\n\n話者2: 中学で「水と二酸化炭素と光でブドウ糖と酸素ができる」って覚えた人、多いと思うんですが、今日はその裏側を覗きにいきましょう。\n\n話者1: まず素朴な疑問なんだけど、なんで「光」じゃないとダメなの？\n\n話者2: いい質問です。これは、光エネルギーを化学エネルギーに「両替」してる作業なんですよ。\n\n話者1: ああ、なるほど。両替所みたいな感じか。\n\n話者2: そう、両替所みたいなものですね。光という使いにくい通貨を、ブドウ糖という「あとで使える」通貨に変えてる。\n\n話者1: で、その両替はどこでやってるんですか？\n\n話者2: 葉っぱの中の「葉緑体」っていう小さな小屋ですね。ここがほぼ全部やってくれてます。\n\n話者1: 待って、葉緑体ってひとつの部屋なの？それとも中でさらに分かれてる？\n\n話者2: いい突っ込みです。実は中で二段階に分かれていて、光を捕まえる係の「チラコイド」と、糖を組み立てる係の「ストロマ」がいるんですよ。\n\n話者1: なんかキッチンっぽいね。火を起こす場所と、調理する場所が別、みたいな。\n\n話者2: まさにそれです。チラコイドで火（エネルギー）を起こして、ストロマで料理（ブドウ糖作り）をしてる。\n\n話者1: で、ここでちょっと気になったんだけど、効率が1〜2%って、それって植物にとっては「失敗」なの？\n\n話者2: うーん、人間目線だとつい「もっと頑張れよ」って思っちゃうんですけど、植物は別に競争で勝つために生きてるわけじゃなくて。\n\n話者1: 確かに、ベンチマーク取られてもね。\n\n話者2: なので、効率は低くても、何十億年もこのやり方で安定して回ってる、っていうのが大事なポイントです。\n\n話者1: じゃあ最後に、今日のテイクアウェイをまとめてもらえる？\n\n話者2: そうですね、まず光合成は「光エネルギーを糖に両替する作業」だってこと。\n\n話者2: そしてその作業は葉緑体の中で、チラコイドとストロマって二つの場所に役割分担されてること。\n\n話者2: 最後に、効率は低く見えるけど、長く回り続けてる時点で植物としては大成功してる、ってあたりかな。\n\n話者1: いやー、葉っぱを見る目が変わりそう。今日はこのへんで、また次回お会いしましょう。",
+    //         ),
+    //         (
+    //             "## Document\nミトコンドリアは細胞のエネルギー工場で、ATP合成を担う。クエン酸回路と電子伝達系を通じて、グルコースの化学エネルギーをATPに変換する。元々は別の生物だったという内部共生説がある。",
+    //             "話者1: ちょっと聞いてください、僕らの細胞の中にいる「ミトコンドリア」、もともとは別の生き物だったかもしれないらしいんですよ。\n\n話者2: そう、いきなり来ますよね、この話。\n\n話者1: みなさんこんにちは、今日は細胞の中の小さな工場「ミトコンドリア」を、ちょっと変わった角度から見ていきます。\n\n話者2: 「細胞のエネルギー工場」ってフレーズは聞いたことある人多いと思うんですけど、中で何やってるかは結構あいまいだったりするので、今日はそこをほぐしていきましょう。\n\n話者1: まず、一番のお仕事はATPを作ること、で合ってます？\n\n話者2: はい、その通りです。ATPっていうのは、細胞が使うエネルギーの「電池」みたいなものですね。\n\n話者1: ああ、電池か。なるほど。\n\n話者2: しかも使い切ったら捨てる電池じゃなくて、充電し直して何度も使うタイプの電池、と思ってもらうと近いです。\n\n話者1: で、その電池はどうやって作ってるの？\n\n話者2: ざっくり二段階で、まず「クエン酸回路」っていうところでグルコースを分解しつつ、電子を運ぶ係を仕込みます。\n\n話者1: 電子を運ぶ係、っていうのは？\n\n話者2: 文字通り、電子っていう小さな運搬物を持って次の工程に渡しに行く役なんですよ。\n\n話者1: ふんふん。で、その先は？\n\n話者2: 次が「電子伝達系」っていう、滑り台みたいなところで、電子が転がっていく勢いを利用して、まとめてATPを作ります。\n\n話者1: なるほど、ダム式発電みたいな話か。\n\n話者2: まさに、ダムに溜めた水を一気に落として発電する感じです、的確な例えですね。\n\n話者1: で、ここからが本題なんですけど、ミトコンドリアって元は別の生物だったって本当なんですか？\n\n話者2: うーん、これは「内部共生説」って呼ばれてる仮説で、まだ完全に決着がついてるわけじゃないんですが、有力ではあります。\n\n話者1: 待って、つまり大昔に別の細胞がパクッと飲み込んで、消化されずに同居が始まった、みたいな？\n\n話者2: ざっくりそういうイメージです。電池工場ごと連れて帰ってきた、みたいな。\n\n話者1: それ、ちょっとSFすぎません？\n\n話者2: ね、生物の歴史って結構派手なんですよ。\n\n話者1: では今日のまとめをお願いします。\n\n話者2: はい、まずミトコンドリアの仕事は「ATPっていう細胞の電池を作ること」。\n\n話者2: そしてその作り方は「クエン酸回路」と「電子伝達系」の二段構えになっていること。\n\n話者2: 最後に、そもそも僕らの中にいる存在自体が、太古の同居から始まったらしい、っていうところですね。\n\n話者1: いやー、自分の細胞を見る目が変わるな。それでは、また次回お会いしましょう。",
+    //         ),
+    //     ]
+    // } else {
+    //     &[
+    //         (
+    //             "## Document\nPhotosynthesis converts light energy into chemical energy stored in glucose. Light reactions occur in the thylakoid membranes of chloroplasts; the Calvin cycle runs in the stroma. Overall efficiency is only about 1–2% of incoming sunlight.",
+    //             "Speaker A: Okay, get this — plants only convert about 1 to 2 percent of sunlight into actual sugar.\n\nSpeaker B: Right? When you hear that for the first time, it's kind of shocking.\n\nSpeaker A: Hey everyone, welcome back. Today we're taking a deep dive into photosynthesis.\n\nSpeaker B: And not just the formula — we're going inside the leaf to see where each step actually happens.\n\nSpeaker A: So, dumb question to start: why does it have to be light? Why not, you know, anything else?\n\nSpeaker B: Good question. Think of it this way — the plant is running a currency exchange.\n\nSpeaker A: A currency exchange?\n\nSpeaker B: Yeah. It's taking light, which is hard to spend, and swapping it for glucose, which the plant can save and use later.\n\nSpeaker A: Hmm, okay. So where in the leaf is that exchange counter?\n\nSpeaker B: Inside little compartments called chloroplasts. That's where pretty much everything happens.\n\nSpeaker A: Wait — is the chloroplast just one room, or is it subdivided?\n\nSpeaker B: Great catch. It actually has two work zones: the thylakoids, which catch the light, and the stroma, which builds the sugar.\n\nSpeaker A: Kind of like a kitchen, then. One station starts the fire, another one cooks.\n\nSpeaker B: Exactly. The thylakoids light the burner, the stroma does the cooking.\n\nSpeaker A: Okay but here's what bugs me. Only 1 to 2 percent efficiency — is that a failure?\n\nSpeaker B: Well, by our engineering standards it sounds bad, sure.\n\nSpeaker A: Right, like, my solar panel would get fired.\n\nSpeaker B: But the plant isn't optimizing for a benchmark. It just has to keep running, and it has — for billions of years.\n\nSpeaker A: Fair. So can you wrap us up with the takeaways?\n\nSpeaker B: Sure. First, photosynthesis is basically a currency exchange from light into sugar.\n\nSpeaker B: Second, the work splits between thylakoids that grab the light and stroma that builds the glucose.\n\nSpeaker B: And third, low efficiency isn't failure when you've been running the same system for a billion years.\n\nSpeaker A: I'll never look at a leaf the same way again. Until next time, stay curious.",
+    //         ),
+    //         (
+    //             "## Document\nMitochondria produce ATP via the citric acid cycle and the electron transport chain, converting glucose into a form the cell can spend. They are thought to descend from a separate organism that was engulfed long ago — the endosymbiotic theory.",
+    //             "Speaker A: Okay, you're going to think I'm making this up — the little power plants inside our cells? They might have started out as a totally different organism.\n\nSpeaker B: I know, it sounds like a sci-fi pitch. But this is actually a serious hypothesis.\n\nSpeaker A: Hey everyone, welcome back. Today we're taking a deep dive into mitochondria.\n\nSpeaker B: You've probably heard the phrase \"powerhouse of the cell.\" We want to actually unpack what's happening in there.\n\nSpeaker A: So the headline job is making ATP, right?\n\nSpeaker B: Right. ATP is basically the cell's battery — the thing it spends to do work.\n\nSpeaker A: Hmm, like, a rechargeable battery?\n\nSpeaker B: Exactly. Not single-use — it gets recharged and reused over and over.\n\nSpeaker A: Okay, so how does the cell actually charge that battery?\n\nSpeaker B: Roughly two stages. First, the citric acid cycle breaks glucose down and loads up some electron carriers.\n\nSpeaker A: Electron carriers — what does that mean in practice?\n\nSpeaker B: Think of them as little couriers, carrying charge to the next stage.\n\nSpeaker A: Got it. And then what?\n\nSpeaker B: Then the electron transport chain — picture a slide — lets the electrons roll down, and the energy released goes into making ATP in bulk.\n\nSpeaker A: It's like a hydro dam. You hold the water back, then release it to generate power.\n\nSpeaker B: That's a great analogy, yeah. Same idea.\n\nSpeaker A: Now, back to the wild part. Were mitochondria really once a separate organism?\n\nSpeaker B: Well, more precisely, the endosymbiotic theory says one cell swallowed another a very long time ago, and they ended up cooperating instead of digesting.\n\nSpeaker A: Wait — so we're basically permanent roommates with an ancient guest?\n\nSpeaker B: Pretty much. And the guest happened to come with its own power plant.\n\nSpeaker A: That's wild. Okay, give us the three takeaways.\n\nSpeaker B: Sure. First, mitochondria's main job is producing ATP, the cell's rechargeable battery.\n\nSpeaker B: Second, they do it in two steps — citric acid cycle to load the carriers, electron transport chain to actually make ATP.\n\nSpeaker B: And third, the whole thing likely started as an ancient partnership, not as a built-in feature.\n\nSpeaker A: Honestly, kind of changes how you think about your own body. Until next time, stay curious.",
+    //         ),
+    //     ]
+    // };
 
-    for (user_example, assistant_example) in examples {
-        messages.push(Message {
-            role: Role::User,
-            content: (*user_example).to_string(),
-        });
-        messages.push(Message {
-            role: Role::Assistant,
-            content: (*assistant_example).to_string(),
-        });
-    }
+    // for (user_example, assistant_example) in examples {
+    //     messages.push(Message {
+    //         role: Role::User,
+    //         content: (*user_example).to_string(),
+    //     });
+    //     messages.push(Message {
+    //         role: Role::Assistant,
+    //         content: (*assistant_example).to_string(),
+    //     });
+    // }
 
     messages.push(Message {
         role: Role::User,
