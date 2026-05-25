@@ -254,7 +254,7 @@ pub async fn send_message(
     let completion = app
         .llm_client
         .complete(
-            crate::util::llm::CopilotImpl::MODEL_GPT_5_MINI,
+            crate::util::llm::CopilotImpl::MODEL_AUTO,
             chat.to_completion_input(),
         )
         .await?;
