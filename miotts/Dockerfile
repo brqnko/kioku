@@ -14,7 +14,7 @@ RUN cmake -B build -DLLAMA_CURL=ON \
 FROM python:3.12-slim-bookworm
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        git cmake g++ libsndfile1 libcurl4 curl ca-certificates \
+        git cmake build-essential libsndfile1 libcurl4 curl ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=llama-build /src/build/bin/llama-server /usr/local/bin/
