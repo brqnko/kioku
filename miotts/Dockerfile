@@ -2,7 +2,7 @@
 FROM debian:bookworm-slim AS llama-build
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        cmake g++ git libcurl4-openssl-dev ca-certificates \
+        cmake build-essential git libcurl4-openssl-dev ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 RUN git clone --depth 1 https://github.com/ggml-org/llama.cpp.git /src
