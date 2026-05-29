@@ -92,6 +92,8 @@ pub struct CreateFileBody {
     storage_id: Option<uuid::Uuid>,
     #[schema(max_length = 33554432)]
     text: Option<String>,
+    #[schema(max_length = 2048)]
+    url: Option<String>,
     parent_id: uuid::Uuid,
     #[schema(inline)]
     parent_kind: ParentKind,
@@ -155,6 +157,7 @@ pub async fn create_file(
         description: body.description,
         storage_id: body.storage_id,
         text: body.text,
+        url: body.url,
         parent_id: body.parent_id,
         parent_kind: body.parent_kind.as_u8(),
     };

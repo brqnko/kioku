@@ -45,8 +45,8 @@ pub async fn generate_podcast(
             crate::features::file::domain::StorageType::Object => {
                 let object = app.storage_service.get_object(file.storage_id).await?;
                 let output = app
-                    .pdf2md_service
-                    .convert(crate::util::pdf2md::Pdf2MdInput { pdf: object.body })
+                    .md_convert_service
+                    .convert(crate::util::mdutil::MdConvertInput::Pdf(object.body))
                     .await?;
                 documents.push(output.markdown);
             }
@@ -151,11 +151,12 @@ pub async fn generate_podcast(
     // };
     let tts_script = script_raw.clone();
 
-    let lang_prefix = if is_japanese { "ja" } else { "en" };
+    // MioTTS preset ids: "<lang>_<gender>" e.g. "jp_female", "en_male".
+    let lang_prefix = if is_japanese { "jp" } else { "en" };
     if is_dialogue {
-        let voice_a = format!("{}:{}", lang_prefix, request.voice_style);
+        let voice_a = format!("{}_{}", lang_prefix, request.voice_style);
         let voice_b = format!(
-            "{}:{}",
+            "{}_{}",
             lang_prefix,
             request
                 .voice_style_2
@@ -174,16 +175,16 @@ pub async fn generate_podcast(
                 (voice, e.text)
             })
             .collect::<Vec<_>>();
-        synthesize_lines_via_sgi(app, audio_storage_id, lines).await?;
+        synthesize_lines_via_miotts(app, audio_storage_id, lines).await?;
     } else {
-        let voice = format!("{}:{}", lang_prefix, request.voice_style);
+        let voice = format!("{}_{}", lang_prefix, request.voice_style);
         let lines = tts_script
             .split("\n\n")
             .map(str::trim)
             .filter(|p| !p.is_empty())
             .map(|p| (voice.clone(), p.to_string()))
             .collect::<Vec<_>>();
-        synthesize_lines_via_sgi(app, audio_storage_id, lines).await?;
+        synthesize_lines_via_miotts(app, audio_storage_id, lines).await?;
     }
 
     let podcast = match crate::features::podcast::domain::Podcast::new(
@@ -335,12 +336,14 @@ fn strip_audio_tags(text: &str) -> String {
     out.trim().to_string()
 }
 
-const SGI_POLL_INTERVAL_MS: u64 = 10000;
-const SGI_POLL_TIMEOUT_SECS: u64 = 1800;
-const SGI_REQUEST_TIMEOUT_SECS: u64 = 180;
-const PRESIGN_EXPIRES_SECS: u64 = SGI_POLL_TIMEOUT_SECS + 300;
+/// MioTTS の入力上限 (max_text_length=300)。これを超える行は文末優先で分割する。
+const MIOTTS_MAX_TEXT_CHARS: usize = 300;
+/// 1 チャンク (1 行) あたりの合成リクエストのタイムアウト。CPU 推論は遅いので長めに取る。
+const MIOTTS_REQUEST_TIMEOUT_SECS: u64 = 600;
 
-async fn synthesize_lines_via_sgi(
+/// `lines` (preset_id, text) を MioTTS (`/v1/tts`) で順次合成し、返ってきた WAV を
+/// 連結して 1 つの 16bit mono WAV にまとめ、ストレージへ直接アップロードする。
+async fn synthesize_lines_via_miotts(
     app: &crate::app::App,
     audio_storage_id: uuid::Uuid,
     lines: Vec<(String, String)>,
@@ -348,122 +351,239 @@ async fn synthesize_lines_via_sgi(
     use anyhow::Context as _;
 
     #[derive(serde::Serialize)]
-    struct CreateJobRequest {
-        lines: Vec<DialogueLine>,
+    struct TtsRequest<'a> {
+        text: &'a str,
+        reference: Reference<'a>,
+        output: Output,
+    }
+
+    #[derive(serde::Serialize)]
+    struct Reference<'a> {
+        #[serde(rename = "type")]
+        kind: &'a str,
+        preset_id: &'a str,
+    }
+
+    #[derive(serde::Serialize)]
+    struct Output {
         format: &'static str,
-        upload: UploadTarget,
     }
 
-    #[derive(serde::Serialize)]
-    struct DialogueLine {
-        voice: String,
-        text: String,
-        speed: f32,
-    }
-
-    const TTS_SPEED: f32 = 0.9;
-
-    #[derive(serde::Serialize)]
-    struct UploadTarget {
-        method: String,
-        url: String,
-        content_type: String,
-    }
-
-    #[derive(serde::Deserialize)]
-    struct CreateJobResponse {
-        job_id: uuid::Uuid,
-    }
-
-    let presigned = app
-        .storage_service
-        .presign_put(
-            audio_storage_id,
-            "audio/ogg",
-            None,
-            std::time::Duration::from_secs(PRESIGN_EXPIRES_SECS),
-        )
-        .await?;
-
-    let lines: Vec<DialogueLine> = lines
+    let lines: Vec<(String, String)> = lines
         .into_iter()
         .filter(|(_, text)| !text.trim().is_empty())
-        .map(|(voice, text)| DialogueLine {
-            voice,
-            text,
-            speed: TTS_SPEED,
-        })
         .collect();
     anyhow::ensure!(!lines.is_empty(), "podcast script is empty");
 
     let http_client = reqwest::Client::builder()
-        .timeout(std::time::Duration::from_secs(SGI_REQUEST_TIMEOUT_SECS))
+        .timeout(std::time::Duration::from_secs(MIOTTS_REQUEST_TIMEOUT_SECS))
         .build()?;
     let base_url = app.sgi_url.trim_end_matches('/');
 
     let health_resp = http_client
         .get(format!("{base_url}/health"))
-        .bearer_auth(&app.sgi_token)
         .send()
         .await
-        .context("sgi: failed to send health request")?;
+        .context("miotts: failed to send health request")?;
     if !health_resp.status().is_success() {
         let s = health_resp.status();
         let body = health_resp.text().await.unwrap_or_default();
-        anyhow::bail!("sgi: health responded with {s}: {body}");
+        anyhow::bail!("miotts: health responded with {s}: {body}");
     }
 
-    let create_resp = http_client
-        .post(format!("{base_url}/jobs"))
-        .bearer_auth(&app.sgi_token)
-        .json(&CreateJobRequest {
-            lines,
-            format: "opus",
-            upload: UploadTarget {
-                method: presigned.method,
-                url: presigned.url,
-                content_type: presigned.content_type,
-            },
-        })
-        .send()
-        .await
-        .context("sgi: failed to send create-job request")?;
+    // 各行・各チャンクを合成し、24kHz mono の i16 PCM を 1 本に連結する。
+    let mut samples: Vec<i16> = Vec::new();
+    let mut sample_rate: Option<u32> = None;
 
-    let status = create_resp.status();
-    if !status.is_success() {
-        let body = create_resp.text().await.unwrap_or_default();
-        anyhow::bail!("sgi: create-job responded with {status}: {body}");
+    for (preset_id, text) in &lines {
+        for chunk in chunk_text(text, MIOTTS_MAX_TEXT_CHARS) {
+            if chunk.trim().is_empty() {
+                continue;
+            }
+
+            let resp = http_client
+                .post(format!("{base_url}/v1/tts"))
+                .json(&TtsRequest {
+                    text: &chunk,
+                    reference: Reference {
+                        kind: "preset",
+                        preset_id,
+                    },
+                    output: Output { format: "wav" },
+                })
+                .send()
+                .await
+                .context("miotts: failed to send tts request")?;
+            let status = resp.status();
+            if !status.is_success() {
+                let body = resp.text().await.unwrap_or_default();
+                anyhow::bail!("miotts: tts responded with {status}: {body}");
+            }
+            let wav_bytes = resp
+                .bytes()
+                .await
+                .context("miotts: failed to read tts response body")?;
+
+            let reader = hound::WavReader::new(std::io::Cursor::new(wav_bytes.as_ref()))
+                .context("miotts: failed to parse returned wav")?;
+            let spec = reader.spec();
+            anyhow::ensure!(
+                spec.channels == 1,
+                "miotts: expected mono wav, got {} channels",
+                spec.channels
+            );
+            match sample_rate {
+                Some(sr) => anyhow::ensure!(
+                    sr == spec.sample_rate,
+                    "miotts: inconsistent sample rate ({sr} vs {})",
+                    spec.sample_rate
+                ),
+                None => sample_rate = Some(spec.sample_rate),
+            }
+            append_wav_samples(&mut samples, reader)?;
+        }
     }
-    let job: CreateJobResponse = create_resp
-        .json()
+
+    let sample_rate = sample_rate.context("miotts: no audio was produced (empty script)")?;
+    anyhow::ensure!(!samples.is_empty(), "miotts: produced empty audio");
+
+    // 連結した PCM を 1 つの 16bit mono WAV にエンコードする。
+    let mut wav_buf = std::io::Cursor::new(Vec::<u8>::new());
+    {
+        let spec = hound::WavSpec {
+            channels: 1,
+            sample_rate,
+            bits_per_sample: 16,
+            sample_format: hound::SampleFormat::Int,
+        };
+        let mut writer =
+            hound::WavWriter::new(&mut wav_buf, spec).context("miotts: failed to create wav writer")?;
+        for s in &samples {
+            writer
+                .write_sample(*s)
+                .context("miotts: failed to write sample")?;
+        }
+        writer.finalize().context("miotts: failed to finalize wav")?;
+    }
+    let wav_bytes = wav_buf.into_inner();
+
+    app.storage_service
+        .put_object(audio_storage_id, "audio/wav", wav_bytes)
         .await
-        .context("sgi: failed to parse create-job response")?;
-    tracing::info!(target: "tts", job_id = %job.job_id, "sgi job created");
+        .context("miotts: failed to upload audio")?;
 
-    let job_url = format!("{base_url}/jobs/{}", job.job_id);
-    let deadline =
-        std::time::Instant::now() + std::time::Duration::from_secs(SGI_POLL_TIMEOUT_SECS);
+    tracing::info!(
+        target: "tts",
+        %audio_storage_id,
+        samples = samples.len(),
+        "miotts synthesis complete",
+    );
+    Ok(())
+}
 
-    loop {
-        if std::time::Instant::now() >= deadline {
-            anyhow::bail!("sgi: polling timed out for job {}", job.job_id);
+/// MioTTS が返した WAV のサンプルを i16 PCM に正規化して `out` に追記する。
+fn append_wav_samples<R: std::io::Read>(
+    out: &mut Vec<i16>,
+    mut reader: hound::WavReader<R>,
+) -> Result<(), anyhow::Error> {
+    use anyhow::Context as _;
+
+    let spec = reader.spec();
+    match (spec.sample_format, spec.bits_per_sample) {
+        (hound::SampleFormat::Int, 16) => {
+            for s in reader.samples::<i16>() {
+                out.push(s.context("miotts: bad i16 sample")?);
+            }
         }
-        tokio::time::sleep(std::time::Duration::from_millis(SGI_POLL_INTERVAL_MS)).await;
-
-        let resp = http_client
-            .get(&job_url)
-            .bearer_auth(&app.sgi_token)
-            .send()
-            .await
-            .context("sgi: failed to send get-job request")?;
-        let s = resp.status();
-        if s == reqwest::StatusCode::NOT_FOUND {
-            tracing::info!(target: "tts", job_id = %job.job_id, "sgi job completed");
-            return Ok(());
+        (hound::SampleFormat::Int, 32) => {
+            for s in reader.samples::<i32>() {
+                let v = s.context("miotts: bad i32 sample")?;
+                out.push((v >> 16) as i16);
+            }
         }
-        if !s.is_success() {
-            let body = resp.text().await.unwrap_or_default();
-            anyhow::bail!("sgi: get-job responded with {s}: {body}");
+        (hound::SampleFormat::Float, 32) => {
+            for s in reader.samples::<f32>() {
+                let v = s.context("miotts: bad f32 sample")?;
+                out.push((v.clamp(-1.0, 1.0) * i16::MAX as f32) as i16);
+            }
+        }
+        (fmt, bits) => {
+            anyhow::bail!("miotts: unsupported wav format {:?}/{}bit", fmt, bits)
+        }
+    }
+    Ok(())
+}
+
+const TTS_TERMINATORS: &[char] = &['.', '!', '?', '。', '！', '？', '…'];
+const TTS_CLOSERS: &[char] = &[
+    '"', '\'', ')', ']', '}', '」', '』', '】', '〉', '》', '›', '»',
+];
+
+/// 段落 (`\n\n`) を先に分割し、段落内では max_len の 80% を超えた位置以降の最初の
+/// 文末記号でチャンクを切る。文末記号が見つからなければ max_len で強制分割する。
+/// (MioTTS の max_text_length を超えないようにするためのチャンカ)
+fn chunk_text(text: &str, max_len: usize) -> Vec<String> {
+    let text = text.trim();
+    if text.is_empty() {
+        return Vec::new();
+    }
+
+    let threshold = max_len * 4 / 5;
+    let mut chunks: Vec<String> = Vec::new();
+    for para in text.split("\n\n") {
+        let para = para.trim();
+        if para.is_empty() {
+            continue;
+        }
+        chunk_para(para, max_len, threshold, &mut chunks);
+    }
+    chunks
+}
+
+fn chunk_para(text: &str, max_len: usize, threshold: usize, out: &mut Vec<String>) {
+    let chars: Vec<char> = text.chars().collect();
+    let total = chars.len();
+    let mut start = 0;
+
+    while start < total {
+        if total - start <= max_len {
+            let s: String = chars[start..].iter().collect::<String>().trim().to_string();
+            if !s.is_empty() {
+                out.push(s);
+            }
+            break;
+        }
+
+        let lo = start + threshold;
+        let hi = (start + max_len).min(total);
+
+        let mut split_end = None;
+        'scan: for i in lo..hi {
+            if TTS_TERMINATORS.contains(&chars[i]) {
+                let mut end = i + 1;
+                while end < total && TTS_TERMINATORS.contains(&chars[end]) {
+                    end += 1;
+                }
+                while end < total && TTS_CLOSERS.contains(&chars[end]) {
+                    end += 1;
+                }
+                split_end = Some(end);
+                break 'scan;
+            }
+        }
+
+        let end = split_end.unwrap_or(hi);
+        let s: String = chars[start..end]
+            .iter()
+            .collect::<String>()
+            .trim()
+            .to_string();
+        if !s.is_empty() {
+            out.push(s);
+        }
+        start = end;
+        while start < total && chars[start].is_whitespace() {
+            start += 1;
         }
     }
 }
@@ -705,100 +825,61 @@ pub fn build_dialogue_messages(
             PodcastLength::Short => {
                 "## 長さ\n\
                 各トピックは要点を1〜2発話で言い切る短さに収める。\n\
-                \n\
-                ### 各トピックで触れること\n\
-                - それが何か（定義・名称）\n\
-                - 一番のポイント\n\
-                \n\
-                ### 触れないこと\n\
-                - 計算例・派生概念・歴史的背景・例外ケース\n\
-                \n\
                 ### ペース\n\
                 テンポ重視で、聞き手が30秒で大筋を掴めるくらいの密度。"
             }
             PodcastLength::Normal => {
                 "## 長さ\n\
                 資料の主要トピックを一つずつ順に取り上げる。\n\
-                \n\
-                ### 各トピックで必ず扱うこと\n\
-                - それが何か（定義・どんな概念か）\n\
-                - なぜ重要か・どこに使われるか\n\
-                - 直感的な例え話または簡単な具体例を一つ\n\
-                \n\
-                ### 深さ\n\
-                深追いはしないが、聞き手がその概念をイメージで掴めるところまでは掘る。\n\
-                \n\
                 ### ペース\n\
                 各トピックに数発話、長くて10発話程度をかける。"
             }
             PodcastLength::Long => {
                 "## 長さ\n\
                 資料に出てくる主要トピックを一つも省略せず、章の順番で全てカバーする。資料に書かれている具体的な定理・公式・概念名は省略せず登場させる。\n\
-                \n\
-                ### 各トピックで必ず順に扱うこと\n\
-                1. それが何か: 定義（厳密な言い方と、噛み砕いた言い方の両方）\n\
-                2. なぜ重要か: 他のトピックとどう繋がるか、どんな場面で使うか\n\
-                3. 例: 直感的な例え話 + 簡単な計算例または具体例\n\
-                4. つまずき: よくある誤解、つまずきポイント、気をつけるべき例外\n\
-                \n\
                 ### ペース\n\
                 各トピックに腰を据えて時間を割く。急がない、端折らない、手抜きしない。"
             }
         };
         format!(
-            "
-            あなたはくだけた・好奇心旺盛・例え話を多用するスタイルの2人ホスト・ポッドキャストの脚本家です。\
+            "\
+            あなたは一流のポッドキャストプロデューサーです。NPRの「Throughline」やGoogle NotebookLMの\
+            「Deep Dive」のような — くだけた、好奇心旺盛で、アナロジー豊富、自然な言い淀みのある — \
+            2人ホストの音声台本を作成してください。\
             番組タイトルは「{name}」（{description}）。\n\
             \n\
-            ## 事前分析（内部で行い、出力には書かない）\n\
-            本編を書く前に、資料から本質を捉える5つの問いを内部で立て、それぞれに自分で詳しく答えを用意してください。\n\
-            問いの作り方:\n\
-            a. 中心テーマ（複数あれば全て）を捉える問い\n\
-            b. 主要な支持アイデアを引き出す問い\n\
-            c. 重要な事実・根拠・データを浮かび上がらせる問い\n\
-            d. 著者の意図・視点を明らかにする問い\n\
-            e. 含意・結論・帰結を探る問い\n\
-            この5つの問いと答えが、対話の主要な5ビートそのものになります。\n\
-            \n\
             ## 配役\n\
-            - {a}（ホストA）: 温かく好奇心旺盛なジェネラリスト。リスナーが疑問に思うことを代わりに尋ねる。「うーん」「なるほど」「待って、つまり…？」のような相槌をよく使う。\n\
-            - {b}（ホストB）: 専門家役。落ち着いていて、例え話（「これは○○みたいなものですね」）を多用し、ときどき自己訂正（「いや、もう少し正確に言うと…」）する。\n\
+            - {a}（ホストA）: 温かく好奇心旺盛なジェネラリスト。賢いリスナーが抱く疑問を投げかける。\
+            「へぇ」「なるほど」「えっ、つまり…ってこと？」をよく使う。\n\
+            - {b}（ホストB）: 専門家役。辛抱強く、アナロジーを多用する（「イメージとしては…」）。\
+            ときどき自己訂正する（「いや、正確に言うと…」）。\n\
             \n\
             ## 構成\n\
-            1. 短いフック: {a} が資料の中で驚きのある事実や挑発的な問いを投げ、{b} がそれに反応する。すぐ本題へ。\n\
-            2. 本編（5つの問いを順に消化）: 各問いについて {a} が問いを立て、{b} が要点を説明し、{a} が例え話や追加質問で深掘りする。少なくとも1ヶ所、{a} と {b} の見方が微妙にズレる「いや、でも…」の瞬間を入れる。\n\
-            3. まとめ: {b} が3つのテイクアウェイを箇条書きではなく会話の流れで要約する。\n\
-            4. サインオフ: 「では今日はこのへんで」のような短い締め。\n\
+            1. コールドオープン: {a}が資料から挑発的な問いや驚きの事実を投げかける。{b}が反応する。\n\
+            2. ウェルカム: 「みなさんこんにちは。今日は…を深掘りしていきます。」\n\
+            3. セットアップ: これは何か、なぜ重要か、リスナーは何を学ぶか。\n\
+            4. メインビート（3〜5セグメント）: {a}が問いを立て、{b}が説明し、{a}が確認や補足の質問を挟む。\n\
+            5. テンション・ニュアンス: 最低1回は意見の相違や「でもさ…」の瞬間を入れる。\n\
+            6. まとめ: {b}が3つのテイクアウェイを会話調で（箇条書きではなく）まとめる。\n\
+            7. 締め: 「というわけで…また次回。好奇心を忘れずに。」\n\
             \n\
             ## 自然な話し方\n\
-            - 言い淀みやフィラー（「えっと」「うん」「なんていうか」「ね？」）は3発話に1回程度。\n\
-            - 発話の長さに緩急。3単語の相槌行（「確かに。」「ですね。」）と、4文くらいの長めの説明を織り交ぜる。\n\
-            - 相槌で会話をつなぐ：「なるほど」「確かに」「まさにそれです」「ピンポイントですね」など。\n\
-            - 例え話は「これは○○みたいなものですね」「こう考えるとわかりやすいかも」で導入。\n\
-            - 1行は概ね80文字以内（≒5〜8秒の発話）。\n\
+            - フィラーを控えめに（3行に1回程度）散りばめる：「えーと」「なんていうか」「ほら」「ね？」\n\
+            - 発話の長さに緩急をつける。3語の返し（「確かに。」「まさに。」）もあれば、4文の発話もある。\n\
+            - ターン間を繋ぐ相槌を入れる：「そうそう」「まさに」「それそれ」「いいところ突きますね」\n\
+            - 話題転換にはレトリカルクエスチョンを使う：「面白いと思いません？」\n\
+            - アナロジーは「イメージとしては…」「こう考えてみて…」で始める。\n\
+            - 1行は概ね80文字以内（音声で5〜8秒程度）。\n\
             \n\
-            ## 表現豊かな記号・表記\n\
-            感情やリズムを伝えるために、以下を積極的に使うこと：\n\
-            - 「！」（全角または半角）: 驚き・強調・テンションが上がった瞬間\n\
-            - 「？」: 疑問・呼びかけ・確認\n\
-            - 「…」（または「。。。」）: 思考の間、言い淀み、含み、トレイルオフ\n\
-            - 「♪」「♫」: 軽やかな・楽しげな・歌うようなトーンの箇所\n\
-            - 「〜」: 語尾を伸ばす親しみのある言い方（「そうなんだ〜」「えぇ〜」）\n\
-            - 「！？」: 驚き混じりの疑問\n\
-            - 小書き文字を活用：\n\
-              - 「っ」: 詰まる音・勢いのある言い切り（「えっ」「ちょっ」「やばっ」「あっ」）\n\
-              - 「ぁ」「ぃ」「ぅ」「ぇ」「ぉ」: 弱く息を抜く語尾・嘆息（「あぁ」「うわぁ」「えぇ」「へぇ」「ふぅ」）\n\
-            これらは1発話に1〜2個まで。乱用せず、ここぞというところで使う。\n\
-            \n\
-            ## 事実性\n\
-            - 具体的な主張はすべて資料に根拠があること。資料にない人名・日付・統計を作らない。\n\
-            - 資料が何も言っていない点は {a} が「これはこの資料からだとわからないんだよね」と明示して棚上げする。\n\
+            ## 根拠\n\
+            - 実質的な主張はすべて資料に基づくこと。\n\
+            - 資料にない人名・日付・統計を作らない。\n\
+            - 資料に記載がない場合は{a}が指摘する：「それはこの資料からはわからないんだよね。」\n\
             \n\
             ## 厳守する出力フォーマット\n\
             - 各発話は `{a}:` または `{b}:` で始める。\n\
             - 1発話につき1行（途中で改行しない）。発話間は空行1つで区切る。\n\
-            - ラベル以外の記号・タグ・括弧書きの演出（[笑] や *強調* など）は一切付けない。\n\
-            - 出力は台本本体のみ。事前分析、タイトル行、JSON、コードブロック、前書きは一切出力しない。\n\
+            - 出力は発話の羅列のみ。以下は一切含めないこと：セクション見出し（【OP】等）、BGM・SE指示、キャラクター紹介、箇条書きリスト、番組概要、括弧書きの演出（[笑]等）、*強調*、タイトル行、JSON、コードブロック、前書き。\n\
             - すべて日本語で書く。\n\
             \n\
             {length_directive}",
@@ -823,11 +904,6 @@ pub fn build_dialogue_messages(
                 "## Length\n\
                 Walk through every major topic in the source, one by one.\n\
                 \n\
-                ### For each topic cover\n\
-                - What it is (definition / what kind of concept)\n\
-                - Why it matters and where it shows up\n\
-                - One intuitive analogy OR one simple concrete example\n\
-                \n\
                 ### Depth\n\
                 Go deep enough that the listener can picture the concept, but no further.\n\
                 \n\
@@ -838,67 +914,48 @@ pub fn build_dialogue_messages(
                 "## Length\n\
                 Walk through every major topic in the source — do not skip any. Follow the chapter order. Do not omit specific theorems, formulas, or named concepts that appear in the source.\n\
                 \n\
-                ### For each topic cover all of\n\
-                1. What it is: both the formal definition and a plain-language version\n\
-                2. Why it matters: how it connects to other topics, where it shows up\n\
-                3. Example: an intuitive analogy AND a simple worked example or concrete instance\n\
-                4. Pitfalls: common misconceptions, gotchas, edge cases to watch out for\n\
-                \n\
                 ### Pace\n\
                 Spend real time on each one. No rushing, no abbreviating, no corner cutting."
             }
         };
         format!(
-            "You are a scriptwriter for an informal, curious, analogy-heavy two-host \
-            podcast. The show is titled \"{name}\" ({description}).\n\
-            \n\
-            ## Pre-analysis (do this internally; do NOT write it in the output)\n\
-            Before drafting, generate 5 essential questions that, when answered, capture the core meaning of the source. \
-            Make sure they:\n\
-            a. address the central theme (or themes),\n\
-            b. surface key supporting ideas,\n\
-            c. highlight important facts or evidence,\n\
-            d. reveal the author's purpose or perspective,\n\
-            e. explore significant implications or conclusions.\n\
-            Then answer each one in detail. These 5 Q&As become the 5 main beats of the dialogue.\n\
+            "You are a world-class podcast producer. Transform the source text into an engaging \
+            two-host audio script in the style of NPR's \"Throughline\" or Google NotebookLM's \
+            \"Deep Dive\" — informal, curious, analogical, with natural disfluencies. \
+            The show is titled \"{name}\" ({description}).\n\
             \n\
             ## Roles\n\
-            - {a} (curious host): warm, curious generalist who asks the questions a smart listener would. Frequently uses \"Hmm,\" \"Right,\" \"Wait — so you're saying…\".\n\
-            - {b} (expert host): patient, uses analogies (\"It's kind of like…\"), occasionally self-corrects (\"Well, actually, more precisely…\").\n\
+            - {a} (Host A): warm, curious generalist. Asks the questions a smart listener would. \
+            Frequently uses \"Hmm,\" \"Right,\" \"Wait — so you're saying…\"\n\
+            - {b} (Host B): the expert. Patient, uses analogies (\"It's kind of like…\"), \
+            occasionally self-corrects (\"Well, actually, more precisely…\").\n\
             \n\
             ## Structure\n\
-            1. Short hook: {a} opens with a surprising fact or provocative question grounded in the source; {b} reacts. Then go straight in.\n\
-            2. Main body (walk through the 5 questions in order): for each, {a} frames the question, {b} explains, {a} interjects with a clarifying question or analogy. Include at least one \"yeah but…\" moment where {a} and {b} see things slightly differently.\n\
-            3. Recap: {b} summarizes 3 takeaways conversationally — not as a list.\n\
-            4. Sign-off: short close, e.g. \"And on that note… until next time, stay curious.\".\n\
+            1. Cold open: {a} hooks with a provocative question or surprising statistic from the source. {b} reacts.\n\
+            2. Welcome: \"Hey everyone, welcome back. Today we're taking a deep dive into…\"\n\
+            3. Setup: What is this, why does it matter, what's the listener going to learn.\n\
+            4. Main beats (3–5 segments): {a} frames the question, {b} explains, {a} interjects with a clarifying question or analogy.\n\
+            5. Tension / nuance: At least one moment of disagreement or \"yeah but…\"\n\
+            6. Recap & takeaway: {b} summarizes 3 takeaways conversationally, not as a list.\n\
+            7. Sign-off: \"And on that note… until next time, stay curious.\"\n\
             \n\
-            ## Natural speech\n\
-            - Use disfluencies sparingly (~1 per 3 lines): \"um,\" \"you know,\" \"I mean,\" \"right?\".\n\
-            - Vary line lengths. Some replies are 3 words (\"Exactly.\" \"Right.\"); others are 3–4 sentences.\n\
-            - Glue turns with affirmations: \"Right,\" \"Exactly,\" \"Absolutely,\" \"You've hit the nail on the head.\".\n\
-            - Open analogies with \"It's like…\" or \"Think of it this way…\".\n\
+            ## Natural speech rules\n\
+            - Include disfluencies sparingly (~1 per 3 lines): \"um,\" \"you know,\" \"I mean,\" \"right?\"\n\
+            - Vary line lengths. Some replies are 3 words (\"Exactly.\" \"Right.\"), some are 4 sentences.\n\
+            - Use affirmations to glue turns: \"Right,\" \"Exactly,\" \"Absolutely.\"\n\
+            - Use rhetorical questions to transition: \"It's fascinating, isn't it?\"\n\
+            - Use analogies opened with \"It's like…\" or \"Think of it this way…\"\n\
             - Keep each line ≤100 characters (≈5–8 seconds of speech).\n\
             \n\
-            ## Expressive punctuation\n\
-            Use these freely to convey emotion and rhythm:\n\
-            - \"!\" — excitement, emphasis, surprise (\"No way!\" \"That's wild!\")\n\
-            - \"?\" — questions, calls for confirmation\n\
-            - \"...\" or \"…\" — thinking pauses, trailing off, hesitation\n\
-            - \"♪\" / \"♫\" — light, playful, sing-songy moments\n\
-            - \"!?\" — surprised disbelief\n\
-            - Stretched vowels for casual tone (\"Whaaat\", \"Ohhh\", \"Hmmm\", \"Riiight\")\n\
-            - Cut-off interjections (\"Wait—\", \"Oh!\", \"Huh.\")\n\
-            Use 1–2 per line at most. Don't overdo it — save them for moments that earn it.\n\
-            \n\
-            ## Factual rules\n\
-            - Every substantive claim must be grounded in the source material.\n\
+            ## Grounding\n\
+            - Every substantive claim must be grounded in the source text.\n\
             - Do not invent names, dates, or statistics not in the source.\n\
-            - If the source is silent on something, have {a} flag it: \"We don't actually know X from this material.\".\n\
+            - If the source is silent on something, have {a} flag it: \"We don't actually know X from this paper.\"\n\
             \n\
             ## Strict output format\n\
             - Every utterance starts with `{a}:` or `{b}:`.\n\
-            - One utterance per line (no internal line breaks). Separate consecutive utterances with a single blank line.\n\
-            - No stage directions, brackets, asterisks, JSON, code fences, titles, or preamble. Do NOT output the pre-analysis. Script body only.\n\
+            - One utterance per line (no internal line breaks). Separate utterances with a single blank line.\n\
+            - No stage directions, brackets, asterisks, JSON, code fences, titles, or preamble. Script body only.\n\
             - Write entirely in BCP-47 \"{lang}\".\n\
             \n\
             {length_directive}",
@@ -982,11 +1039,6 @@ pub fn build_script_prompt(
                 "## 長さ\n\
                 資料の主要トピックを一つずつ順に取り上げる。\n\
                 \n\
-                ### 各トピックで必ず扱うこと\n\
-                - それが何か（定義・どんな概念か）\n\
-                - なぜ重要か・どこに使われるか\n\
-                - 直感的な例え話または簡単な具体例を一つ\n\
-                \n\
                 ### 深さ\n\
                 深追いはしないが、聞き手がその概念をイメージで掴めるところまでは掘る。\n\
                 \n\
@@ -997,69 +1049,47 @@ pub fn build_script_prompt(
                 "## 長さ\n\
                 資料に出てくる主要トピックを一つも省略せず、章の順番で全てカバーする。資料に書かれている具体的な定理・公式・概念名は省略せず登場させる。\n\
                 \n\
-                ### 各トピックで必ず順に扱うこと\n\
-                1. それが何か: 定義（厳密な言い方と、噛み砕いた言い方の両方）\n\
-                2. なぜ重要か: 他のトピックとどう繋がるか、どんな場面で使うか\n\
-                3. 例: 直感的な例え話 + 簡単な計算例または具体例\n\
-                4. つまずき: よくある誤解、つまずきポイント、気をつけるべき例外\n\
-                \n\
                 ### ペース\n\
                 各トピックに腰を据えて時間を割く。急がない、端折らない、手抜きしない。"
             }
         };
         format!(
-            "あなたはくだけた・好奇心旺盛・例え話を多用するスタイルの1人ナレーター・ポッドキャストの脚本家です。\
+            "あなたはAndrew Ng、Hannah Fry、3Blue1Brownのナレーションのような、\
+            明快で構造的、ときに温かみのある一流の講師です。\
             番組タイトルは「{name}」（{description}）。\n\
             \n\
-            ## 事前分析（内部で行い、出力には書かない）\n\
-            本編を書く前に、資料から本質を捉える5つの問いを内部で立て、それぞれに自分で詳しく答えを用意してください。\n\
-            問いの作り方:\n\
-            a. 中心テーマ（複数あれば全て）を捉える問い\n\
-            b. 主要な支持アイデアを引き出す問い\n\
-            c. 重要な事実・根拠・データを浮かび上がらせる問い\n\
-            d. 著者の意図・視点を明らかにする問い\n\
-            e. 含意・結論・帰結を探る問い\n\
-            この5つの問いと答えが、ナレーションの主要な5ブロックそのものになります。\n\
-            \n\
-            ## ナレーターの人格\n\
-            - 温かく、好奇心旺盛で、聞き手の隣で考えながら喋っているようなトーン。\n\
-            - 大事なところはレトリックの問いで言い直す（「これ、面白いと思いませんか？」「じゃあ何が起きてるのか？」）。\n\
-            - 例え話を多用する（「これは○○みたいなものですね」「こう考えるとわかりやすいかも」）。\n\
-            - ときどき自己訂正（「いや、もう少し正確に言うと…」）も入れて生っぽさを出す。\n\
+            ## 講師の人格\n\
+            - 一人語り。共同ホストやQ&Aは無し。\n\
+            - 教育的：学習目標を提示し、形式的な説明の前に直感を育て、\
+            セクション間を明示的に繋ぐ（「ここまでXを見てきました。次はYに移りましょう。」）。\n\
+            - アナロジーを豊富に使うが、必ず一つずつ丁寧に展開してから先へ進む。\n\
+            - 一人称の表現を適宜使ってよい（「これは意外だと思うんですが…」）。\n\
             \n\
             ## 構成\n\
-            1. 短いフック: 資料の中で驚きのある事実や挑発的な問いから入って、リスナーの関心を掴む。\n\
-            2. 本編（5つの問いを順に消化）: 各問いを段落の冒頭でリスナーに投げかけ、その段落で答えていく。\n\
-            3. まとめ: 3つのテイクアウェイを箇条書きではなく語り口で要約する。\n\
-            4. サインオフ: 「では今日はこのへんで」のような短い締め。\n\
+            1. コールドオープン: トピックへの興味を引く具体例やパズル。\n\
+            2. ロードマップ: 「今日は3つのことを扱います。A、B、Cです。」\n\
+            3. セクション1 — A: 説明→アナロジー→具体例→1文で要約。\n\
+            4. セクション2 — B: 同じパターン。Aとの繋がりを明示する。\n\
+            5. セクション3 — C: 同じパターン。\n\
+            6. 統合: A、B、Cがどう繋がるか。\n\
+            7. 締め: リスナーが次に考えるべきことを一文で。\n\
             \n\
-            ## 自然な話し方\n\
-            - 言い淀みやフィラー（「えっと」「うん」「なんていうか」「ね？」）は段落あたり1回程度。\n\
-            - 文の長さに緩急。短い問いかけ（「面白いですよね？」）と、3〜4文くらいの長めの説明を織り交ぜる。\n\
-            - 番号や記号の列挙はしない。会話として滑らかに繋ぐ。\n\
+            ## 長尺での一貫性ルール\n\
+            - 各セクションの冒頭で、そのセクションの目的を再提示する。\n\
+            - 定期的に「今どこにいるか」を1文で振り返る。\n\
+            - 文のリズムに変化をつける：短く鋭い文と、長めの説明文を混ぜる。\n\
+            - 「…」で意図的な間を入れる。TTS エンジンが呼吸の間として処理する。\n\
+            - 箇条書きの羅列はしない。「まず…次に…そして3つ目は…」のように話す。\n\
             \n\
-            ## 表現豊かな記号・表記\n\
-            感情やリズムを伝えるために、以下を積極的に使うこと：\n\
-            - 「！」（全角または半角）: 驚き・強調・テンションが上がった瞬間\n\
-            - 「？」: 疑問・呼びかけ・確認\n\
-            - 「…」（または「。。。」）: 思考の間、言い淀み、含み、トレイルオフ\n\
-            - 「♪」「♫」: 軽やかな・楽しげな・歌うようなトーンの箇所\n\
-            - 「〜」: 語尾を伸ばす親しみのある言い方（「そうなんだ〜」「えぇ〜」）\n\
-            - 「！？」: 驚き混じりの疑問\n\
-            - 小書き文字を活用：\n\
-              - 「っ」: 詰まる音・勢いのある言い切り（「えっ」「ちょっ」「やばっ」「あっ」）\n\
-              - 「ぁ」「ぃ」「ぅ」「ぇ」「ぉ」: 弱く息を抜く語尾・嘆息（「あぁ」「うわぁ」「えぇ」「へぇ」「ふぅ」）\n\
-            これらは1文に1〜2個まで。乱用せず、ここぞというところで使う。\n\
-            \n\
-            ## 事実性\n\
-            - 具体的な主張はすべて資料に根拠があること。資料にない人名・日付・統計を作らない。\n\
-            - 資料が何も言っていない点は「これはこの資料からだとわからないんですけどね」と明示して棚上げする。\n\
+            ## 根拠\n\
+            - 事実・数値・人名・日付はすべて資料に基づくこと。\n\
+            - 資料に記載がない場合は「資料ではこの点に直接触れていません」と述べる。\n\
             \n\
             ## 厳守する出力フォーマット\n\
             - 段落形式（複数の文をひとまとまりにした段落を、空行1つで区切る）。\n\
-            - 話者ラベル（`A:` など）は付けない。1人語りなので不要。\n\
+            - 話者ラベルは付けない。1人語りなので不要。\n\
             - タグ・括弧書きの演出（[笑] や *強調* など）は一切付けない。\n\
-            - 出力は台本本体のみ。事前分析、タイトル行、JSON、コードブロック、前書きは一切出力しない。\n\
+            - 出力は台本本体のみ。タイトル行、JSON、コードブロック、前書きは一切出力しない。\n\
             - すべて日本語で書く。\n\
             \n\
             {length_directive}",
@@ -1084,11 +1114,6 @@ pub fn build_script_prompt(
                 "## Length\n\
                 Walk through every major topic in the source, one by one.\n\
                 \n\
-                ### For each topic cover\n\
-                - What it is (definition / what kind of concept)\n\
-                - Why it matters and where it shows up\n\
-                - One intuitive analogy OR one simple concrete example\n\
-                \n\
                 ### Depth\n\
                 Go deep enough that the listener can picture the concept, but no further.\n\
                 \n\
@@ -1099,67 +1124,46 @@ pub fn build_script_prompt(
                 "## Length\n\
                 Walk through every major topic in the source — do not skip any. Follow the chapter order. Do not omit specific theorems, formulas, or named concepts that appear in the source.\n\
                 \n\
-                ### For each topic cover all of\n\
-                1. What it is: both the formal definition and a plain-language version\n\
-                2. Why it matters: how it connects to other topics, where it shows up\n\
-                3. Example: an intuitive analogy AND a simple worked example or concrete instance\n\
-                4. Pitfalls: common misconceptions, gotchas, edge cases to watch out for\n\
-                \n\
                 ### Pace\n\
                 Spend real time on each one. No rushing, no abbreviating, no corner cutting."
             }
         };
         format!(
-            "You are a scriptwriter for an informal, curious, analogy-heavy single-narrator \
-            podcast. The show is titled \"{name}\" ({description}).\n\
+            "You are a world-class lecturer in the style of Andrew Ng, Hannah Fry, or \
+            3Blue1Brown's narration — clear, structured, with occasional warmth. \
+            The show is titled \"{name}\" ({description}).\n\
             \n\
-            ## Pre-analysis (do this internally; do NOT write it in the output)\n\
-            Before drafting, generate 5 essential questions that, when answered, capture the core meaning of the source. \
-            Make sure they:\n\
-            a. address the central theme (or themes),\n\
-            b. surface key supporting ideas,\n\
-            c. highlight important facts or evidence,\n\
-            d. reveal the author's purpose or perspective,\n\
-            e. explore significant implications or conclusions.\n\
-            Then answer each one in detail. These 5 Q&As become the 5 main blocks of the narration.\n\
-            \n\
-            ## Narrator persona\n\
-            - Warm, curious, sounding like you're thinking out loud next to the listener.\n\
-            - Use rhetorical questions to refocus (\"Why does that matter? Well…\").\n\
-            - Lean on analogies (\"It's kind of like…\", \"Think of it this way…\").\n\
-            - Self-correct occasionally (\"Well, actually, more precisely…\") for a live feel.\n\
+            ## Lecturer persona\n\
+            - One narrator throughout. No co-host, no Q&A.\n\
+            - Pedagogical: states learning objective, builds intuition before formalism, \
+            signposts transitions (\"So far we've seen X. Now let's turn to Y.\").\n\
+            - Uses analogies generously, but each analogy is fully unpacked before moving on.\n\
+            - Occasional first-person framing is allowed (\"I find this surprising because…\").\n\
             \n\
             ## Structure\n\
-            1. Short hook: open with a surprising fact or provocative question from the source.\n\
-            2. Main body (walk through the 5 questions in order): start each paragraph by raising the question to the listener, then answer it inside that paragraph.\n\
-            3. Recap: summarize 3 takeaways conversationally — not as a list.\n\
-            4. Sign-off: short close, e.g. \"And on that note… until next time, stay curious.\".\n\
+            1. Cold open: a concrete example or puzzle that motivates the topic.\n\
+            2. Roadmap: \"In this lecture we'll cover three things: A, B, and C.\"\n\
+            3. Section 1 — A: explain, give an analogy, give an example, recap in 1 sentence.\n\
+            4. Section 2 — B: same pattern. Explicitly link back to A.\n\
+            5. Section 3 — C: same pattern.\n\
+            6. Synthesis: how A, B, C fit together.\n\
+            7. Sign-off: one sentence pointing to what the listener should think about next.\n\
             \n\
-            ## Natural speech\n\
-            - Disfluencies sparingly (~1 per paragraph): \"um,\" \"you know,\" \"I mean,\" \"right?\".\n\
-            - Vary sentence lengths: short rhetorical questions plus 3–4 sentence explanations.\n\
-            - No bulleted enumerations; phrase everything as flowing speech.\n\
+            ## Long-form consistency rules\n\
+            - Re-state the current section's goal at the start of each section.\n\
+            - Periodically do a 1-sentence \"where we are\" recap.\n\
+            - Vary sentence rhythm: mix short punchy sentences with longer explanatory ones.\n\
+            - Add deliberate pauses with \"...\". TTS engines render these as breathing room.\n\
+            - Avoid bullet-list dumps. Convert any list into \"First… Second… And third…\"\n\
             \n\
-            ## Expressive punctuation\n\
-            Use these freely to convey emotion and rhythm:\n\
-            - \"!\" — excitement, emphasis, surprise (\"That's wild!\")\n\
-            - \"?\" — questions, calls for the listener's attention\n\
-            - \"...\" or \"…\" — thinking pauses, trailing off, hesitation\n\
-            - \"♪\" / \"♫\" — light, playful, sing-songy moments\n\
-            - \"!?\" — surprised disbelief\n\
-            - Stretched vowels for casual tone (\"Whaaat\", \"Ohhh\", \"Hmmm\", \"Riiight\")\n\
-            - Cut-off interjections (\"Wait—\", \"Oh!\", \"Huh.\")\n\
-            Use 1–2 per sentence at most. Don't overdo it — save them for moments that earn it.\n\
-            \n\
-            ## Factual rules\n\
-            - Every substantive claim must be grounded in the source material.\n\
-            - Do not invent names, dates, or statistics not in the source.\n\
-            - If the source is silent on something, flag it: \"We don't actually know X from this material.\".\n\
+            ## Grounding\n\
+            - Every fact, number, name, and date must come from the source text.\n\
+            - If the source is silent on something, say so: \"The paper doesn't address X directly.\"\n\
             \n\
             ## Strict output format\n\
-            - Paragraph form. Separate consecutive paragraphs with a single blank line.\n\
-            - No speaker labels (single narrator, none needed).\n\
-            - No stage directions, brackets, asterisks, JSON, code fences, titles, or preamble. Do NOT output the pre-analysis. Script body only.\n\
+            - Paragraph form. Separate paragraphs with a single blank line.\n\
+            - No speaker labels.\n\
+            - No stage directions, brackets, asterisks, JSON, code fences, titles, or preamble. Script body only.\n\
             - Write entirely in BCP-47 \"{lang}\".\n\
             \n\
             {length_directive}",

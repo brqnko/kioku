@@ -21,24 +21,12 @@ type ChildItem =
 type FolderItem = Extract<ChildItem, { kind: "folder" }>;
 type FileItem = Extract<ChildItem, { kind: "file" }>;
 
-type VoiceStyle =
-  | "F1"
-  | "F2"
-  | "F3"
-  | "F4"
-  | "F5"
-  | "moka"
-  | "M1"
-  | "M2"
-  | "M3"
-  | "M4"
-  | "M5"
-  | "keld";
+type VoiceStyle = "female" | "male";
 
-const FEMALE_VOICES: VoiceStyle[] = ["F1", "F2", "F3", "F4", "F5", "moka"];
-const MALE_VOICES: VoiceStyle[] = ["M1", "M2", "M3", "M4", "M5", "keld"];
-const DEFAULT_VOICE: VoiceStyle = "moka";
-const DEFAULT_VOICE_2: VoiceStyle = "keld";
+const FEMALE_VOICES: VoiceStyle[] = ["female"];
+const MALE_VOICES: VoiceStyle[] = ["male"];
+const DEFAULT_VOICE: VoiceStyle = "female";
+const DEFAULT_VOICE_2: VoiceStyle = "male";
 const VOICE_STORAGE_KEY = "podcast.voiceStyle";
 const VOICE_2_STORAGE_KEY = "podcast.voiceStyle2";
 const ALL_VOICES: VoiceStyle[] = [...FEMALE_VOICES, ...MALE_VOICES];

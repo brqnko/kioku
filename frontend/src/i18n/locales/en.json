@@ -218,7 +218,8 @@
     "title": "New File",
     "tabs": {
       "file": "File",
-      "text": "Text"
+      "text": "Text",
+      "url": "URL"
     },
     "file": {
       "cta": "Click or drop files to upload",
@@ -232,6 +233,13 @@
       "namePlaceholder": "e.g. memo.note",
       "body": "Body",
       "bodyPlaceholder": "Type your content here..."
+    },
+    "url": {
+      "name": "File name",
+      "namePlaceholder": "e.g. Article summary",
+      "label": "URL",
+      "placeholder": "https://example.com/article",
+      "hint": "The page content will be converted to Markdown and saved"
     },
     "status": {
       "pending": "Pending",
@@ -251,6 +259,7 @@
     "errors": {
       "fileRequired": "Please choose a file.",
       "nameRequired": "Please enter a file name.",
+      "urlRequired": "Please enter a URL.",
       "tooLarge": "Too large (max 32MB).",
       "failed": "Failed to save."
     }
@@ -426,18 +435,8 @@
         "female": "Female",
         "male": "Male",
         "styles": {
-          "F1": "F1 — Warm",
-          "F2": "F2 — Bright",
-          "F3": "F3 — Calm",
-          "F4": "F4 — Crisp",
-          "F5": "F5 — Soft",
-          "moka": "moka",
-          "M1": "M1 — Steady",
-          "M2": "M2 — Rich",
-          "M3": "M3 — Clear",
-          "M4": "M4 — Mellow",
-          "M5": "M5 — Bold",
-          "keld": "keld"
+          "female": "Female",
+          "male": "Male"
         }
       },
       "length": {

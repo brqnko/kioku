@@ -88,6 +88,7 @@ pub struct CreateFileInput {
     pub description: String,
     pub storage_id: Option<uuid::Uuid>,
     pub text: Option<String>,
+    pub url: Option<String>,
     pub parent_id: uuid::Uuid,
     pub parent_kind: u8,
 }
@@ -109,8 +110,8 @@ pub async fn create_file(
     let mut pending_put: Option<(uuid::Uuid, String, Vec<u8>)> = None;
     let mut text_to_persist: Option<super::domain::Text> = None;
 
-    let (storage_type, file_size) = match (input.storage_id, input.text) {
-        (Some(temp_id), None) => {
+    let (storage_type, file_size) = match (input.storage_id, input.text, input.url) {
+        (Some(temp_id), None, None) => {
             let got = app.temporary_storage_service.get_object(temp_id).await?;
             match super::domain::ContentLength::new(got.content_length) {
                 Ok(_) => {}
@@ -120,8 +121,21 @@ pub async fn create_file(
             pending_put = Some((temp_id, got.content_type, got.body));
             (super::domain::StorageType::Object, size)
         }
-        (None, Some(text)) => {
+        (None, Some(text), None) => {
             let text_vo = match super::domain::Text::new(text) {
+                Ok(ok) => ok,
+                Err(err) => return Ok(Err(err)),
+            };
+            let size = text_vo.0.len() as u64;
+            text_to_persist = Some(text_vo);
+            (super::domain::StorageType::Text, size)
+        }
+        (None, None, Some(url)) => {
+            let output = app
+                .md_convert_service
+                .convert(crate::util::mdutil::MdConvertInput::Url(url))
+                .await?;
+            let text_vo = match super::domain::Text::new(output.markdown) {
                 Ok(ok) => ok,
                 Err(err) => return Ok(Err(err)),
             };
@@ -132,7 +146,7 @@ pub async fn create_file(
         _ => {
             return Ok(Err(crate::domain::DomainError::new(
                 "invalid_input",
-                "exactly one of storage_id or text must be provided".to_string(),
+                "exactly one of storage_id, text, or url must be provided".to_string(),
                 crate::domain::DomainErrorKind::BadInput,
             )));
         }

@@ -232,6 +232,11 @@ paths:
                   - string
                   - 'null'
                   maxLength: 33554432
+                url:
+                  type:
+                  - string
+                  - 'null'
+                  maxLength: 2048
         required: true
       responses:
         '200':
@@ -2699,7 +2704,7 @@ paths:
                     format: uuid
                 voice_style:
                   type: string
-                  description: 'One of: F1, F2, F3, F4, F5, moka, M1, M2, M3, M4, M5, keld'
+                  description: 'One of: female, male'
                 voice_style_2:
                   type:
                   - string

@@ -7,7 +7,7 @@ pub struct CreatePodcastBody {
     #[schema(max_length = 1024)]
     description: String,
     used_file_ids: Vec<uuid::Uuid>,
-    /// One of: F1, F2, F3, F4, F5, moka, M1, M2, M3, M4, M5, keld
+    /// One of: female, male
     voice_style: String,
     /// Optional second voice. When provided, the podcast is generated as a two-speaker dialogue.
     voice_style_2: Option<String>,

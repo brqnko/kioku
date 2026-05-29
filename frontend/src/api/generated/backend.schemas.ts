@@ -51,6 +51,11 @@ export type CreateFileBody = {
      * @nullable
      */
   text?: string | null;
+  /**
+     * @maxLength 2048
+     * @nullable
+     */
+  url?: string | null;
 };
 
 export type CreateFile200ParentKind = typeof CreateFile200ParentKind[keyof typeof CreateFile200ParentKind];
@@ -730,7 +735,7 @@ export type CreatePodcastBody = {
   /** @maxLength 256 */
   name: string;
   used_file_ids: string[];
-  /** One of: F1, F2, F3, F4, F5, moka, M1, M2, M3, M4, M5, keld */
+  /** One of: female, male */
   voice_style: string;
   /**
      * Optional second voice. When provided, the podcast is generated as a two-speaker dialogue.

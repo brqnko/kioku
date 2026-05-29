@@ -7,7 +7,7 @@ pub mod jti_blacklist;
 pub mod jwt;
 pub mod llm;
 pub mod otel;
-pub mod pdf2md;
+pub mod mdutil;
 pub mod podcast_request;
 pub mod random;
 pub mod storage;

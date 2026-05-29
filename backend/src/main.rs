@@ -141,8 +141,8 @@ async fn main() -> anyhow::Result<()> {
     let llm_client: Arc<dyn backend::util::llm::LLMClient> =
         Arc::new(backend::util::llm::CopilotImpl::new(config.github_token)?);
 
-    let pdf2md_service: Arc<dyn backend::util::pdf2md::Pdf2MdService> =
-        Arc::new(backend::util::pdf2md::Pdf2MdServiceImpl::new());
+    let md_convert_service: Arc<dyn backend::util::mdutil::MdConvertService> =
+        Arc::new(backend::util::mdutil::MdConvertServiceImpl::new());
 
     let podcast_request_service: Arc<dyn backend::util::podcast_request::PodcastRequestService> =
         Arc::new(
@@ -161,7 +161,7 @@ async fn main() -> anyhow::Result<()> {
         jti_blacklist_service,
         embedding_client,
         llm_client,
-        pdf2md_service,
+        md_convert_service,
         podcast_request_service,
         code_runner_client,
         mysql_kind: config.mysql_kind,

@@ -218,7 +218,8 @@
     "title": "新規ファイル",
     "tabs": {
       "file": "ファイル",
-      "text": "テキスト"
+      "text": "テキスト",
+      "url": "URL"
     },
     "file": {
       "cta": "クリックまたはドロップでファイルを選択",
@@ -232,6 +233,13 @@
       "namePlaceholder": "例: メモ.note",
       "body": "本文",
       "bodyPlaceholder": "ここに内容を入力..."
+    },
+    "url": {
+      "name": "ファイル名",
+      "namePlaceholder": "例: 記事まとめ",
+      "label": "URL",
+      "placeholder": "https://example.com/article",
+      "hint": "ページの内容をMarkdownに変換して保存します"
     },
     "status": {
       "pending": "待機中",
@@ -251,6 +259,7 @@
     "errors": {
       "fileRequired": "ファイルを選択してください。",
       "nameRequired": "ファイル名を入力してください。",
+      "urlRequired": "URLを入力してください。",
       "tooLarge": "サイズが大きすぎます（最大 32MB）。",
       "failed": "保存に失敗しました。"
     }
@@ -426,18 +435,8 @@
         "female": "女性",
         "male": "男性",
         "styles": {
-          "F1": "F1 — 柔らかい",
-          "F2": "F2 — 明るい",
-          "F3": "F3 — 落ち着いた",
-          "F4": "F4 — はっきり",
-          "F5": "F5 — やさしい",
-          "moka": "moka",
-          "M1": "M1 — 安定感",
-          "M2": "M2 — 厚みのある",
-          "M3": "M3 — クリア",
-          "M4": "M4 — まろやか",
-          "M5": "M5 — 力強い",
-          "keld": "keld"
+          "female": "女性",
+          "male": "男性"
         }
       },
       "length": {

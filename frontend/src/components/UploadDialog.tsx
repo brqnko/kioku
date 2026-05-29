@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import { useTranslation } from "react-i18next";
 import { useSWRConfig } from "swr";
 import { Dialog } from "./Dialog";
-import { createTextFile, uploadFile } from "../api/upload";
+import { createTextFile, createUrlFile, uploadFile } from "../api/upload";
 import { invalidateAfterMutation } from "../utils/swrCache";
 import { pushNotification } from "../notifications/store";
 
@@ -14,7 +14,7 @@ interface UploadDialogProps {
   onSuccess: () => unknown | Promise<unknown>;
 }
 
-type Mode = "file" | "text";
+type Mode = "file" | "text" | "url";
 
 type UploadStatus = "pending" | "uploading" | "done" | "failed";
 
@@ -79,6 +79,7 @@ export function UploadDialog({
   const [isDragging, setIsDragging] = useState(false);
   const [name, setName] = useState("");
   const [text, setText] = useState("");
+  const [url, setUrl] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -90,6 +91,7 @@ export function UploadDialog({
       setIsDragging(false);
       setName("");
       setText("");
+      setUrl("");
       setError(null);
       setSubmitting(false);
     }
@@ -220,6 +222,34 @@ export function UploadDialog({
       setError(t("upload.errors.nameRequired"));
       return;
     }
+
+    if (mode === "url") {
+      const trimmedUrl = url.trim();
+      if (!trimmedUrl) {
+        setError(t("upload.errors.urlRequired"));
+        return;
+      }
+      setSubmitting(true);
+      try {
+        await createUrlFile({
+          name: trimmedName,
+          url: trimmedUrl,
+          parentId,
+          parentKind,
+        });
+        await Promise.all([
+          onSuccess(),
+          invalidateAfterMutation(mutate, { library: true, dashboard: true }),
+        ]);
+        onClose();
+      } catch (err) {
+        setError(translateTopError(err));
+      } finally {
+        setSubmitting(false);
+      }
+      return;
+    }
+
     setSubmitting(true);
     try {
       await createTextFile({
@@ -279,6 +309,17 @@ export function UploadDialog({
               }`}
             >
               {t("upload.tabs.text")}
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode("url")}
+              class={`px-4 py-1.5 rounded-md text-sm font-medium cursor-pointer border-none ${
+                mode === "url"
+                  ? "bg-overlay-soft text-text-primary"
+                  : "bg-transparent text-text-secondary hover:text-text-primary"
+              }`}
+            >
+              {t("upload.tabs.url")}
             </button>
           </div>
         </div>
@@ -394,6 +435,50 @@ export function UploadDialog({
                   rows={8}
                   class="textarea-field font-mono"
                 />
+              </div>
+            </>
+          )}
+
+          {mode === "url" && (
+            <>
+              <div class="flex flex-col gap-2">
+                <label
+                  for="upload-url-name"
+                  class="text-caption font-bold text-text-secondary"
+                >
+                  {t("upload.url.name")}
+                </label>
+                <input
+                  id="upload-url-name"
+                  type="text"
+                  value={name}
+                  onInput={(e) => setName((e.target as HTMLInputElement).value)}
+                  placeholder={t("upload.url.namePlaceholder")}
+                  maxLength={256}
+                  required
+                  class="input-field"
+                />
+              </div>
+              <div class="flex flex-col gap-2">
+                <label
+                  for="upload-url-input"
+                  class="text-caption font-bold text-text-secondary"
+                >
+                  {t("upload.url.label")}
+                </label>
+                <input
+                  id="upload-url-input"
+                  type="url"
+                  value={url}
+                  onInput={(e) => setUrl((e.target as HTMLInputElement).value)}
+                  placeholder={t("upload.url.placeholder")}
+                  maxLength={2048}
+                  required
+                  class="input-field"
+                />
+                <span class="text-xs text-text-disabled">
+                  {t("upload.url.hint")}
+                </span>
               </div>
             </>
           )}

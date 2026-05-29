@@ -86,3 +86,28 @@ export async function createTextFile(
   };
   return kyInstance.post("files", { json: body }).json<CreateFile200>();
 }
+
+interface CreateUrlFileOptions {
+  name: string;
+  url: string;
+  parentId: string;
+  parentKind: "project" | "folder";
+  description?: string;
+}
+
+export async function createUrlFile(
+  opts: CreateUrlFileOptions,
+): Promise<CreateFile200> {
+  const { name, url, parentId, parentKind, description = "" } = opts;
+  const body: CreateFileBody = {
+    name,
+    description,
+    parent_id: parentId,
+    parent_kind:
+      parentKind === "project"
+        ? CreateFileBodyParentKind.project
+        : CreateFileBodyParentKind.folder,
+    url,
+  };
+  return kyInstance.post("files", { json: body }).json<CreateFile200>();
+}
