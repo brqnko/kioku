@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN git clone --depth 1 https://github.com/ggml-org/llama.cpp.git /src
 WORKDIR /src
-RUN cmake -B build -DLLAMA_CURL=ON \
+RUN cmake -B build -DLLAMA_CURL=ON -DBUILD_SHARED_LIBS=OFF \
     && cmake --build build --target llama-server -j"$(nproc)"
 
 # ── Stage 2: Runtime ─────────────────────────────────────────────────────────
