@@ -2,12 +2,12 @@
 FROM debian:bookworm-slim AS llama-build
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        cmake build-essential git libcurl4-openssl-dev ca-certificates \
+        cmake build-essential git libcurl4-openssl-dev libssl-dev ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 RUN git clone --depth 1 https://github.com/ggml-org/llama.cpp.git /src
 WORKDIR /src
-RUN cmake -B build -DLLAMA_CURL=ON -DBUILD_SHARED_LIBS=OFF \
+RUN cmake -B build -DLLAMA_CURL=ON -DLLAMA_OPENSSL=ON -DBUILD_SHARED_LIBS=OFF \
     && cmake --build build --target llama-server -j"$(nproc)"
 
 # ── Stage 2: Runtime ─────────────────────────────────────────────────────────
