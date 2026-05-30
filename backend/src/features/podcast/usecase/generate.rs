@@ -357,6 +357,7 @@ async fn synthesize_lines_via_miotts(
         text: &'a str,
         reference: Reference<'a>,
         output: Output,
+        best_of_n: BestOfN,
     }
 
     #[derive(serde::Serialize)]
@@ -370,6 +371,14 @@ async fn synthesize_lines_via_miotts(
     struct Output {
         format: &'static str,
     }
+
+    // 各チャンクを複数候補生成して最良を自動選択させ、読み崩れ/アーティファクトを減らす。
+    #[derive(serde::Serialize)]
+    struct BestOfN {
+        enabled: bool,
+        n: u8,
+    }
+    const BEST_OF_N: u8 = 2;
 
     let lines: Vec<(String, String)> = lines
         .into_iter()
@@ -439,6 +448,10 @@ async fn synthesize_lines_via_miotts(
                             preset_id,
                         },
                         output: Output { format: "wav" },
+                        best_of_n: BestOfN {
+                            enabled: true,
+                            n: BEST_OF_N,
+                        },
                     })
                     .send()
                     .await
