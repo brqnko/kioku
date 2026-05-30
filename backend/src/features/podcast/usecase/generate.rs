@@ -151,40 +151,39 @@ pub async fn generate_podcast(
     // };
     let tts_script = script_raw.clone();
 
-    // MioTTS preset ids: "<lang>_<gender>" e.g. "jp_female", "en_male".
-    let lang_prefix = if is_japanese { "jp" } else { "en" };
+    // Irodori has no fixed presets; a fixed seed yields a consistent (reproducible)
+    // voice. Map each speaker's gender selection to a distinct seed so the two
+    // speakers stay consistent across chunks.
     if is_dialogue {
-        let voice_a = format!("{}_{}", lang_prefix, request.voice_style);
-        let voice_b = format!(
-            "{}_{}",
-            lang_prefix,
+        let seed_a = voice_seed(&request.voice_style);
+        let seed_b = voice_seed(
             request
                 .voice_style_2
                 .as_deref()
-                .expect("voice_style_2 already checked")
+                .expect("voice_style_2 already checked"),
         );
         let tts_entries = parse_dialogue_script(&tts_script, speaker_labels);
         let lines = tts_entries
             .into_iter()
             .map(|e| {
-                let voice = if e.speaker == speaker_labels.a {
-                    voice_a.clone()
+                let seed = if e.speaker == speaker_labels.a {
+                    seed_a
                 } else {
-                    voice_b.clone()
+                    seed_b
                 };
-                (voice, e.text)
+                (seed, e.text)
             })
             .collect::<Vec<_>>();
-        synthesize_lines_via_miotts(app, audio_storage_id, lines).await?;
+        synthesize_lines_via_irodori(app, audio_storage_id, lines).await?;
     } else {
-        let voice = format!("{}_{}", lang_prefix, request.voice_style);
+        let seed = voice_seed(&request.voice_style);
         let lines = tts_script
             .split("\n\n")
             .map(str::trim)
             .filter(|p| !p.is_empty())
-            .map(|p| (voice.clone(), p.to_string()))
+            .map(|p| (seed, p.to_string()))
             .collect::<Vec<_>>();
-        synthesize_lines_via_miotts(app, audio_storage_id, lines).await?;
+        synthesize_lines_via_irodori(app, audio_storage_id, lines).await?;
     }
 
     let podcast = match crate::features::podcast::domain::Podcast::new(
@@ -343,35 +342,40 @@ const MIOTTS_REQUEST_TIMEOUT_SECS: u64 = 600;
 /// コールドスタート(ゼロスケールからの復帰=モデルロード)を待つ /health ポーリングの上限。
 const MIOTTS_HEALTH_TIMEOUT_SECS: u64 = 420;
 
-/// `lines` (preset_id, text) を MioTTS (`/v1/tts`) で順次合成し、返ってきた WAV を
-/// 連結して 1 つの 16bit mono WAV にまとめ、ストレージへ直接アップロードする。
-async fn synthesize_lines_via_miotts(
+/// マッピング: 話者の選択(female/male)を Irodori の固定 seed に変換する。
+/// Irodori はプリセットを持たないが、seed を固定すると声が一貫・再現的になる。
+/// (どの seed がどんな声かは聴いて調整できるよう、定数で持つ)
+fn voice_seed(voice_style: &str) -> u64 {
+    match voice_style {
+        "male" => 20,
+        _ => 11, // female / その他
+    }
+}
+
+/// `lines` (seed, text) を Irodori-TTS-Server (`/v1/audio/speech`, OpenAI 互換) で順次
+/// 合成し、返ってきた WAV を連結 → opus(ogg)へ圧縮 → ストレージへアップロードする。
+async fn synthesize_lines_via_irodori(
     app: &crate::app::App,
     audio_storage_id: uuid::Uuid,
-    lines: Vec<(String, String)>,
+    lines: Vec<(u64, String)>,
 ) -> Result<(), anyhow::Error> {
     use anyhow::Context as _;
 
     #[derive(serde::Serialize)]
-    struct TtsRequest<'a> {
-        text: &'a str,
-        reference: Reference<'a>,
-        output: Output,
+    struct SpeechRequest<'a> {
+        model: &'static str,
+        input: &'a str,
+        voice: &'static str,
+        response_format: &'static str,
+        irodori: IrodoriOpts,
     }
 
     #[derive(serde::Serialize)]
-    struct Reference<'a> {
-        #[serde(rename = "type")]
-        kind: &'a str,
-        preset_id: &'a str,
+    struct IrodoriOpts {
+        seed: u64,
     }
 
-    #[derive(serde::Serialize)]
-    struct Output {
-        format: &'static str,
-    }
-
-    let lines: Vec<(String, String)> = lines
+    let lines: Vec<(u64, String)> = lines
         .into_iter()
         .filter(|(_, text)| !text.trim().is_empty())
         .collect();
@@ -417,7 +421,7 @@ async fn synthesize_lines_via_miotts(
     let mut samples: Vec<i16> = Vec::new();
     let mut sample_rate: Option<u32> = None;
 
-    for (preset_id, text) in &lines {
+    for (seed, text) in &lines {
         for chunk in chunk_text(text, MIOTTS_MAX_TEXT_CHARS) {
             if chunk.trim().is_empty() {
                 continue;
@@ -431,18 +435,17 @@ async fn synthesize_lines_via_miotts(
             let mut wav_bytes: Option<Vec<u8>> = None;
             for attempt in 1..=MAX_ATTEMPTS {
                 let resp = http_client
-                    .post(format!("{base_url}/v1/tts"))
-                    .json(&TtsRequest {
-                        text: &chunk,
-                        reference: Reference {
-                            kind: "preset",
-                            preset_id,
-                        },
-                        output: Output { format: "wav" },
+                    .post(format!("{base_url}/v1/audio/speech"))
+                    .json(&SpeechRequest {
+                        model: "irodori-tts",
+                        input: &chunk,
+                        voice: "none",
+                        response_format: "wav",
+                        irodori: IrodoriOpts { seed: *seed },
                     })
                     .send()
                     .await
-                    .context("miotts: failed to send tts request")?;
+                    .context("irodori: failed to send tts request")?;
                 let status = resp.status();
                 if status.is_success() {
                     wav_bytes = Some(
