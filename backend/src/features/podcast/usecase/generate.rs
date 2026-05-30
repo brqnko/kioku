@@ -401,30 +401,55 @@ async fn synthesize_lines_via_miotts(
                 continue;
             }
 
-            let resp = http_client
-                .post(format!("{base_url}/v1/tts"))
-                .json(&TtsRequest {
-                    text: &chunk,
-                    reference: Reference {
-                        kind: "preset",
-                        preset_id,
-                    },
-                    output: Output { format: "wav" },
-                })
-                .send()
-                .await
-                .context("miotts: failed to send tts request")?;
-            let status = resp.status();
-            if !status.is_success() {
+            // MioTTS の LLM はサンプリングが確率的で、稀に音声トークンを出せず 422
+            // ("No speech tokens found") を返す。また 5xx(コールドスタート時の 504 等)も
+            // 一過性なのでリトライする。リトライ尽きても 422 のままのチャンクは、Podcast 全体を
+            // 失敗させずに読み飛ばす。
+            const MAX_ATTEMPTS: usize = 4;
+            let mut wav_bytes: Option<Vec<u8>> = None;
+            for attempt in 1..=MAX_ATTEMPTS {
+                let resp = http_client
+                    .post(format!("{base_url}/v1/tts"))
+                    .json(&TtsRequest {
+                        text: &chunk,
+                        reference: Reference {
+                            kind: "preset",
+                            preset_id,
+                        },
+                        output: Output { format: "wav" },
+                    })
+                    .send()
+                    .await
+                    .context("miotts: failed to send tts request")?;
+                let status = resp.status();
+                if status.is_success() {
+                    wav_bytes = Some(
+                        resp.bytes()
+                            .await
+                            .context("miotts: failed to read tts response body")?
+                            .to_vec(),
+                    );
+                    break;
+                }
                 let body = resp.text().await.unwrap_or_default();
+                let retriable = status == reqwest::StatusCode::UNPROCESSABLE_ENTITY
+                    || status.is_server_error();
+                if retriable && attempt < MAX_ATTEMPTS {
+                    tracing::warn!(target: "tts", %status, attempt, "miotts: retrying chunk");
+                    tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+                    continue;
+                }
+                if status == reqwest::StatusCode::UNPROCESSABLE_ENTITY {
+                    tracing::warn!(target: "tts", %status, "miotts: skipping unsynthesizable chunk: {body}");
+                    break;
+                }
                 anyhow::bail!("miotts: tts responded with {status}: {body}");
             }
-            let wav_bytes = resp
-                .bytes()
-                .await
-                .context("miotts: failed to read tts response body")?;
+            let Some(wav_bytes) = wav_bytes else {
+                continue;
+            };
 
-            let reader = hound::WavReader::new(std::io::Cursor::new(wav_bytes.as_ref()))
+            let reader = hound::WavReader::new(std::io::Cursor::new(wav_bytes.as_slice()))
                 .context("miotts: failed to parse returned wav")?;
             let spec = reader.spec();
             anyhow::ensure!(
