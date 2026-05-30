@@ -340,6 +340,8 @@ fn strip_audio_tags(text: &str) -> String {
 const MIOTTS_MAX_TEXT_CHARS: usize = 300;
 /// 1 チャンク (1 行) あたりの合成リクエストのタイムアウト。CPU 推論は遅いので長めに取る。
 const MIOTTS_REQUEST_TIMEOUT_SECS: u64 = 600;
+/// コールドスタート(ゼロスケールからの復帰=モデルロード)を待つ /health ポーリングの上限。
+const MIOTTS_HEALTH_TIMEOUT_SECS: u64 = 420;
 
 /// `lines` (preset_id, text) を MioTTS (`/v1/tts`) で順次合成し、返ってきた WAV を
 /// 連結して 1 つの 16bit mono WAV にまとめ、ストレージへ直接アップロードする。
@@ -380,15 +382,35 @@ async fn synthesize_lines_via_miotts(
         .build()?;
     let base_url = app.sgi_url.trim_end_matches('/');
 
-    let health_resp = http_client
-        .get(format!("{base_url}/health"))
-        .send()
-        .await
-        .context("miotts: failed to send health request")?;
-    if !health_resp.status().is_success() {
-        let s = health_resp.status();
-        let body = health_resp.text().await.unwrap_or_default();
-        anyhow::bail!("miotts: health responded with {s}: {body}");
+    // MioTTS はゼロスケール(min-replicas=0)からの復帰時、モデルのロードでコールド
+    // スタートに数分かかる。最初の /health が即通らなくても、起動完了するまで
+    // ポーリングして待つ(初回リクエストが Container Apps のタイムアウトで落ちても
+    // リトライで拾う)。
+    {
+        let deadline = std::time::Instant::now()
+            + std::time::Duration::from_secs(MIOTTS_HEALTH_TIMEOUT_SECS);
+        let mut ready = false;
+        let mut last_err = String::from("no response");
+        while std::time::Instant::now() < deadline {
+            match http_client
+                .get(format!("{base_url}/health"))
+                .timeout(std::time::Duration::from_secs(30))
+                .send()
+                .await
+            {
+                Ok(resp) if resp.status().is_success() => {
+                    ready = true;
+                    break;
+                }
+                Ok(resp) => last_err = format!("status {}", resp.status()),
+                Err(e) => last_err = e.to_string(),
+            }
+            tokio::time::sleep(std::time::Duration::from_secs(15)).await;
+        }
+        anyhow::ensure!(
+            ready,
+            "miotts: server did not become healthy in time: {last_err}"
+        );
     }
 
     // 各行・各チャンクを合成し、24kHz mono の i16 PCM を 1 本に連結する。
