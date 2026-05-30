@@ -514,8 +514,14 @@ async fn synthesize_lines_via_miotts(
     }
     let wav_bytes = wav_buf.into_inner();
 
+    // 非圧縮 WAV は opus の 15〜20 倍のサイズになるため、ffmpeg にパイプして
+    // opus(ogg コンテナ)へ圧縮してから保存する。
+    let ogg_bytes = encode_wav_to_opus(wav_bytes)
+        .await
+        .context("miotts: failed to encode opus")?;
+
     app.storage_service
-        .put_object(audio_storage_id, "audio/wav", wav_bytes)
+        .put_object(audio_storage_id, "audio/ogg", ogg_bytes)
         .await
         .context("miotts: failed to upload audio")?;
 
@@ -526,6 +532,61 @@ async fn synthesize_lines_via_miotts(
         "miotts synthesis complete",
     );
     Ok(())
+}
+
+/// 連結済み WAV を ffmpeg にパイプして opus(ogg コンテナ)へ圧縮する。
+/// kioku backend には音声エンコード crate が無いため ffmpeg を使う。
+async fn encode_wav_to_opus(wav_bytes: Vec<u8>) -> Result<Vec<u8>, anyhow::Error> {
+    use anyhow::Context as _;
+    use tokio::io::AsyncWriteExt as _;
+
+    let mut child = tokio::process::Command::new("ffmpeg")
+        .args([
+            "-hide_banner",
+            "-loglevel",
+            "error",
+            "-f",
+            "wav",
+            "-i",
+            "pipe:0",
+            "-c:a",
+            "libopus",
+            "-b:a",
+            "32k",
+            "-application",
+            "voip",
+            "-f",
+            "ogg",
+            "pipe:1",
+        ])
+        .stdin(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::piped())
+        .spawn()
+        .context("failed to spawn ffmpeg")?;
+
+    // stdin への書き込みと stdout の読み出しを同時に行わないとパイプがデッドロックする。
+    let mut stdin = child.stdin.take().expect("ffmpeg stdin piped");
+    let writer = tokio::spawn(async move {
+        let _ = stdin.write_all(&wav_bytes).await;
+        // stdin を drop してEOFを通知する。
+    });
+
+    let output = child
+        .wait_with_output()
+        .await
+        .context("failed to run ffmpeg")?;
+    let _ = writer.await;
+
+    if !output.status.success() {
+        anyhow::bail!(
+            "ffmpeg exited with {}: {}",
+            output.status,
+            String::from_utf8_lossy(&output.stderr)
+        );
+    }
+    anyhow::ensure!(!output.stdout.is_empty(), "ffmpeg produced empty output");
+    Ok(output.stdout)
 }
 
 /// MioTTS が返した WAV のサンプルを i16 PCM に正規化して `out` に追記する。

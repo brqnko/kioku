@@ -27,7 +27,7 @@ FROM debian:bookworm-slim AS runtime
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        ca-certificates libssl3 && \
+        ca-certificates libssl3 ffmpeg && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
