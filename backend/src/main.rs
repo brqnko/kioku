@@ -15,8 +15,7 @@ struct Config {
     s3_temporary_bucket: String,
     redis_url: String,
     github_token: String,
-    sgi_url: String,
-    sgi_token: String,
+    irodori_url: String,
 }
 
 impl Config {
@@ -47,8 +46,7 @@ impl Config {
             s3_temporary_bucket: require("S3_TEMPORARY_BUCKET")?,
             redis_url: require("REDIS_URL")?,
             github_token: require("GITHUB_TOKEN")?,
-            sgi_url: require("SGI_URL")?,
-            sgi_token: require("SGI_TOKEN")?,
+            irodori_url: require("IRODORI_URL")?,
         })
     }
 }
@@ -168,8 +166,7 @@ async fn main() -> anyhow::Result<()> {
         access_token_duration: chrono::Duration::hours(1),
         refresh_token_duration: chrono::Duration::days(7),
         frontend_url: config.frontend_url,
-        sgi_url: config.sgi_url,
-        sgi_token: config.sgi_token,
+        irodori_url: config.irodori_url,
     }));
 
     let bind_addr = format!("0.0.0.0:{}", config.port);

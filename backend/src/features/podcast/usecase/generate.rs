@@ -335,12 +335,12 @@ fn strip_audio_tags(text: &str) -> String {
     out.trim().to_string()
 }
 
-/// MioTTS の入力上限 (max_text_length=300)。これを超える行は文末優先で分割する。
-const MIOTTS_MAX_TEXT_CHARS: usize = 300;
+/// Irodori の入力上限 (max_text_length=300)。これを超える行は文末優先で分割する。
+const IRODORI_MAX_TEXT_CHARS: usize = 300;
 /// 1 チャンク (1 行) あたりの合成リクエストのタイムアウト。CPU 推論は遅いので長めに取る。
-const MIOTTS_REQUEST_TIMEOUT_SECS: u64 = 600;
+const IRODORI_REQUEST_TIMEOUT_SECS: u64 = 600;
 /// コールドスタート(ゼロスケールからの復帰=モデルロード)を待つ /health ポーリングの上限。
-const MIOTTS_HEALTH_TIMEOUT_SECS: u64 = 420;
+const IRODORI_HEALTH_TIMEOUT_SECS: u64 = 420;
 
 /// マッピング: 話者の選択(female/male)を Irodori の固定 seed に変換する。
 /// Irodori はプリセットを持たないが、seed を固定すると声が一貫・再現的になる。
@@ -382,17 +382,17 @@ async fn synthesize_lines_via_irodori(
     anyhow::ensure!(!lines.is_empty(), "podcast script is empty");
 
     let http_client = reqwest::Client::builder()
-        .timeout(std::time::Duration::from_secs(MIOTTS_REQUEST_TIMEOUT_SECS))
+        .timeout(std::time::Duration::from_secs(IRODORI_REQUEST_TIMEOUT_SECS))
         .build()?;
-    let base_url = app.sgi_url.trim_end_matches('/');
+    let base_url = app.irodori_url.trim_end_matches('/');
 
-    // MioTTS はゼロスケール(min-replicas=0)からの復帰時、モデルのロードでコールド
+    // Irodori はゼロスケール(min-replicas=0)からの復帰時、モデルのロードでコールド
     // スタートに数分かかる。最初の /health が即通らなくても、起動完了するまで
     // ポーリングして待つ(初回リクエストが Container Apps のタイムアウトで落ちても
     // リトライで拾う)。
     {
         let deadline = std::time::Instant::now()
-            + std::time::Duration::from_secs(MIOTTS_HEALTH_TIMEOUT_SECS);
+            + std::time::Duration::from_secs(IRODORI_HEALTH_TIMEOUT_SECS);
         let mut ready = false;
         let mut last_err = String::from("no response");
         while std::time::Instant::now() < deadline {
@@ -413,7 +413,7 @@ async fn synthesize_lines_via_irodori(
         }
         anyhow::ensure!(
             ready,
-            "miotts: server did not become healthy in time: {last_err}"
+            "irodori: server did not become healthy in time: {last_err}"
         );
     }
 
@@ -422,12 +422,12 @@ async fn synthesize_lines_via_irodori(
     let mut sample_rate: Option<u32> = None;
 
     for (seed, text) in &lines {
-        for chunk in chunk_text(text, MIOTTS_MAX_TEXT_CHARS) {
+        for chunk in chunk_text(text, IRODORI_MAX_TEXT_CHARS) {
             if chunk.trim().is_empty() {
                 continue;
             }
 
-            // MioTTS の LLM はサンプリングが確率的で、稀に音声トークンを出せず 422
+            // Irodori の LLM はサンプリングが確率的で、稀に音声トークンを出せず 422
             // ("No speech tokens found") を返す。また 5xx(コールドスタート時の 504 等)も
             // 一過性なのでリトライする。リトライ尽きても 422 のままのチャンクは、Podcast 全体を
             // 失敗させずに読み飛ばす。
@@ -451,7 +451,7 @@ async fn synthesize_lines_via_irodori(
                     wav_bytes = Some(
                         resp.bytes()
                             .await
-                            .context("miotts: failed to read tts response body")?
+                            .context("irodori: failed to read tts response body")?
                             .to_vec(),
                     );
                     break;
@@ -460,32 +460,32 @@ async fn synthesize_lines_via_irodori(
                 let retriable = status == reqwest::StatusCode::UNPROCESSABLE_ENTITY
                     || status.is_server_error();
                 if retriable && attempt < MAX_ATTEMPTS {
-                    tracing::warn!(target: "tts", %status, attempt, "miotts: retrying chunk");
+                    tracing::warn!(target: "tts", %status, attempt, "irodori: retrying chunk");
                     tokio::time::sleep(std::time::Duration::from_secs(2)).await;
                     continue;
                 }
                 if status == reqwest::StatusCode::UNPROCESSABLE_ENTITY {
-                    tracing::warn!(target: "tts", %status, "miotts: skipping unsynthesizable chunk: {body}");
+                    tracing::warn!(target: "tts", %status, "irodori: skipping unsynthesizable chunk: {body}");
                     break;
                 }
-                anyhow::bail!("miotts: tts responded with {status}: {body}");
+                anyhow::bail!("irodori: tts responded with {status}: {body}");
             }
             let Some(wav_bytes) = wav_bytes else {
                 continue;
             };
 
             let reader = hound::WavReader::new(std::io::Cursor::new(wav_bytes.as_slice()))
-                .context("miotts: failed to parse returned wav")?;
+                .context("irodori: failed to parse returned wav")?;
             let spec = reader.spec();
             anyhow::ensure!(
                 spec.channels == 1,
-                "miotts: expected mono wav, got {} channels",
+                "irodori: expected mono wav, got {} channels",
                 spec.channels
             );
             match sample_rate {
                 Some(sr) => anyhow::ensure!(
                     sr == spec.sample_rate,
-                    "miotts: inconsistent sample rate ({sr} vs {})",
+                    "irodori: inconsistent sample rate ({sr} vs {})",
                     spec.sample_rate
                 ),
                 None => sample_rate = Some(spec.sample_rate),
@@ -494,8 +494,8 @@ async fn synthesize_lines_via_irodori(
         }
     }
 
-    let sample_rate = sample_rate.context("miotts: no audio was produced (empty script)")?;
-    anyhow::ensure!(!samples.is_empty(), "miotts: produced empty audio");
+    let sample_rate = sample_rate.context("irodori: no audio was produced (empty script)")?;
+    anyhow::ensure!(!samples.is_empty(), "irodori: produced empty audio");
 
     // 連結した PCM を 1 つの 16bit mono WAV にエンコードする。
     let mut wav_buf = std::io::Cursor::new(Vec::<u8>::new());
@@ -507,13 +507,13 @@ async fn synthesize_lines_via_irodori(
             sample_format: hound::SampleFormat::Int,
         };
         let mut writer =
-            hound::WavWriter::new(&mut wav_buf, spec).context("miotts: failed to create wav writer")?;
+            hound::WavWriter::new(&mut wav_buf, spec).context("irodori: failed to create wav writer")?;
         for s in &samples {
             writer
                 .write_sample(*s)
-                .context("miotts: failed to write sample")?;
+                .context("irodori: failed to write sample")?;
         }
-        writer.finalize().context("miotts: failed to finalize wav")?;
+        writer.finalize().context("irodori: failed to finalize wav")?;
     }
     let wav_bytes = wav_buf.into_inner();
 
@@ -521,18 +521,18 @@ async fn synthesize_lines_via_irodori(
     // opus(ogg コンテナ)へ圧縮してから保存する。
     let ogg_bytes = encode_wav_to_opus(wav_bytes)
         .await
-        .context("miotts: failed to encode opus")?;
+        .context("irodori: failed to encode opus")?;
 
     app.storage_service
         .put_object(audio_storage_id, "audio/ogg", ogg_bytes)
         .await
-        .context("miotts: failed to upload audio")?;
+        .context("irodori: failed to upload audio")?;
 
     tracing::info!(
         target: "tts",
         %audio_storage_id,
         samples = samples.len(),
-        "miotts synthesis complete",
+        "irodori synthesis complete",
     );
     Ok(())
 }
@@ -592,7 +592,7 @@ async fn encode_wav_to_opus(wav_bytes: Vec<u8>) -> Result<Vec<u8>, anyhow::Error
     Ok(output.stdout)
 }
 
-/// MioTTS が返した WAV のサンプルを i16 PCM に正規化して `out` に追記する。
+/// Irodori が返した WAV のサンプルを i16 PCM に正規化して `out` に追記する。
 fn append_wav_samples<R: std::io::Read>(
     out: &mut Vec<i16>,
     mut reader: hound::WavReader<R>,
@@ -603,23 +603,23 @@ fn append_wav_samples<R: std::io::Read>(
     match (spec.sample_format, spec.bits_per_sample) {
         (hound::SampleFormat::Int, 16) => {
             for s in reader.samples::<i16>() {
-                out.push(s.context("miotts: bad i16 sample")?);
+                out.push(s.context("irodori: bad i16 sample")?);
             }
         }
         (hound::SampleFormat::Int, 32) => {
             for s in reader.samples::<i32>() {
-                let v = s.context("miotts: bad i32 sample")?;
+                let v = s.context("irodori: bad i32 sample")?;
                 out.push((v >> 16) as i16);
             }
         }
         (hound::SampleFormat::Float, 32) => {
             for s in reader.samples::<f32>() {
-                let v = s.context("miotts: bad f32 sample")?;
+                let v = s.context("irodori: bad f32 sample")?;
                 out.push((v.clamp(-1.0, 1.0) * i16::MAX as f32) as i16);
             }
         }
         (fmt, bits) => {
-            anyhow::bail!("miotts: unsupported wav format {:?}/{}bit", fmt, bits)
+            anyhow::bail!("irodori: unsupported wav format {:?}/{}bit", fmt, bits)
         }
     }
     Ok(())
@@ -632,7 +632,7 @@ const TTS_CLOSERS: &[char] = &[
 
 /// 段落 (`\n\n`) を先に分割し、段落内では max_len の 80% を超えた位置以降の最初の
 /// 文末記号でチャンクを切る。文末記号が見つからなければ max_len で強制分割する。
-/// (MioTTS の max_text_length を超えないようにするためのチャンカ)
+/// (Irodori の max_text_length を超えないようにするためのチャンカ)
 fn chunk_text(text: &str, max_len: usize) -> Vec<String> {
     let text = text.trim();
     if text.is_empty() {

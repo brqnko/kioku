@@ -50,8 +50,7 @@ pub struct App {
         std::sync::Arc<dyn crate::util::podcast_request::PodcastRequestService>,
     pub code_runner_client: std::sync::Arc<dyn crate::util::code_runner::CodeRunnerClient>,
     pub locker: std::sync::Arc<dyn crate::util::ad_lock::Locker>,
-    pub sgi_url: String,
-    pub sgi_token: String,
+    pub irodori_url: String,
 }
 
 pub struct AppArgs {
@@ -71,8 +70,7 @@ pub struct AppArgs {
     pub access_token_duration: chrono::Duration,
     pub refresh_token_duration: chrono::Duration,
     pub frontend_url: String,
-    pub sgi_url: String,
-    pub sgi_token: String,
+    pub irodori_url: String,
 }
 
 impl App {
@@ -93,8 +91,7 @@ impl App {
             access_token_duration,
             refresh_token_duration,
             frontend_url,
-            sgi_url,
-            sgi_token,
+            irodori_url,
         } = args;
         use std::sync::Arc;
 
@@ -152,8 +149,7 @@ impl App {
             md_convert_service,
             podcast_request_service,
             code_runner_client,
-            sgi_url,
-            sgi_token,
+            irodori_url,
         }
     }
 }
