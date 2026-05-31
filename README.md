@@ -11,7 +11,7 @@ flowchart LR
     db["TiDB"]
     redis["Redis"]
     s3["S3"]
-    sgs["SGS"]
+    tts["Irodori-TTS"]
     copilot["GitHub Copilot"]
 
     user -->|HTTPS| nginx
@@ -20,11 +20,11 @@ flowchart LR
     backend --> db
     backend --> redis
     backend --> s3
-    backend --> sgs
+    backend --> tts
     backend --> copilot
 ```
 
-SGSについては[brqnko/speech-generation-server](https://github.com/brqnko/speech-generation-server)を参照してください。
+音声生成には[Irodori-TTS-Server](https://github.com/Aratako/Irodori-TTS-Server)を使用しています。GPU(Azure Container Apps)向けのビルド構成は`irodori/`を参照してください。
 
 ## 環境構築
 
@@ -49,8 +49,7 @@ VSCodeのDevcontainerを使って開くことをおすすめします。
 | `S3_PROVIDER_NAME` | S3プロバイダー名 |
 | `S3_BUCKET` | ファイル保存用バケット |
 | `S3_TEMPORARY_BUCKET` | 一時ファイル用バケット |
-| `SGI_URL` | SGSのエンドポイント |
-| `SGI_TOKEN` | SGSの認証トークン |
+| `IRODORI_URL` | Irodori-TTS-Serverのエンドポイント |
 | `GITHUB_TOKEN` | GitHub Copilot API用トークン |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | OpenTelemetryエクスポーターのエンドポイント |
 | `OTEL_EXPORTER_OTLP_PROTOCOL` | OpenTelemetryプロトコル |
