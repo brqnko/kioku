@@ -1,7 +1,8 @@
 import { useTranslation } from "react-i18next";
-import SideNavBar from "../components/SideNavBar";
-import TopAppBar from "../components/TopAppBar";
+import { AppLayout } from "../components/AppLayout";
 import { MarkdownView } from "../components/MarkdownView";
+import { PageHeader } from "../components/PageHeader";
+import { StateMessage } from "../components/StateMessage";
 import { useDashboard } from "../hooks/useDashboard";
 import { useDocumentHead } from "../hooks/useDocumentHead";
 import { formatRelative } from "../utils/datetime";
@@ -24,16 +25,11 @@ export default function DashboardPage() {
   const { data, error, isLoading } = useDashboard();
 
   return (
-    <div class="min-h-screen bg-background-dark text-text-primary">
-      <SideNavBar />
-      <TopAppBar />
-      <main class="ml-[var(--sidebar-width)] p-4 tablet:p-8 h-[calc(100vh-3.5rem)] overflow-y-auto flex flex-col gap-8 transition-[margin-left] duration-200 ease-in-out">
-        <header class="flex flex-col gap-1">
-          <h1 class="heading-h2">{t("dashboard.title")}</h1>
-          <p class="text-caption text-text-secondary">
-            {t("dashboard.subtitle")}
-          </p>
-        </header>
+    <AppLayout className="flex flex-col gap-8">
+      <PageHeader
+        title={t("dashboard.title")}
+        description={t("dashboard.subtitle")}
+      />
 
         <div class="grid grid-cols-12 gap-4 auto-rows-min">
           <section class="col-span-12 bg-surface-dark rounded-[12px] border border-border-subtle p-6">
@@ -60,17 +56,19 @@ export default function DashboardPage() {
               </div>
 
               {isLoading && (
-                <p class="text-sm text-text-muted-dark">
+                <StateMessage>
                   {t("dashboard.loading")}
-                </p>
+                </StateMessage>
               )}
               {error && (
-                <p class="text-sm text-danger">{t("dashboard.error")}</p>
+                <StateMessage tone="danger">
+                  {t("dashboard.error")}
+                </StateMessage>
               )}
               {data && !data.ai_learning_summary && (
-                <p class="text-sm text-text-muted-dark">
+                <StateMessage>
                   {t("dashboard.summary.empty")}
-                </p>
+                </StateMessage>
               )}
               {data?.ai_learning_summary && (
                 <MarkdownView
@@ -101,19 +99,19 @@ export default function DashboardPage() {
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {isLoading && (
-                <p class="col-span-full text-sm text-text-muted-dark">
+                <StateMessage className="col-span-full">
                   {t("dashboard.loading")}
-                </p>
+                </StateMessage>
               )}
               {error && (
-                <p class="col-span-full text-sm text-danger">
+                <StateMessage tone="danger" className="col-span-full">
                   {t("dashboard.error")}
-                </p>
+                </StateMessage>
               )}
               {data?.recent_seen_files?.length === 0 && (
-                <p class="col-span-full text-sm text-text-muted-dark">
+                <StateMessage className="col-span-full">
                   {t("dashboard.recent.empty")}
-                </p>
+                </StateMessage>
               )}
               {data?.recent_seen_files?.map(
                 (file: GetDashboard200RecentSeenFilesItem) => {
@@ -148,7 +146,6 @@ export default function DashboardPage() {
             </div>
           </section>
         </div>
-      </main>
-    </div>
+    </AppLayout>
   );
 }

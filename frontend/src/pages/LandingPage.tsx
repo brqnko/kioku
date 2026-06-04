@@ -2,7 +2,6 @@ import { useTranslation, Trans } from "react-i18next";
 import DashboardButton from "../components/DashboardButton";
 import GoogleSignInButton from "../components/GoogleSignInButton";
 import HeaderControls from "../components/HeaderControls";
-import { Reveal } from "../components/Reveal";
 import { useAuth } from "../hooks/useAuth";
 import { useDocumentHead } from "../hooks/useDocumentHead";
 
@@ -276,7 +275,7 @@ export default function LandingPage() {
       <main class="pt-8 md:pt-10">
         <section class="max-w-7xl mx-auto px-6 md:px-8 mb-14 md:mb-20">
           <div class="grid lg:grid-cols-[1.05fr_1fr] items-center gap-12 lg:gap-20">
-            <Reveal class="flex flex-col gap-6 md:gap-8 lg:pl-16 xl:pl-24">
+            <div class="flex flex-col gap-6 md:gap-8 lg:pl-16 xl:pl-24">
               <h1 class="text-4xl md:text-6xl xl:text-7xl font-bold text-charcoal dark:text-white leading-[1.05] tracking-tight">
                 {t("hero.title")}
               </h1>
@@ -285,22 +284,18 @@ export default function LandingPage() {
               ) : (
                 <GoogleSignInButton align="start" />
               )}
-            </Reveal>
-            <Reveal
-              as="ul"
-              delay={150}
-              class="flex flex-col gap-5 md:gap-6 list-disc pl-7 text-xl md:text-2xl font-bold text-charcoal dark:text-white marker:text-primary leading-snug"
-            >
+            </div>
+            <ul class="flex flex-col gap-5 md:gap-6 list-disc pl-7 text-xl md:text-2xl font-bold text-charcoal dark:text-white marker:text-primary leading-snug">
               <li>{t("hero.feature1")}</li>
               <li>{t("hero.feature2")}</li>
               <li>{t("hero.feature3")}</li>
-            </Reveal>
+            </ul>
           </div>
         </section>
 
         <section class="max-w-7xl mx-auto px-6 md:px-8 mb-14 md:mb-20">
           <div class="lg:pl-16 xl:pl-24">
-            <Reveal class="max-w-2xl border-l-4 border-primary pl-6 md:pl-10 py-4 md:py-6">
+            <div class="max-w-2xl border-l-4 border-primary pl-6 md:pl-10 py-4 md:py-6">
               <h2 class="text-2xl md:text-4xl font-bold text-charcoal dark:text-white mb-6 md:mb-8 leading-tight">
                 {t("statement.heading")}
               </h2>
@@ -310,7 +305,7 @@ export default function LandingPage() {
                   {t("statement.body2")}
                 </p>
               </div>
-            </Reveal>
+            </div>
           </div>
         </section>
 
@@ -351,7 +346,7 @@ export default function LandingPage() {
 
               if (key === "library") {
                 return (
-                  <Reveal
+                  <div
                     key={key}
                     class="md:grid md:grid-cols-12 md:items-start md:gap-y-8 flex flex-col gap-8 md:mt-32 md:mb-16"
                   >
@@ -371,11 +366,11 @@ export default function LandingPage() {
                     <div class="md:col-start-1 md:col-span-9 md:row-start-2 order-3">
                       {mockBlock}
                     </div>
-                  </Reveal>
+                  </div>
                 );
               }
               return (
-                <Reveal
+                <div
                   key={key}
                   class="md:grid md:grid-cols-12 md:items-start md:gap-y-8 flex flex-col gap-8"
                 >
@@ -399,7 +394,7 @@ export default function LandingPage() {
                   <div class="md:col-start-4 md:col-span-9 md:row-start-2 order-3">
                     {mockBlock}
                   </div>
-                </Reveal>
+                </div>
               );
             })}
           </div>
