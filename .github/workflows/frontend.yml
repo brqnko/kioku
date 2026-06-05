@@ -20,6 +20,8 @@ jobs:
         working-directory: frontend
     permissions:
       contents: read
+    env:
+      NPM_CONFIG_REGISTRY: https://npm.flatt.tech/
 
     steps:
       - uses: actions/checkout@v6
@@ -29,6 +31,18 @@ jobs:
           node-version: 24
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
+
+      - name: Setup Takumi Guard (npm)
+        uses: flatt-security/setup-takumi-guard-npm@v1
+
+      - name: Verify npm registry is Takumi Guard
+        run: |
+          actual="$(npm config get registry)"
+          echo "registry=$actual"
+          if [ "$actual" != "https://npm.flatt.tech/" ]; then
+            echo "::error::npm is not routed through Takumi Guard (registry=$actual)"
+            exit 1
+          fi
 
       - run: npm ci
 
