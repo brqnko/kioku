@@ -200,6 +200,7 @@ export type GetFileAncestors200 = {
 };
 
 export type GetFileContent200Content = {
+  content_type: string;
   expires_at: string;
   kind: 'url';
   method: string;
@@ -891,4 +892,3 @@ export type ListSessions200 = {
   /** @nullable */
   next_cursor?: string | null;
 };
-

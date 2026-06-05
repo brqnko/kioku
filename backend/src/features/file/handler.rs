@@ -176,6 +176,7 @@ pub enum FileContentBody {
     Url {
         url: String,
         method: String,
+        content_type: String,
         expires_at: chrono::DateTime<chrono::Utc>,
     },
     Text {
@@ -235,10 +236,12 @@ pub async fn get_file_content(
                 super::usecase::FileContent::Url {
                     url,
                     method,
+                    content_type,
                     expires_at,
                 } => FileContentBody::Url {
                     url,
                     method,
+                    content_type,
                     expires_at,
                 },
                 super::usecase::FileContent::Text { content } => FileContentBody::Text { content },

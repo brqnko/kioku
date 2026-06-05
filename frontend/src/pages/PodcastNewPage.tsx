@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import { useLocation, useRoute } from "preact-iso";
 import { useTranslation } from "react-i18next";
-import SideNavBar from "../components/SideNavBar";
-import TopAppBar from "../components/TopAppBar";
+import { AppLayout } from "../components/AppLayout";
 import { kyInstance } from "../api/mutator";
 import { useProject, useProjectChildren } from "../hooks/useProject";
 import { useFolderChildren } from "../hooks/useFolder";
@@ -23,13 +22,12 @@ type FileItem = Extract<ChildItem, { kind: "file" }>;
 
 type VoiceStyle = "female" | "male";
 
-const FEMALE_VOICES: VoiceStyle[] = ["female"];
-const MALE_VOICES: VoiceStyle[] = ["male"];
+const VOICE_OPTIONS: VoiceStyle[] = ["female", "male"];
 const DEFAULT_VOICE: VoiceStyle = "female";
 const DEFAULT_VOICE_2: VoiceStyle = "male";
 const VOICE_STORAGE_KEY = "podcast.voiceStyle";
 const VOICE_2_STORAGE_KEY = "podcast.voiceStyle2";
-const ALL_VOICES: VoiceStyle[] = [...FEMALE_VOICES, ...MALE_VOICES];
+const ALL_VOICES: VoiceStyle[] = VOICE_OPTIONS;
 
 type SpeakerCount = 1 | 2;
 const SPEAKER_COUNTS: SpeakerCount[] = [1, 2];
@@ -96,7 +94,6 @@ interface VoicePickerProps {
   playing: VoiceStyle | null;
   onPreview: (v: VoiceStyle) => void;
   titleKey?: string;
-  hintKey?: string;
   disabledVoice?: VoiceStyle;
 }
 
@@ -106,21 +103,23 @@ function VoicePicker({
   playing,
   onPreview,
   titleKey,
-  hintKey,
   disabledVoice,
 }: VoicePickerProps) {
   const { t } = useTranslation();
 
-  const renderGroup = (title: string, items: VoiceStyle[]) => (
-    <div class="flex flex-col gap-1.5">
-      <span class="text-[10px] font-bold uppercase tracking-widest text-text-secondary">
-        {title}
-      </span>
+  return (
+    <div class="flex flex-col gap-3">
+      <div class="flex flex-col gap-1">
+        <label class="text-xs font-bold uppercase tracking-widest text-text-secondary">
+          {t(titleKey ?? "podcast.create.voice.title")}
+        </label>
+      </div>
       <div class="grid grid-cols-1 tablet:grid-cols-2 gap-1.5">
-        {items.map((v) => {
+        {VOICE_OPTIONS.map((v) => {
           const selected = value === v;
           const isPlaying = playing === v;
           const isDisabled = disabledVoice === v && !selected;
+          const voiceLabel = t(`podcast.create.voice.styles.${v}`);
           return (
             <div
               key={v}
@@ -150,7 +149,7 @@ function VoicePicker({
                   )}
                 </span>
                 <span class="text-[13px] leading-tight text-text-primary truncate">
-                  {t(`podcast.create.voice.styles.${v}`)}
+                  {voiceLabel}
                 </span>
               </button>
               <button
@@ -158,8 +157,8 @@ function VoicePicker({
                 onClick={() => onPreview(v)}
                 aria-label={
                   isPlaying
-                    ? t("podcast.create.voice.stop", { name: v })
-                    : t("podcast.create.voice.play", { name: v })
+                    ? t("podcast.create.voice.stop", { name: voiceLabel })
+                    : t("podcast.create.voice.play", { name: voiceLabel })
                 }
                 class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-transparent text-text-secondary hover:text-text-primary hover:bg-overlay-faint cursor-pointer"
               >
@@ -174,21 +173,6 @@ function VoicePicker({
           );
         })}
       </div>
-    </div>
-  );
-
-  return (
-    <div class="flex flex-col gap-3">
-      <div class="flex flex-col gap-1">
-        <label class="text-xs font-bold uppercase tracking-widest text-text-secondary">
-          {t(titleKey ?? "podcast.create.voice.title")}
-        </label>
-        <span class="text-[11px] text-text-disabled leading-snug">
-          {t(hintKey ?? "podcast.create.voice.hint")}
-        </span>
-      </div>
-      {renderGroup(t("podcast.create.voice.female"), FEMALE_VOICES)}
-      {renderGroup(t("podcast.create.voice.male"), MALE_VOICES)}
     </div>
   );
 }
@@ -257,9 +241,6 @@ function SpeakerCountPicker({ value, onChange }: SpeakerCountPickerProps) {
         <label class="text-xs font-bold uppercase tracking-widest text-text-secondary">
           {t("podcast.create.speakers.title")}
         </label>
-        <span class="text-[11px] text-text-disabled leading-snug">
-          {t("podcast.create.speakers.hint")}
-        </span>
       </div>
       <div role="radiogroup" class="grid grid-cols-2 gap-1.5">
         {SPEAKER_COUNTS.map((v) => {
@@ -412,14 +393,18 @@ function FolderNode({ folder, selectedIds, onToggleFile }: FolderNodeProps) {
   );
 }
 
-export default function PodcastNewPage() {
-  const { t, i18n } = useTranslation();
-  useDocumentHead({ title: "New podcast — kioku", robots: "noindex,nofollow" });
-  const route = useRoute();
-  const { route: navigate } = useLocation();
-  const projectId = route.params.projectId;
+interface PodcastCreatorProps {
+  projectId: string;
+  compact?: boolean;
+  onCreated?: (podcastId?: string) => void;
+}
 
-  const { data: project, error: projectError } = useProject(projectId);
+export function PodcastCreator({
+  projectId,
+  compact = false,
+  onCreated,
+}: PodcastCreatorProps) {
+  const { t, i18n } = useTranslation();
   const {
     items,
     isLoading,
@@ -431,7 +416,6 @@ export default function PodcastNewPage() {
 
   const [selected, setSelected] = useState<Map<string, string>>(new Map());
   const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
   const [voiceStyle, setVoiceStyle] = useState<VoiceStyle>(loadStoredVoice);
   const [voiceStyle2, setVoiceStyle2] = useState<VoiceStyle>(loadStoredVoice2);
   const [speakerCount, setSpeakerCount] = useState<SpeakerCount>(
@@ -537,16 +521,19 @@ export default function PodcastNewPage() {
     try {
       const body: CreatePodcastBody = {
         name: finalName,
-        description: description.trim(),
+        description: "",
         used_file_ids: Array.from(selected.keys()),
         voice_style: voiceStyle,
         voice_style_2: speakerCount === 2 ? voiceStyle2 : null,
         length,
       };
-      await kyInstance
+      const created = await kyInstance
         .post(`projects/${projectId}/podcasts`, { json: body })
         .json<CreatePodcast200>();
-      navigate(`/projects/${projectId}/podcasts`);
+      setSelected(new Map());
+      setName("");
+      setSubmitting(false);
+      onCreated?.(created.podcast_id);
     } catch {
       setSubmitError(t("podcast.create.errors.failed"));
       setSubmitting(false);
@@ -556,97 +543,16 @@ export default function PodcastNewPage() {
   const canSubmit = !submitting && selected.size > 0 && !!projectId;
 
   return (
-    <div class="min-h-screen bg-background-dark text-text-primary">
-      <SideNavBar />
-      <TopAppBar />
-      <main class="ml-[var(--sidebar-width)] p-4 tablet:p-8 h-[calc(100vh-3.5rem)] overflow-hidden flex flex-col transition-[margin-left] duration-200 ease-in-out">
-        <header class="mb-6 flex flex-col gap-2">
-          <nav class="flex items-center gap-1.5 text-text-secondary text-sm font-medium flex-wrap">
-            <a
-              href="/podcast"
-              class="hover:text-text-primary no-underline text-inherit"
-            >
-              {t("nav.podcast")}
-            </a>
-            <span class="material-symbols-outlined text-[16px] select-none">
-              chevron_right
-            </span>
-            <a
-              href={`/projects/${projectId}/podcasts`}
-              class="hover:text-text-primary no-underline text-inherit truncate max-w-[160px]"
-            >
-              {project?.name ?? (projectError ? "—" : "...")}
-            </a>
-            <span class="material-symbols-outlined text-[16px] select-none">
-              chevron_right
-            </span>
-            <span class="text-text-primary">{t("podcast.create.crumb")}</span>
-          </nav>
-          <h1 class="heading-h2">{t("podcast.create.title")}</h1>
-        </header>
-
         <form
           onSubmit={handleSubmit}
-          class="flex-1 grid grid-cols-12 gap-4 tablet:gap-6 overflow-hidden min-h-0"
+          class={
+            compact
+              ? "flex flex-col gap-4 min-h-0"
+              : "flex-1 overflow-y-auto min-h-0"
+          }
         >
-          <section class="col-span-12 lg:col-span-7 flex flex-col bg-surface-dark border border-border-subtle rounded-[12px] overflow-hidden min-h-0">
-            <div class="p-4 border-b border-border-subtle flex items-center justify-between">
-              <h3 class="text-sm font-bold text-text-primary">
-                {t("podcast.create.source.title")}
-              </h3>
-              <span class="text-xs text-text-secondary">
-                {t("podcast.create.source.count", { count: selected.size })}
-              </span>
-            </div>
-            <div class="flex-1 overflow-y-auto overflow-x-hidden p-2 space-y-1">
-              {childrenError && (
-                <p class="p-2 text-sm text-danger">
-                  {t("project.errors.children")}
-                </p>
-              )}
-              {isLoading && items.length === 0 && (
-                <p class="p-2 text-sm text-text-secondary">
-                  {t("podcast.create.loading")}
-                </p>
-              )}
-              {!isLoading && !childrenError && items.length === 0 && (
-                <p class="p-4 text-sm text-text-secondary italic text-center">
-                  {t("podcast.create.source.empty")}
-                </p>
-              )}
-              {folders.map((folder) => (
-                <FolderNode
-                  key={folder.id}
-                  folder={folder}
-                  selectedIds={selected}
-                  onToggleFile={toggleFile}
-                />
-              ))}
-              {files.map((file) => (
-                <FileRow
-                  key={file.id}
-                  file={file}
-                  selected={selected.has(file.id)}
-                  onToggle={() => toggleFile(file.id, file.name)}
-                />
-              ))}
-              {hasMore && (
-                <button
-                  type="button"
-                  onClick={loadMore}
-                  disabled={loadingMore}
-                  class="w-full text-xs text-text-secondary hover:text-text-primary p-2 cursor-pointer bg-transparent border-none disabled:opacity-50"
-                >
-                  {loadingMore
-                    ? t("podcast.create.loading")
-                    : t("podcast.create.loadMore")}
-                </button>
-              )}
-            </div>
-          </section>
-
-          <aside class="col-span-12 lg:col-span-5 flex flex-col gap-6 overflow-y-auto min-h-0">
-            <div class="bg-surface-dark border border-border-subtle rounded-[12px] p-6 flex flex-col gap-6">
+          <aside class="flex flex-col gap-4 min-h-0">
+            <div class="bg-surface-dark border border-border-subtle rounded-[12px] p-5 tablet:p-6 flex flex-col gap-6">
               <h3 class="text-sm font-bold text-text-primary border-b border-border-subtle pb-4">
                 {t("podcast.create.settings.title")}
               </h3>
@@ -666,29 +572,6 @@ export default function PodcastNewPage() {
                   placeholder={t("podcast.create.placeholders.name")}
                   maxLength={256}
                   class="input-field"
-                />
-              </div>
-
-              <div class="flex flex-col gap-2">
-                <label
-                  for="podcast-description"
-                  class="text-xs font-bold uppercase tracking-widest text-text-secondary"
-                >
-                  {t("podcast.create.fields.description")}{" "}
-                  <span class="text-text-disabled font-normal normal-case tracking-normal">
-                    {t("podcast.create.fields.optional")}
-                  </span>
-                </label>
-                <textarea
-                  id="podcast-description"
-                  value={description}
-                  onInput={(e) =>
-                    setDescription((e.target as HTMLTextAreaElement).value)
-                  }
-                  placeholder={t("podcast.create.placeholders.description")}
-                  rows={4}
-                  maxLength={1024}
-                  class="textarea-field"
                 />
               </div>
 
@@ -724,7 +607,67 @@ export default function PodcastNewPage() {
               <LengthPicker value={length} onChange={(v) => setLength(v)} />
             </div>
 
-            <div class="mt-auto flex flex-col gap-3">
+            <section
+              class={`flex flex-col bg-surface-dark border border-border-subtle rounded-[12px] overflow-hidden min-h-0 ${
+                compact ? "max-h-[22rem]" : "min-h-[22rem] max-h-[34rem]"
+              }`}
+            >
+              <div class="p-4 border-b border-border-subtle flex items-center justify-between">
+                <h3 class="text-sm font-bold text-text-primary">
+                  {t("podcast.create.source.title")}
+                </h3>
+                <span class="text-xs text-text-secondary">
+                  {t("podcast.create.source.count", { count: selected.size })}
+                </span>
+              </div>
+              <div class="flex-1 overflow-y-auto overflow-x-hidden p-2 space-y-1">
+                {childrenError && (
+                  <p class="p-2 text-sm text-danger">
+                    {t("project.errors.children")}
+                  </p>
+                )}
+                {isLoading && items.length === 0 && (
+                  <p class="p-2 text-sm text-text-secondary">
+                    {t("podcast.create.loading")}
+                  </p>
+                )}
+                {!isLoading && !childrenError && items.length === 0 && (
+                  <p class="p-4 text-sm text-text-secondary italic text-center">
+                    {t("podcast.create.source.empty")}
+                  </p>
+                )}
+                {folders.map((folder) => (
+                  <FolderNode
+                    key={folder.id}
+                    folder={folder}
+                    selectedIds={selected}
+                    onToggleFile={toggleFile}
+                  />
+                ))}
+                {files.map((file) => (
+                  <FileRow
+                    key={file.id}
+                    file={file}
+                    selected={selected.has(file.id)}
+                    onToggle={() => toggleFile(file.id, file.name)}
+                  />
+                ))}
+                {hasMore && (
+                  <button
+                    type="button"
+                    onClick={loadMore}
+                    disabled={loadingMore}
+                    class="w-full text-xs text-text-secondary hover:text-text-primary p-2 cursor-pointer bg-transparent border-none disabled:opacity-50"
+                  >
+                    {loadingMore
+                      ? t("podcast.create.loading")
+                      : t("podcast.create.loadMore")}
+                  </button>
+                )}
+              </div>
+            </section>
+
+            <div class="flex flex-col gap-3">
               {submitError && (
                 <p class="text-sm text-danger text-center">{submitError}</p>
               )}
@@ -743,13 +686,51 @@ export default function PodcastNewPage() {
                   ? t("podcast.create.submitting")
                   : t("podcast.create.submit")}
               </button>
-              <p class="text-center text-[11px] text-text-disabled leading-relaxed">
-                {t("podcast.create.notice")}
-              </p>
             </div>
           </aside>
         </form>
-      </main>
-    </div>
+  );
+}
+
+export default function PodcastNewPage() {
+  const { t } = useTranslation();
+  useDocumentHead({ title: "New podcast — kioku", robots: "noindex,nofollow" });
+  const route = useRoute();
+  const { route: navigate } = useLocation();
+  const projectId = route.params.projectId;
+  const { data: project, error: projectError } = useProject(projectId);
+
+  return (
+    <AppLayout scroll="hidden" className="flex flex-col">
+      <header class="mb-6 flex flex-col gap-2">
+        <nav class="flex items-center gap-1.5 text-text-secondary text-sm font-medium flex-wrap">
+          <a
+            href="/dashboard"
+            class="hover:text-text-primary no-underline text-inherit"
+          >
+            {t("workspace.title")}
+          </a>
+          <span class="material-symbols-outlined text-[16px] select-none">
+            chevron_right
+          </span>
+          <a
+            href={`/projects/${projectId}`}
+            class="hover:text-text-primary no-underline text-inherit truncate max-w-[160px]"
+          >
+            {project?.name ?? (projectError ? "—" : "...")}
+          </a>
+          <span class="material-symbols-outlined text-[16px] select-none">
+            chevron_right
+          </span>
+          <span class="text-text-primary">{t("podcast.create.crumb")}</span>
+        </nav>
+        <h1 class="heading-h2">{t("podcast.create.title")}</h1>
+      </header>
+
+      <PodcastCreator
+        projectId={projectId}
+        onCreated={() => navigate(`/projects/${projectId}`)}
+      />
+    </AppLayout>
   );
 }

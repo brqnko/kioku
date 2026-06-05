@@ -1,4 +1,3 @@
-
 pub enum MdConvertInput {
     Pdf(Vec<u8>),
     Url(String),
@@ -46,12 +45,7 @@ impl MdConvertService for MdConvertServiceImpl {
                 .await??
             }
             MdConvertInput::Url(url) => {
-                let response = self
-                    .client
-                    .get(&url)
-                    .send()
-                    .await?
-                    .error_for_status()?;
+                let response = self.client.get(&url).send().await?.error_for_status()?;
                 let html = response.text().await?;
                 html2md_rs::to_md::safe_from_html_to_md(html)
                     .map_err(|e| anyhow::anyhow!("failed to convert html to markdown: {e:?}"))?

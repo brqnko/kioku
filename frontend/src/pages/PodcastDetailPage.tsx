@@ -1,22 +1,11 @@
-import { useEffect, useRef, useState } from "preact/hooks";
 import { useRoute } from "preact-iso";
 import { useTranslation } from "react-i18next";
 import { HTTPError } from "ky";
-import SideNavBar from "../components/SideNavBar";
-import TopAppBar from "../components/TopAppBar";
+import { AppLayout } from "../components/AppLayout";
+import { PodcastPlayer } from "../components/PodcastPlayer";
 import { useProject } from "../hooks/useProject";
 import { usePodcast } from "../hooks/usePodcasts";
 import { useDocumentHead } from "../hooks/useDocumentHead";
-
-const PLAYBACK_RATES = [1, 1.25, 1.5, 1.75, 2] as const;
-
-function formatTime(seconds: number): string {
-  if (!Number.isFinite(seconds) || seconds < 0) return "0:00";
-  const total = Math.floor(seconds);
-  const m = Math.floor(total / 60);
-  const s = total % 60;
-  return `${m}:${s.toString().padStart(2, "0")}`;
-}
 
 export default function PodcastDetailPage() {
   const { t } = useTranslation();
@@ -28,392 +17,86 @@ export default function PodcastDetailPage() {
   const { data: project } = useProject(projectId);
   const { data: podcast, error, isLoading } = usePodcast(projectId, podcastId);
 
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const progressRef = useRef<HTMLDivElement>(null);
-
-  const [playing, setPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [muted, setMuted] = useState(false);
-  const [volume, setVolume] = useState(1);
-  const [rateIndex, setRateIndex] = useState(0);
-  const [audioError, setAudioError] = useState(false);
-
-  const playbackRate = PLAYBACK_RATES[rateIndex];
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    audio.playbackRate = playbackRate;
-  }, [playbackRate]);
-
-  useEffect(() => {
-    setPlaying(false);
-    setCurrentTime(0);
-    setDuration(0);
-    setAudioError(false);
-  }, [podcastId]);
-
-  const togglePlay = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    if (audio.paused) {
-      audio.play().catch(() => setAudioError(true));
-    } else {
-      audio.pause();
-    }
-  };
-
-  const skip = (delta: number) => {
-    const audio = audioRef.current;
-    if (!audio || !Number.isFinite(audio.duration)) return;
-    audio.currentTime = Math.max(
-      0,
-      Math.min(audio.duration, audio.currentTime + delta),
-    );
-  };
-
-  const cycleRate = () => {
-    setRateIndex((i) => (i + 1) % PLAYBACK_RATES.length);
-  };
-
-  const toggleMute = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    audio.muted = !audio.muted;
-    setMuted(audio.muted);
-  };
-
-  const changeVolume = (v: number) => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    audio.volume = v;
-    setVolume(v);
-    if (v === 0) {
-      audio.muted = true;
-      setMuted(true);
-    } else if (audio.muted) {
-      audio.muted = false;
-      setMuted(false);
-    }
-  };
-
-  const seekFromEvent = (e: MouseEvent) => {
-    const audio = audioRef.current;
-    const bar = progressRef.current;
-    if (!audio || !bar || !Number.isFinite(audio.duration)) return;
-    const rect = bar.getBoundingClientRect();
-    const ratio = Math.max(
-      0,
-      Math.min(1, (e.clientX - rect.left) / rect.width),
-    );
-    audio.currentTime = ratio * audio.duration;
-    setCurrentTime(audio.currentTime);
-  };
-
-  const seekBy = (delta: number) => {
-    const audio = audioRef.current;
-    if (!audio || !Number.isFinite(audio.duration)) return;
-    audio.currentTime = Math.max(
-      0,
-      Math.min(audio.duration, audio.currentTime + delta),
-    );
-    setCurrentTime(audio.currentTime);
-  };
-
-  const seekTo = (ratio: number) => {
-    const audio = audioRef.current;
-    if (!audio || !Number.isFinite(audio.duration)) return;
-    audio.currentTime = Math.max(0, Math.min(1, ratio)) * audio.duration;
-    setCurrentTime(audio.currentTime);
-  };
-
-  const handleProgressKeyDown = (e: KeyboardEvent) => {
-    switch (e.key) {
-      case "ArrowLeft":
-        e.preventDefault();
-        seekBy(-5);
-        break;
-      case "ArrowRight":
-        e.preventDefault();
-        seekBy(5);
-        break;
-      case "Home":
-        e.preventDefault();
-        seekTo(0);
-        break;
-      case "End":
-        e.preventDefault();
-        seekTo(1);
-        break;
-      case "PageDown":
-        e.preventDefault();
-        seekBy(-30);
-        break;
-      case "PageUp":
-        e.preventDefault();
-        seekBy(30);
-        break;
-    }
-  };
-
-  const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
-
   const isGenerating =
     error instanceof HTTPError && error.response?.status === 404;
   const showLoading = isLoading && !podcast && !error;
   const showError = error && !isGenerating;
-
   const podcastsHref = `/projects/${projectId}/podcasts`;
 
   return (
-    <div class="min-h-screen bg-background-dark text-text-primary">
-      <SideNavBar />
-      <TopAppBar />
-      <main class="ml-[var(--sidebar-width)] p-4 tablet:p-8 h-[calc(100vh-3.5rem)] overflow-y-auto transition-[margin-left] duration-200 ease-in-out">
-        <div class="max-w-[800px] mx-auto flex flex-col gap-8">
-          <nav class="flex items-center gap-1.5 text-text-secondary text-sm font-medium flex-wrap">
-            <a
-              href="/podcast"
-              class="hover:text-text-primary no-underline text-inherit"
+    <AppLayout>
+      <div class="max-w-[800px] mx-auto flex flex-col gap-8">
+        <nav class="flex items-center gap-1.5 text-text-secondary text-sm font-medium flex-wrap">
+          <a
+            href="/dashboard"
+            class="hover:text-text-primary no-underline text-inherit"
+          >
+            {t("workspace.title")}
+          </a>
+          <span class="material-symbols-outlined text-[16px] select-none">
+            chevron_right
+          </span>
+          <a
+            href={podcastsHref}
+            class="hover:text-text-primary no-underline text-inherit truncate max-w-[160px]"
+          >
+            {project?.name ?? "..."}
+          </a>
+          <span class="material-symbols-outlined text-[16px] select-none">
+            chevron_right
+          </span>
+          <span class="text-text-primary truncate max-w-[200px]">
+            {podcast?.name ?? t("podcast.detail.crumb")}
+          </span>
+        </nav>
+
+        {showLoading && (
+          <p class="text-sm text-text-secondary text-center py-16">
+            {t("podcast.loading")}
+          </p>
+        )}
+
+        {isGenerating && (
+          <div class="flex flex-col items-center gap-4 py-16 text-center">
+            <span
+              class="material-symbols-outlined text-warning text-[32px]"
+              style={{ fontVariationSettings: "'FILL' 1" }}
             >
-              {t("nav.podcast")}
-            </a>
-            <span class="material-symbols-outlined text-[16px] select-none">
-              chevron_right
+              hourglass_top
             </span>
+            <p class="text-sm text-text-secondary max-w-md">
+              {t("podcast.detail.generating")}
+            </p>
             <a
               href={podcastsHref}
-              class="hover:text-text-primary no-underline text-inherit truncate max-w-[160px]"
+              class="text-sm text-accent-blue hover:underline no-underline"
             >
-              {project?.name ?? "..."}
+              {t("podcast.detail.backToList")}
             </a>
-            <span class="material-symbols-outlined text-[16px] select-none">
-              chevron_right
-            </span>
-            <span class="text-text-primary truncate max-w-[200px]">
-              {podcast?.name ?? t("podcast.detail.crumb")}
-            </span>
-          </nav>
+          </div>
+        )}
 
-          {showLoading && (
-            <p class="text-sm text-text-secondary text-center py-16">
-              {t("podcast.loading")}
-            </p>
-          )}
+        {showError && (
+          <p class="text-sm text-danger text-center py-16">
+            {t("podcast.errors.load")}
+          </p>
+        )}
 
-          {isGenerating && (
-            <div class="flex flex-col items-center gap-4 py-16 text-center">
-              <span
-                class="material-symbols-outlined text-warning text-[32px]"
-                style={{ fontVariationSettings: "'FILL' 1" }}
-              >
-                hourglass_top
-              </span>
-              <p class="text-sm text-text-secondary max-w-md">
-                {t("podcast.detail.generating")}
-              </p>
-              <a
-                href={podcastsHref}
-                class="text-sm text-accent-blue hover:underline no-underline"
-              >
-                {t("podcast.detail.backToList")}
-              </a>
-            </div>
-          )}
-
-          {showError && (
-            <p class="text-sm text-danger text-center py-16">
-              {t("podcast.errors.load")}
-            </p>
-          )}
-
-          {podcast && (
-            <>
-              <header class="flex flex-col gap-4 items-center text-center">
-                <h1 class="heading-h1 max-w-[600px]">{podcast.name}</h1>
-                {podcast.description && (
-                  <p class="text-body text-text-secondary max-w-[500px]">
-                    {podcast.description}
-                  </p>
-                )}
-              </header>
-
-              <section class="bg-surface-dark border border-border-subtle rounded-[12px] p-6 flex flex-col gap-6 shadow-[0_4px_12px_rgba(0,0,0,0.15)]">
-                <audio
-                  ref={audioRef}
-                  src={podcast.audio_url}
-                  preload="metadata"
-                  onLoadedMetadata={(e) => {
-                    setDuration((e.currentTarget as HTMLAudioElement).duration);
-                  }}
-                  onTimeUpdate={(e) => {
-                    setCurrentTime(
-                      (e.currentTarget as HTMLAudioElement).currentTime,
-                    );
-                  }}
-                  onPlay={() => setPlaying(true)}
-                  onPause={() => setPlaying(false)}
-                  onEnded={() => setPlaying(false)}
-                  onError={() => setAudioError(true)}
-                />
-
-                <div class="flex flex-col gap-2">
-                  <div class="flex justify-between text-sm text-text-secondary">
-                    <span>{formatTime(currentTime)}</span>
-                    <span>{duration > 0 ? formatTime(duration) : "--:--"}</span>
-                  </div>
-                  <div
-                    ref={progressRef}
-                    role="slider"
-                    aria-label={t("podcast.detail.progress")}
-                    aria-valuemin={0}
-                    aria-valuemax={duration || 0}
-                    aria-valuenow={currentTime}
-                    tabIndex={0}
-                    onClick={seekFromEvent}
-                    onKeyDown={handleProgressKeyDown}
-                    class="h-2 w-full bg-surface-container-high rounded-full overflow-hidden relative cursor-pointer group focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-blue/60"
-                  >
-                    <div
-                      class="absolute left-0 top-0 h-full bg-text-primary group-hover:bg-accent-blue rounded-full"
-                      style={{ width: `${progress}%` }}
-                    />
-                  </div>
-                </div>
-
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={toggleMute}
-                      aria-label={
-                        muted
-                          ? t("podcast.detail.unmute")
-                          : t("podcast.detail.mute")
-                      }
-                      title={
-                        muted
-                          ? t("podcast.detail.unmute")
-                          : t("podcast.detail.mute")
-                      }
-                      class="icon-button"
-                    >
-                      <span class="material-symbols-outlined">
-                        {muted || volume === 0
-                          ? "volume_off"
-                          : volume < 0.5
-                            ? "volume_down"
-                            : "volume_up"}
-                      </span>
-                    </button>
-                    <input
-                      type="range"
-                      min="0"
-                      max="1"
-                      step="0.01"
-                      value={muted ? 0 : volume}
-                      onInput={(e) =>
-                        changeVolume(
-                          parseFloat(
-                            (e.currentTarget as HTMLInputElement).value,
-                          ),
-                        )
-                      }
-                      aria-label={t("podcast.detail.volume")}
-                      class="w-20 h-1 cursor-pointer"
-                      style={{ accentColor: "#2383e2" }}
-                    />
-                  </div>
-
-                  <div class="flex items-center gap-4">
-                    <button
-                      type="button"
-                      onClick={() => skip(-10)}
-                      aria-label={t("podcast.detail.replay10")}
-                      title={t("podcast.detail.replay10")}
-                      class="icon-button"
-                    >
-                      <span class="material-symbols-outlined text-[28px]">
-                        replay_10
-                      </span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={togglePlay}
-                      disabled={audioError || duration === 0}
-                      aria-label={
-                        playing
-                          ? t("podcast.detail.pause")
-                          : t("podcast.detail.play")
-                      }
-                      class="w-16 h-16 rounded-full bg-cta text-cta-fg flex items-center justify-center hover:bg-cta-hover shadow-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <span
-                        class="material-symbols-outlined text-[32px]"
-                        style={{ fontVariationSettings: "'FILL' 1" }}
-                      >
-                        {playing ? "pause" : "play_arrow"}
-                      </span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => skip(10)}
-                      aria-label={t("podcast.detail.forward10")}
-                      title={t("podcast.detail.forward10")}
-                      class="icon-button"
-                    >
-                      <span class="material-symbols-outlined text-[28px]">
-                        forward_10
-                      </span>
-                    </button>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={cycleRate}
-                    aria-label={t("podcast.detail.speed")}
-                    title={t("podcast.detail.speed")}
-                    class="btn-secondary text-xs px-3 min-w-[3rem]"
-                  >
-                    {playbackRate}x
-                  </button>
-                </div>
-
-                {audioError && (
-                  <p class="text-sm text-danger text-center">
-                    {t("podcast.detail.audioError")}
-                  </p>
-                )}
-              </section>
-
-              {podcast.podcast_script.length > 0 && (
-                <section class="flex flex-col gap-4">
-                  <div class="flex items-center gap-2 text-text-secondary border-b border-border-subtle pb-2">
-                    <span class="material-symbols-outlined">subject</span>
-                    <h2 class="heading-h2">{t("podcast.detail.transcript")}</h2>
-                  </div>
-                  <ol class="flex flex-col gap-4 list-none p-0 m-0">
-                    {podcast.podcast_script.map((entry, idx) => (
-                      <li
-                        key={`${idx}-${entry.speaker}`}
-                        class="flex flex-col sm:flex-row gap-2 sm:gap-4"
-                      >
-                        <span class="shrink-0 sm:w-32 text-xs font-bold uppercase tracking-widest text-accent-blue pt-1">
-                          {entry.speaker}
-                        </span>
-                        <p class="text-base text-text-primary leading-[1.6] flex-1 whitespace-pre-wrap">
-                          {entry.text}
-                        </p>
-                      </li>
-                    ))}
-                  </ol>
-                </section>
+        {podcast && (
+          <>
+            <header class="flex flex-col gap-4 items-center text-center">
+              <h1 class="heading-h1 max-w-[600px]">{podcast.name}</h1>
+              {podcast.description && (
+                <p class="text-body text-text-secondary max-w-[500px]">
+                  {podcast.description}
+                </p>
               )}
-            </>
-          )}
-        </div>
-      </main>
-    </div>
+            </header>
+
+            <PodcastPlayer podcast={podcast} />
+          </>
+        )}
+      </div>
+    </AppLayout>
   );
 }

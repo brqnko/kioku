@@ -1,30 +1,30 @@
-import type { Extension } from "@codemirror/state";
 import {
-  EditorView,
-  keymap,
-  lineNumbers,
-  highlightActiveLine,
-} from "@codemirror/view";
+  autocompletion,
+  closeBrackets,
+  closeBracketsKeymap,
+  completionKeymap,
+} from "@codemirror/autocomplete";
 import {
-  history,
   defaultKeymap,
+  history,
   historyKeymap,
   indentWithTab,
 } from "@codemirror/commands";
 import {
   bracketMatching,
-  indentOnInput,
   defaultHighlightStyle,
+  indentOnInput,
   syntaxHighlighting,
 } from "@codemirror/language";
-import {
-  autocompletion,
-  completionKeymap,
-  closeBrackets,
-  closeBracketsKeymap,
-} from "@codemirror/autocomplete";
 import { searchKeymap, highlightSelectionMatches } from "@codemirror/search";
+import type { Extension } from "@codemirror/state";
 import { oneDark } from "@codemirror/theme-one-dark";
+import {
+  EditorView,
+  highlightActiveLine,
+  keymap,
+  lineNumbers,
+} from "@codemirror/view";
 
 type LangLoader = () => Promise<Extension>;
 
@@ -117,15 +117,15 @@ const ALIASES: Record<string, string> = {
   zsh: "bash",
   yml: "yaml",
   md: "markdown",
-  ex: "ruby", // closest fallback
+  ex: "ruby",
   exs: "ruby",
 };
 
 export function resolveLang(input: string | undefined | null): string {
   if (!input) return "";
-  const t = input.toLowerCase().trim();
-  if (LOADERS[t]) return t;
-  const alias = ALIASES[t];
+  const key = input.toLowerCase().trim();
+  if (LOADERS[key]) return key;
+  const alias = ALIASES[key];
   if (alias && LOADERS[alias]) return alias;
   return "";
 }
@@ -134,12 +134,12 @@ const cache = new Map<string, Promise<Extension>>();
 
 export function loadLanguageExtension(langKey: string): Promise<Extension> {
   if (!langKey || !LOADERS[langKey]) return Promise.resolve([]);
-  let p = cache.get(langKey);
-  if (!p) {
-    p = LOADERS[langKey]().catch(() => [] as Extension);
-    cache.set(langKey, p);
+  let promise = cache.get(langKey);
+  if (!promise) {
+    promise = LOADERS[langKey]().catch(() => [] as Extension);
+    cache.set(langKey, promise);
   }
-  return p;
+  return promise;
 }
 
 export function createBaseExtensions(): Extension {
@@ -169,39 +169,36 @@ export type ThemeMode = "light" | "dark";
 
 export function getCurrentTheme(): ThemeMode {
   if (typeof document === "undefined") return "dark";
-  const v = document.documentElement.getAttribute("data-theme");
-  return v === "light" ? "light" : "dark";
+  return document.documentElement.getAttribute("data-theme") === "light"
+    ? "light"
+    : "dark";
 }
 
 export function getThemeExtension(mode: ThemeMode): Extension {
   return mode === "dark" ? oneDark : [];
 }
 
-const themeSubscribers = new Set<(m: ThemeMode) => void>();
+const themeSubscribers = new Set<(mode: ThemeMode) => void>();
 let themeObserver: MutationObserver | null = null;
 
 function ensureThemeObserver(): void {
   if (themeObserver || typeof document === "undefined") return;
   themeObserver = new MutationObserver(() => {
     const mode = getCurrentTheme();
-    for (const cb of themeSubscribers) {
-      try {
-        cb(mode);
-      } catch {
-        // ignore
-      }
+    for (const callback of themeSubscribers) {
+      callback(mode);
     }
   });
   themeObserver.observe(document.documentElement, {
-    attributes: true,
     attributeFilter: ["data-theme"],
+    attributes: true,
   });
 }
 
-export function onThemeChange(cb: (mode: ThemeMode) => void): () => void {
+export function onThemeChange(callback: (mode: ThemeMode) => void): () => void {
   ensureThemeObserver();
-  themeSubscribers.add(cb);
+  themeSubscribers.add(callback);
   return () => {
-    themeSubscribers.delete(cb);
+    themeSubscribers.delete(callback);
   };
 }

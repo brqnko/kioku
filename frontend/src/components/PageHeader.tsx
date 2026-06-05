@@ -7,6 +7,7 @@ export interface BreadcrumbItem {
 
 interface PageHeaderProps {
   title: ComponentChildren;
+  titleAction?: ComponentChildren;
   description?: ComponentChildren;
   breadcrumbs?: BreadcrumbItem[];
   actions?: ComponentChildren;
@@ -14,6 +15,7 @@ interface PageHeaderProps {
 
 export function PageHeader({
   title,
+  titleAction,
   description,
   breadcrumbs = [],
   actions,
@@ -48,7 +50,10 @@ export function PageHeader({
           </nav>
         )}
         <div class="flex flex-col gap-2">
-          <h1 class="heading-h2 truncate">{title}</h1>
+          <div class="flex min-w-0 items-center gap-2">
+            <h1 class="heading-h2 min-w-0 truncate">{title}</h1>
+            {titleAction}
+          </div>
           {description && (
             <p class="text-body text-text-secondary max-w-3xl">
               {description}

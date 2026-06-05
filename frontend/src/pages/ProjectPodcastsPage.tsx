@@ -1,8 +1,7 @@
 import { useRoute } from "preact-iso";
 import { useState } from "preact/hooks";
 import { useTranslation } from "react-i18next";
-import SideNavBar from "../components/SideNavBar";
-import TopAppBar from "../components/TopAppBar";
+import { AppLayout } from "../components/AppLayout";
 import { RowActionMenu } from "../components/RowActionMenu";
 import { EditPodcastDialog } from "../components/EditPodcastDialog";
 import { DeleteItemDialog } from "../components/DeleteItemDialog";
@@ -63,17 +62,14 @@ export default function ProjectPodcastsPage() {
   const detailHref = (id: string) => `/projects/${projectId}/podcasts/${id}`;
 
   return (
-    <div class="min-h-screen bg-background-dark text-text-primary">
-      <SideNavBar />
-      <TopAppBar />
-      <main class="ml-[var(--sidebar-width)] p-4 tablet:p-8 h-[calc(100vh-3.5rem)] overflow-y-auto transition-[margin-left] duration-200 ease-in-out">
+    <AppLayout>
         <div class="max-w-[1200px] mx-auto">
           <nav class="flex items-center gap-1.5 text-text-secondary text-sm font-medium flex-wrap mb-6">
             <a
-              href="/podcast"
+              href="/dashboard"
               class="hover:text-text-primary no-underline text-inherit"
             >
-              {t("nav.podcast")}
+              {t("workspace.title")}
             </a>
             <span class="material-symbols-outlined text-[16px] select-none">
               chevron_right
@@ -192,7 +188,6 @@ export default function ProjectPodcastsPage() {
             </div>
           )}
         </div>
-      </main>
 
       {editTarget && (
         <EditPodcastDialog
@@ -216,6 +211,6 @@ export default function ProjectPodcastsPage() {
           onSuccess={refresh}
         />
       )}
-    </div>
+    </AppLayout>
   );
 }

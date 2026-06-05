@@ -391,8 +391,8 @@ async fn synthesize_lines_via_irodori(
     // ポーリングして待つ(初回リクエストが Container Apps のタイムアウトで落ちても
     // リトライで拾う)。
     {
-        let deadline = std::time::Instant::now()
-            + std::time::Duration::from_secs(IRODORI_HEALTH_TIMEOUT_SECS);
+        let deadline =
+            std::time::Instant::now() + std::time::Duration::from_secs(IRODORI_HEALTH_TIMEOUT_SECS);
         let mut ready = false;
         let mut last_err = String::from("no response");
         while std::time::Instant::now() < deadline {
@@ -457,8 +457,8 @@ async fn synthesize_lines_via_irodori(
                     break;
                 }
                 let body = resp.text().await.unwrap_or_default();
-                let retriable = status == reqwest::StatusCode::UNPROCESSABLE_ENTITY
-                    || status.is_server_error();
+                let retriable =
+                    status == reqwest::StatusCode::UNPROCESSABLE_ENTITY || status.is_server_error();
                 if retriable && attempt < MAX_ATTEMPTS {
                     tracing::warn!(target: "tts", %status, attempt, "irodori: retrying chunk");
                     tokio::time::sleep(std::time::Duration::from_secs(2)).await;
@@ -506,14 +506,16 @@ async fn synthesize_lines_via_irodori(
             bits_per_sample: 16,
             sample_format: hound::SampleFormat::Int,
         };
-        let mut writer =
-            hound::WavWriter::new(&mut wav_buf, spec).context("irodori: failed to create wav writer")?;
+        let mut writer = hound::WavWriter::new(&mut wav_buf, spec)
+            .context("irodori: failed to create wav writer")?;
         for s in &samples {
             writer
                 .write_sample(*s)
                 .context("irodori: failed to write sample")?;
         }
-        writer.finalize().context("irodori: failed to finalize wav")?;
+        writer
+            .finalize()
+            .context("irodori: failed to finalize wav")?;
     }
     let wav_bytes = wav_buf.into_inner();
 

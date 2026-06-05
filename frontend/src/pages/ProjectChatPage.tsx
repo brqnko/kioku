@@ -1,12 +1,10 @@
-import { useState, useEffect, useRef } from "preact/hooks";
+import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 import { useRoute } from "preact-iso";
 import { useTranslation } from "react-i18next";
-import SideNavBar from "../components/SideNavBar";
-import TopAppBar from "../components/TopAppBar";
+import { AppLayout } from "../components/AppLayout";
 import { Dialog } from "../components/Dialog";
 import { RowActionMenu } from "../components/RowActionMenu";
 import { MarkdownView } from "../components/MarkdownView";
-import { useProject } from "../hooks/useProject";
 import { useChats } from "../hooks/useChat";
 import { useDocumentHead } from "../hooks/useDocumentHead";
 import { kyInstance } from "../api/mutator";
@@ -24,6 +22,7 @@ type LocalMessage = {
 };
 
 type ChatTarget = { id: string; name: string };
+const CHAT_BOTTOM_THRESHOLD_PX = 96;
 
 function ThinkingDots() {
   return (
@@ -45,6 +44,51 @@ function formatSentAt(sentAt: string | undefined, locale: string): string {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+function useChatAutoScroll(
+  activeChatId: string | null,
+  chatLoading: boolean,
+  messages: LocalMessage[],
+) {
+  const messagesPaneRef = useRef<HTMLDivElement>(null);
+  const shouldStickToBottomRef = useRef(true);
+  const pendingScrollBehaviorRef = useRef<ScrollBehavior>("auto");
+
+  const isNearMessagesBottom = useCallback(
+    (el: HTMLElement) =>
+      el.scrollHeight - el.scrollTop - el.clientHeight <
+      CHAT_BOTTOM_THRESHOLD_PX,
+    [],
+  );
+
+  const handleMessagesScroll = useCallback(() => {
+    const el = messagesPaneRef.current;
+    if (!el) return;
+    shouldStickToBottomRef.current = isNearMessagesBottom(el);
+  }, [isNearMessagesBottom]);
+
+  const stickToBottom = useCallback((behavior: ScrollBehavior = "auto") => {
+    shouldStickToBottomRef.current = true;
+    pendingScrollBehaviorRef.current = behavior;
+  }, []);
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      const el = messagesPaneRef.current;
+      if (!el) return;
+      if (!shouldStickToBottomRef.current && !isNearMessagesBottom(el)) return;
+      el.scrollTo({
+        top: el.scrollHeight,
+        behavior: pendingScrollBehaviorRef.current,
+      });
+      pendingScrollBehaviorRef.current = "auto";
+      shouldStickToBottomRef.current = true;
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [activeChatId, chatLoading, isNearMessagesBottom, messages]);
+
+  return { messagesPaneRef, handleMessagesScroll, stickToBottom };
 }
 
 function MessageBubble({
@@ -142,16 +186,16 @@ function MessageBubble({
   );
 }
 
-export default function ProjectChatPage() {
-  const { t, i18n } = useTranslation();
-  useDocumentHead({
-    title: "Project chat — kioku",
-    robots: "noindex,nofollow",
-  });
-  const route = useRoute();
-  const projectId = route.params.projectId as string;
+interface ProjectChatPanelProps {
+  projectId: string;
+  compact?: boolean;
+}
 
-  const { data: project } = useProject(projectId);
+export function ProjectChatPanel({
+  projectId,
+  compact = false,
+}: ProjectChatPanelProps) {
+  const { t, i18n } = useTranslation();
   const {
     items: chats,
     isLoading: chatsLoading,
@@ -168,6 +212,7 @@ export default function ProjectChatPage() {
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   // rename dialog
   const [renamingChat, setRenamingChat] = useState<ChatTarget | null>(null);
@@ -178,14 +223,23 @@ export default function ProjectChatPage() {
   const [deletingChat, setDeletingChat] = useState<ChatTarget | null>(null);
   const [deleteSubmitting, setDeleteSubmitting] = useState(false);
 
-  const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const renameInputRef = useRef<HTMLInputElement>(null);
+  const { messagesPaneRef, handleMessagesScroll, stickToBottom } =
+    useChatAutoScroll(activeChatId, chatLoading, messages);
 
   // Auto-select the most recently active chat once the list loads
   useEffect(() => {
     if (!activeChatId && !chatsLoading && chats.length > 0) {
-      setActiveChatId(chats[0].id);
+      const requested =
+        typeof window !== "undefined"
+          ? new URLSearchParams(window.location.search).get("chat")
+          : null;
+      setActiveChatId(
+        requested && chats.some((chat) => chat.id === requested)
+          ? requested
+          : chats[0].id,
+      );
     }
   }, [chatsLoading, chats.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -196,6 +250,7 @@ export default function ProjectChatPage() {
       return;
     }
     let cancelled = false;
+    stickToBottom();
     setChatLoading(true);
     setSendError(null);
     kyInstance
@@ -222,12 +277,7 @@ export default function ProjectChatPage() {
     return () => {
       cancelled = true;
     };
-  }, [activeChatId, projectId]);
-
-  // Auto-scroll to bottom when new messages arrive
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages.length]);
+  }, [activeChatId, projectId, stickToBottom]);
 
   // Focus rename input when dialog opens
   useEffect(() => {
@@ -243,26 +293,37 @@ export default function ProjectChatPage() {
     el.style.height = `${Math.min(el.scrollHeight, 128)}px`;
   };
 
+  const createChat = async (
+    activate = true,
+    refresh = true,
+  ): Promise<string | null> => {
+    if (!projectId) return null;
+    const date = new Date().toLocaleString(i18n.language, {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    const newChat = await kyInstance
+      .post(`projects/${projectId}/chats`, {
+        json: { name: t("projectChat.newChatName", { date }) },
+      })
+      .json<CreateChat200>();
+    if (refresh) await refreshChats();
+    if (activate) setActiveChatId(newChat.id);
+    setHistoryOpen(false);
+    return newChat.id;
+  };
+
   const handleCreateChat = async () => {
     if (creating || !projectId) return;
     setCreating(true);
+    setSendError(null);
     try {
-      const date = new Date().toLocaleString(i18n.language, {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-      const newChat = await kyInstance
-        .post(`projects/${projectId}/chats`, {
-          json: { name: t("projectChat.newChatName", { date }) },
-        })
-        .json<CreateChat200>();
-      await refreshChats();
-      setActiveChatId(newChat.id);
+      await createChat();
     } catch {
-      // silently ignore; user can retry
+      setSendError(t("projectChat.errors.create"));
     } finally {
       setCreating(false);
     }
@@ -313,7 +374,22 @@ export default function ProjectChatPage() {
   };
 
   const handleSend = async () => {
-    if (!activeChatId || !input.trim() || sending) return;
+    if (!input.trim() || sending || creating) return;
+    let targetChatId = activeChatId;
+    if (!targetChatId) {
+      setCreating(true);
+      setSendError(null);
+      try {
+        targetChatId = await createChat(false, false);
+      } catch {
+        setSendError(t("projectChat.errors.create"));
+        return;
+      } finally {
+        setCreating(false);
+      }
+    }
+    if (!targetChatId) return;
+
     const content = input.trim();
     setInput("");
     if (textareaRef.current) {
@@ -321,6 +397,7 @@ export default function ProjectChatPage() {
     }
     setSending(true);
     setSendError(null);
+    stickToBottom("smooth");
 
     setMessages((prev) => [
       ...prev,
@@ -330,7 +407,7 @@ export default function ProjectChatPage() {
 
     try {
       const result = await kyInstance
-        .post(`projects/${projectId}/chats/${activeChatId}/messages`, {
+        .post(`projects/${projectId}/chats/${targetChatId}/messages`, {
           json: { content },
         })
         .json<SendMessage200>();
@@ -346,6 +423,7 @@ export default function ProjectChatPage() {
           sent_at: am.sent_at,
         },
       ]);
+      setActiveChatId(targetChatId);
       refreshChats();
     } catch {
       setMessages((prev) => prev.filter((m) => !m.thinking));
@@ -367,261 +445,247 @@ export default function ProjectChatPage() {
   };
 
   const activeChat = chats.find((c) => c.id === activeChatId);
+  const chatTitle = activeChat?.name ?? t("projectChat.welcome.title");
+
+  const renderChatHistory = () => (
+    <div class="flex min-h-0 flex-1 flex-col">
+      <div class="shrink-0 p-3 border-b border-border-subtle">
+        <button
+          type="button"
+          onClick={handleCreateChat}
+          disabled={creating}
+          class="btn-secondary w-full justify-center"
+        >
+          {creating ? (
+            <span>{t("projectChat.creating")}</span>
+          ) : (
+            <>
+              <span class="material-symbols-outlined text-[18px]">add</span>
+              {t("projectChat.newChat")}
+            </>
+          )}
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-2">
+        {chatsLoading && chats.length === 0 && (
+          <p class="text-xs text-text-disabled text-center px-2 py-4">
+            {t("chat.loading")}
+          </p>
+        )}
+        {!chatsLoading && chats.length === 0 && (
+          <p class="text-xs text-text-disabled text-center px-2 py-4">
+            {t("projectChat.sessionList.empty")}
+          </p>
+        )}
+
+        <div class="flex flex-col gap-1">
+          {chats.map((chat) => {
+            const active = chat.id === activeChatId;
+            return (
+              <div
+                key={chat.id}
+                class={`group flex items-center rounded-lg ${
+                  active ? "bg-overlay-soft" : "hover:bg-overlay-faint"
+                }`}
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveChatId(chat.id);
+                    setHistoryOpen(false);
+                  }}
+                  class={`flex-1 min-w-0 text-left pl-3 pr-1 py-2.5 text-sm cursor-pointer bg-transparent border-none ${
+                    active
+                      ? "text-text-primary font-medium"
+                      : "text-text-secondary group-hover:text-text-primary"
+                  }`}
+                >
+                  <p class="truncate leading-snug">{chat.name}</p>
+                  <p class="text-xs text-text-disabled mt-0.5">
+                    {new Date(chat.last_activity_at).toLocaleDateString(
+                      i18n.language,
+                    )}
+                  </p>
+                </button>
+                <div class="shrink-0 pr-1 opacity-100 tablet:opacity-0 tablet:group-hover:opacity-100">
+                  <RowActionMenu
+                    icon="more_vert"
+                    ariaLabel={
+                      t("renameItem.menu") + " / " + t("deleteItem.menu")
+                    }
+                    onEdit={() =>
+                      handleRenameOpen({ id: chat.id, name: chat.name })
+                    }
+                    onDelete={() =>
+                      handleDeleteOpen({ id: chat.id, name: chat.name })
+                    }
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {hasMore && (
+          <button
+            type="button"
+            onClick={loadMore}
+            disabled={loadingMore}
+            class="w-full mt-2 py-2 text-xs text-text-secondary hover:text-text-primary disabled:opacity-50 cursor-pointer bg-transparent border-none"
+          >
+            {t("chat.loadMore")}
+          </button>
+        )}
+      </div>
+    </div>
+  );
 
   return (
-    <div class="bg-background-dark text-text-primary overflow-hidden">
-      <SideNavBar />
-      <TopAppBar />
-
-      <div class="ml-[var(--sidebar-width)] flex h-[calc(100vh-3.5rem)] overflow-hidden transition-[margin-left] duration-200 ease-in-out">
-        {/* ── Sessions panel ── */}
-        <aside
-          class={`${activeChatId ? "hidden tablet:flex" : "flex"} w-full tablet:w-64 tablet:shrink-0 border-r border-border-subtle flex-col bg-surface-container-low overflow-hidden`}
-        >
-          <div class="shrink-0 p-3 border-b border-border-subtle">
+    <div
+      class={
+        compact
+          ? "flex h-full min-h-[34rem] flex-col overflow-hidden rounded-lg border border-border-subtle bg-background-dark xl:min-h-0"
+          : "flex flex-col gap-4 min-h-0 flex-1"
+      }
+    >
+      <section
+        class={`flex flex-1 min-h-0 flex-col bg-background-dark overflow-hidden ${
+          compact ? "" : "rounded-lg border border-border-subtle"
+        }`}
+      >
+        <div class="shrink-0 border-b border-border-subtle px-3 tablet:px-5 py-3 flex items-center gap-3">
+          <div class="min-w-0 flex-1">
+            <p class="truncate text-sm font-medium text-text-primary">
+              {chatTitle}
+            </p>
+          </div>
+          <div class="flex shrink-0 items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setHistoryOpen(true)}
+              class="h-8 rounded-md border border-border-subtle bg-transparent px-2.5 text-xs font-medium text-text-secondary hover:bg-overlay-faint hover:text-text-primary flex items-center gap-1.5"
+              aria-label={t("projectChat.history.open")}
+            >
+              <span class="material-symbols-outlined text-[17px]">history</span>
+              <span class="hidden tablet:inline">
+                {t("projectChat.history.open")}
+              </span>
+            </button>
             <button
               type="button"
               onClick={handleCreateChat}
               disabled={creating}
-              class="btn-primary w-full"
+              class="h-8 rounded-md border border-border-subtle bg-transparent px-2.5 text-xs font-medium text-text-secondary hover:bg-overlay-faint hover:text-text-primary disabled:opacity-50 flex items-center gap-1.5"
             >
-              {creating ? (
-                <span>{t("projectChat.creating")}</span>
-              ) : (
-                <>
-                  <span class="material-symbols-outlined text-[18px]">add</span>
-                  {t("projectChat.newChat")}
-                </>
-              )}
+              <span class="material-symbols-outlined text-[17px]">add</span>
+              <span class="hidden tablet:inline">
+                {creating ? t("projectChat.creating") : t("projectChat.newChat")}
+              </span>
             </button>
           </div>
+        </div>
 
-          <div class="flex-1 overflow-y-auto p-2">
-            {chatsLoading && chats.length === 0 && (
-              <p class="text-xs text-text-disabled text-center px-2 py-4">
-                {t("chat.loading")}
-              </p>
-            )}
-            {!chatsLoading && chats.length === 0 && (
-              <p class="text-xs text-text-disabled text-center px-2 py-4">
-                {t("projectChat.sessionList.empty")}
-              </p>
-            )}
-
-            <div class="flex flex-col gap-0.5">
-              {chats.map((chat) => {
-                const active = chat.id === activeChatId;
-                return (
-                  <div
-                    key={chat.id}
-                    class={`group flex items-center rounded-lg ${
-                      active ? "bg-overlay-soft" : "hover:bg-overlay-faint"
-                    }`}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setActiveChatId(chat.id)}
-                      class={`flex-1 min-w-0 text-left pl-3 pr-1 py-2.5 text-sm cursor-pointer bg-transparent border-none ${
-                        active
-                          ? "text-text-primary font-medium"
-                          : "text-text-secondary group-hover:text-text-primary"
-                      }`}
-                    >
-                      <p class="truncate leading-snug">{chat.name}</p>
-                      <p class="text-xs text-text-disabled mt-0.5">
-                        {new Date(chat.last_activity_at).toLocaleDateString(
-                          i18n.language,
-                        )}
-                      </p>
-                    </button>
-                    <div class="shrink-0 pr-1 opacity-0 group-hover:opacity-100">
-                      <RowActionMenu
-                        icon="more_vert"
-                        ariaLabel={
-                          t("renameItem.menu") + " / " + t("deleteItem.menu")
-                        }
-                        onEdit={() =>
-                          handleRenameOpen({ id: chat.id, name: chat.name })
-                        }
-                        onDelete={() =>
-                          handleDeleteOpen({ id: chat.id, name: chat.name })
-                        }
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {hasMore && (
-              <button
-                type="button"
-                onClick={loadMore}
-                disabled={loadingMore}
-                class="w-full mt-1 py-2 text-xs text-text-secondary hover:text-text-primary disabled:opacity-50 cursor-pointer bg-transparent border-none"
-              >
-                {t("chat.loadMore")}
-              </button>
-            )}
-          </div>
-        </aside>
-
-        {/* ── Chat panel ── */}
-        <section
-          class={`${!activeChatId ? "hidden tablet:flex" : "flex"} flex-1 flex-col min-w-0 bg-background-dark overflow-hidden`}
+        <div
+          ref={messagesPaneRef}
+          onScroll={handleMessagesScroll}
+          class="flex-1 overflow-y-auto px-3 py-4 tablet:px-6 tablet:py-6 flex flex-col gap-6"
         >
-          {activeChatId ? (
-            <>
-              {/* Header */}
-              <div class="shrink-0 h-12 border-b border-border-subtle flex items-center px-3 tablet:px-6 gap-2 overflow-hidden">
-                <button
-                  type="button"
-                  onClick={() => setActiveChatId(null)}
-                  aria-label={t("projectChat.back")}
-                  class="tablet:hidden flex items-center justify-center w-8 h-8 rounded hover:bg-overlay-faint cursor-pointer bg-transparent border-none text-text-secondary shrink-0"
-                >
-                  <span class="material-symbols-outlined text-[20px]">
-                    arrow_back
-                  </span>
-                </button>
-                <a
-                  href="/chat"
-                  class="hidden tablet:inline text-xs text-text-disabled hover:text-text-secondary no-underline whitespace-nowrap shrink-0"
-                >
-                  {t("nav.chat")}
-                </a>
-                <span class="hidden tablet:inline material-symbols-outlined text-text-disabled text-[14px] select-none shrink-0">
-                  chevron_right
-                </span>
-                <a
-                  href={`/projects/${projectId}`}
-                  class="text-xs text-text-secondary hover:text-text-primary no-underline truncate min-w-0"
-                >
-                  {project?.name ?? "…"}
-                </a>
-                {activeChat && (
-                  <>
-                    <span class="material-symbols-outlined text-text-disabled text-[14px] select-none shrink-0">
-                      chevron_right
-                    </span>
-                    <span class="text-xs text-text-primary font-medium truncate">
-                      {activeChat.name}
-                    </span>
-                  </>
-                )}
-              </div>
-
-              {/* Messages */}
-              <div class="flex-1 overflow-y-auto px-3 py-4 tablet:px-6 tablet:py-6 flex flex-col gap-6">
-                {chatLoading ? (
-                  <p class="text-sm text-text-disabled text-center py-8">
-                    {t("chat.loading")}
-                  </p>
-                ) : messages.length === 0 ? (
-                  <div class="flex flex-1 items-center justify-center">
-                    <p class="text-sm text-text-disabled">
-                      {t("projectChat.welcome.emptyChat")}
-                    </p>
-                  </div>
-                ) : (
-                  messages.map((msg, i) => (
-                    <MessageBubble
-                      key={i}
-                      msg={msg}
-                      locale={i18n.language}
-                      onCopy={handleCopy}
-                    />
-                  ))
-                )}
-                <div ref={messagesEndRef} />
-              </div>
-
-              {/* Input area */}
-              <div class="shrink-0 px-3 tablet:px-6 pb-4 pt-2">
-                <div class="max-w-3xl mx-auto">
-                  {sendError && (
-                    <p class="text-xs text-danger mb-2 text-center">
-                      {sendError}
-                    </p>
-                  )}
-                  <div class="bg-surface-dark border border-border-subtle focus-within:border-accent-blue rounded-xl p-3 shadow-sm">
-                    <textarea
-                      ref={textareaRef}
-                      value={input}
-                      onInput={handleInputChange}
-                      onKeyDown={handleKeyDown}
-                      disabled={sending}
-                      placeholder={t("projectChat.input.placeholder")}
-                      rows={1}
-                      class="w-full bg-transparent border-none outline-none resize-none text-sm text-text-primary placeholder:text-text-disabled p-0 disabled:opacity-60 leading-6"
-                      style={{ minHeight: "1.5rem", maxHeight: "8rem" }}
-                    />
-                    <div class="flex items-center justify-end mt-2 pt-2 border-t border-border-subtle">
-                      <button
-                        type="button"
-                        onClick={handleSend}
-                        disabled={sending || !input.trim()}
-                        class="btn-primary text-sm"
-                      >
-                        {sending
-                          ? t("projectChat.input.sending")
-                          : t("projectChat.input.send")}
-                        <span class="material-symbols-outlined text-[18px]">
-                          send
-                        </span>
-                      </button>
-                    </div>
-                  </div>
-                  <p class="text-center mt-2 text-[10px] text-text-disabled leading-snug">
-                    {t("projectChat.input.disclaimer")}
-                  </p>
-                </div>
-              </div>
-            </>
-          ) : (
-            /* Welcome / no-chat-selected screen */
-            <div class="flex flex-1 flex-col items-center justify-center gap-6 p-8">
-              <div class="w-14 h-14 rounded-full bg-surface-dark border border-border-subtle flex items-center justify-center">
-                <span
-                  class="material-symbols-outlined text-[28px] text-text-primary"
-                  style={{ fontVariationSettings: "'FILL' 1" }}
-                >
-                  smart_toy
-                </span>
-              </div>
-              <div class="text-center max-w-sm">
-                <h2 class="heading-h2 mb-2">
+          {chatLoading ? (
+            <p class="text-sm text-text-disabled text-center py-8">
+              {t("chat.loading")}
+            </p>
+          ) : !activeChatId && messages.length === 0 ? (
+            <div class="flex flex-1 items-center justify-center py-10">
+              <div class="max-w-sm text-center">
+                <h2 class="text-base font-medium text-text-primary">
                   {t("projectChat.welcome.title")}
                 </h2>
-                {project && (
-                  <a
-                    href={`/projects/${projectId}`}
-                    class="text-sm text-text-disabled hover:text-text-secondary no-underline hover:underline mb-1 inline-block"
-                  >
-                    {project.name}
-                  </a>
-                )}
-                <p class="text-sm text-text-secondary">
+                <p class="mt-2 text-sm text-text-secondary">
                   {t("projectChat.welcome.subtitle")}
                 </p>
               </div>
-              {!chatsLoading && (
+            </div>
+          ) : messages.length === 0 ? (
+            <div class="flex flex-1 items-center justify-center">
+              <p class="text-sm text-text-disabled">
+                {t("projectChat.welcome.emptyChat")}
+              </p>
+            </div>
+          ) : (
+            messages.map((msg, i) => (
+              <MessageBubble
+                key={i}
+                msg={msg}
+                locale={i18n.language}
+                onCopy={handleCopy}
+              />
+            ))
+          )}
+        </div>
+
+        <div class="shrink-0 px-3 tablet:px-6 pb-4 pt-2">
+          <div class="max-w-3xl mx-auto">
+            {sendError && (
+              <p class="text-xs text-danger mb-2 text-center">{sendError}</p>
+            )}
+            <div class="bg-surface-dark border border-border-subtle focus-within:border-accent-blue rounded-xl p-3 shadow-sm">
+              <textarea
+                ref={textareaRef}
+                value={input}
+                onInput={handleInputChange}
+                onKeyDown={handleKeyDown}
+                disabled={sending || creating}
+                placeholder={t("projectChat.input.placeholder")}
+                rows={1}
+                class="w-full bg-transparent border-none outline-none resize-none text-sm text-text-primary placeholder:text-text-disabled p-0 disabled:opacity-60 leading-6"
+                style={{ minHeight: "1.5rem", maxHeight: "8rem" }}
+              />
+              <div class="flex items-center justify-end mt-2 pt-2 border-t border-border-subtle">
                 <button
                   type="button"
-                  onClick={handleCreateChat}
-                  disabled={creating}
-                  class="btn-primary"
+                  onClick={handleSend}
+                  disabled={sending || creating || !input.trim()}
+                  class="btn-primary text-sm"
                 >
-                  <span class="material-symbols-outlined text-[18px]">add</span>
                   {creating
                     ? t("projectChat.creating")
-                    : t("projectChat.welcome.cta")}
+                    : sending
+                      ? t("projectChat.input.sending")
+                      : t("projectChat.input.send")}
+                  <span class="material-symbols-outlined text-[18px]">
+                    send
+                  </span>
                 </button>
-              )}
+              </div>
             </div>
-          )}
-        </section>
-      </div>
+          </div>
+        </div>
+      </section>
+
+      <Dialog
+        open={historyOpen}
+        onClose={() => setHistoryOpen(false)}
+        ariaLabel={t("projectChat.history.title")}
+        maxWidth="max-w-[420px]"
+      >
+        <div class="flex max-h-[72vh] min-h-[24rem] flex-col overflow-hidden">
+          <div class="shrink-0 px-4 py-3 border-b border-border-subtle flex items-center justify-between gap-3">
+            <h2 class="text-sm font-medium text-text-primary">
+              {t("projectChat.history.title")}
+            </h2>
+            <button
+              type="button"
+              onClick={() => setHistoryOpen(false)}
+              class="flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-overlay-faint hover:text-text-primary bg-transparent border-none"
+              aria-label={t("projectChat.history.close")}
+            >
+              <span class="material-symbols-outlined text-[18px]">close</span>
+            </button>
+          </div>
+          {renderChatHistory()}
+        </div>
+      </Dialog>
 
       {/* ── Rename dialog ── */}
       <Dialog
@@ -703,5 +767,20 @@ export default function ProjectChatPage() {
         </div>
       </Dialog>
     </div>
+  );
+}
+
+export default function ProjectChatPage() {
+  useDocumentHead({
+    title: "Project chat — kioku",
+    robots: "noindex,nofollow",
+  });
+  const route = useRoute();
+  const projectId = route.params.projectId as string;
+
+  return (
+    <AppLayout scroll="hidden" className="flex flex-col">
+      <ProjectChatPanel projectId={projectId} />
+    </AppLayout>
   );
 }

@@ -1,7 +1,6 @@
 import { useState } from "preact/hooks";
 import { useTranslation } from "react-i18next";
-import SideNavBar from "../components/SideNavBar";
-import TopAppBar from "../components/TopAppBar";
+import { AppLayout } from "../components/AppLayout";
 import AccountTab from "./profile/AccountTab";
 import SecurityTab from "./profile/SecurityTab";
 import UsageTab from "./profile/UsageTab";
@@ -15,10 +14,7 @@ export default function ProfilePage() {
   const [tab, setTab] = useState<Tab>("account");
 
   return (
-    <div class="min-h-screen bg-background-dark text-text-primary">
-      <SideNavBar />
-      <TopAppBar />
-      <main class="ml-[var(--sidebar-width)] p-4 tablet:p-8 h-[calc(100vh-3.5rem)] overflow-y-auto transition-[margin-left] duration-200 ease-in-out">
+    <AppLayout>
         <div class="max-w-[800px] mx-auto flex flex-col gap-8">
           <nav class="flex items-center gap-1 bg-surface-dark p-1 rounded-full border border-border-dark w-fit">
             <TabButton
@@ -42,8 +38,7 @@ export default function ProfilePage() {
           {tab === "security" && <SecurityTab />}
           {tab === "usage" && <UsageTab />}
         </div>
-      </main>
-    </div>
+    </AppLayout>
   );
 }
 

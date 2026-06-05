@@ -40,20 +40,20 @@ const PREFERRED: Record<string, string> = {
   jl: "julia-head",
 };
 
-function languageKey(lang: string): string {
-  return lang.toLowerCase().replace("c++", "cpp");
+export function normalizeLanguageKey(lang: string | undefined | null): string {
+  return (lang ?? "").toLowerCase().trim().replace("c++", "cpp");
 }
 
 function buildLanguageBuckets(list: Compiler[]): Map<string, Compiler[]> {
   const buckets = new Map<string, Compiler[]>();
-  for (const c of list) {
-    const key = languageKey(c.language);
+  for (const compiler of list) {
+    const key = normalizeLanguageKey(compiler.language);
     let bucket = buckets.get(key);
     if (!bucket) {
       bucket = [];
       buckets.set(key, bucket);
     }
-    bucket.push(c);
+    bucket.push(compiler);
   }
   return buckets;
 }
@@ -62,14 +62,12 @@ export function pickCompiler(
   tag: string | undefined,
   list: Compiler[],
 ): string | null {
-  const t = (tag ?? "").toLowerCase();
+  const key = normalizeLanguageKey(tag);
   const buckets = buildLanguageBuckets(list);
-  const candidates =
-    buckets.get(t) ?? buckets.get(t.replace("c++", "cpp")) ?? [];
-
-  const preferredId = PREFERRED[t];
+  const candidates = buckets.get(key) ?? [];
+  const preferredId = PREFERRED[key] ?? PREFERRED[(tag ?? "").toLowerCase()];
   const preferred =
-    preferredId && list.find((c) => c.name === preferredId)?.name;
+    preferredId && list.find((compiler) => compiler.name === preferredId)?.name;
 
   return preferred ?? candidates[0]?.name ?? null;
 }

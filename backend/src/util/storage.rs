@@ -9,10 +9,12 @@ pub struct PresignedPut {
 pub struct PresignedGet {
     pub url: String,
     pub method: String,
+    pub content_type: String,
     pub expires_at: chrono::DateTime<chrono::Utc>,
 }
 
 pub struct HeadObject {
+    pub content_type: String,
     pub content_length: i64,
 }
 
@@ -193,6 +195,7 @@ impl StorageService for StorageServiceImpl {
     ) -> Result<PresignedGet, anyhow::Error> {
         let expires_at = chrono::Utc::now() + expires_in;
         let presigning_config = aws_sdk_s3::presigning::PresigningConfig::expires_in(expires_in)?;
+        let head = self.head(storage_id).await?;
 
         let presigned = self
             .client
@@ -205,6 +208,7 @@ impl StorageService for StorageServiceImpl {
         Ok(PresignedGet {
             url: presigned.uri().to_string(),
             method: presigned.method().to_string(),
+            content_type: head.content_type,
             expires_at,
         })
     }
@@ -221,8 +225,15 @@ impl StorageService for StorageServiceImpl {
         let content_length = output
             .content_length()
             .ok_or_else(|| anyhow::anyhow!("missing content-length"))?;
+        let content_type = output
+            .content_type()
+            .ok_or_else(|| anyhow::anyhow!("missing content-type"))?
+            .to_string();
 
-        Ok(HeadObject { content_length })
+        Ok(HeadObject {
+            content_type,
+            content_length,
+        })
     }
 
     async fn get_object(&self, storage_id: uuid::Uuid) -> Result<GetObject, anyhow::Error> {
@@ -296,7 +307,10 @@ impl StorageService for StorageServiceImpl {
         }
         result?;
 
-        Ok(HeadObject { content_length })
+        Ok(HeadObject {
+            content_type: content_type.to_string(),
+            content_length,
+        })
     }
 
     async fn delete(&self, storage_id: uuid::Uuid) -> Result<(), anyhow::Error> {

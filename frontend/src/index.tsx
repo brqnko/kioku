@@ -10,8 +10,6 @@ const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicyPage.jsx"));
 const DashboardPage = lazy(() => import("./pages/DashboardPage.jsx"));
 const LibraryPage = lazy(() => import("./pages/LibraryPage.jsx"));
 const ProjectPage = lazy(() => import("./pages/ProjectPage.jsx"));
-const FolderPage = lazy(() => import("./pages/FolderPage.jsx"));
-const FilePage = lazy(() => import("./pages/FilePage.jsx"));
 const PodcastPage = lazy(() => import("./pages/PodcastPage.jsx"));
 const ChatPage = lazy(() => import("./pages/ChatPage.jsx"));
 const ProjectChatPage = lazy(() => import("./pages/ProjectChatPage.jsx"));
@@ -45,8 +43,6 @@ export function App() {
           <Route path="/library" component={LibraryPage} />
           <Route path="/projects/:projectId/chat" component={ProjectChatPage} />
           <Route path="/projects/:projectId" component={ProjectPage} />
-          <Route path="/folders/:folderId" component={FolderPage} />
-          <Route path="/files/:fileId" component={FilePage} />
           <Route path="/podcast" component={PodcastPage} />
           <Route path="/chat" component={ChatPage} />
           <Route

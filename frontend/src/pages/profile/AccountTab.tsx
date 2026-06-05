@@ -137,9 +137,6 @@ export default function AccountTab() {
     <>
       <div class="flex flex-col gap-1">
         <h1 class="heading-h2">{t("profile.account.title")}</h1>
-        <p class="text-body text-text-secondary">
-          {t("profile.account.subtitle")}
-        </p>
       </div>
 
       <section class="flex flex-col gap-4">
@@ -154,10 +151,7 @@ export default function AccountTab() {
             }
             class="input-field"
           />
-          <div class="flex items-center justify-between">
-            <p class="text-xs text-text-muted-dark">
-              {t("profile.account.displayNameHelp")}
-            </p>
+          <div class="flex items-center justify-end">
             <span
               class={`text-xs tabular-nums ${nameLength > 32 ? "text-danger" : "text-text-disabled"}`}
             >

@@ -752,8 +752,10 @@ paths:
                   content:
                     oneOf:
                     - type: object
-                      required: [url, method, expires_at, kind]
+                      required: [url, method, content_type, expires_at, kind]
                       properties:
+                        content_type:
+                          type: string
                         expires_at:
                           type: string
                           format: date-time

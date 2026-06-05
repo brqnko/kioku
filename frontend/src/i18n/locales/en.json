@@ -65,9 +65,7 @@
     },
     "account": {
       "title": "Account settings",
-      "subtitle": "Manage your profile and preferences.",
       "displayName": "Display name",
-      "displayNameHelp": "This is how you will appear to others.",
       "language": "Language",
       "theme": "Theme"
     },
@@ -90,16 +88,9 @@
     },
     "security": {
       "title": "Active sessions",
-      "subtitle": "Manage the devices that are currently signed into your account. Logging out of a device will immediately end its session.",
       "error": "Failed to load sessions.",
       "empty": "No active sessions.",
       "unknownAgent": "Unknown device",
-      "columns": {
-        "device": "Device / Browser",
-        "ip": "IP address",
-        "lastAccessed": "Last accessed",
-        "action": "Action"
-      },
       "revoke": "Log out",
       "revoking": "Revoking...",
       "revokeAll": "Log out of all other devices",
@@ -114,8 +105,7 @@
       }
     },
     "usage": {
-      "title": "Daily usage",
-      "subtitle": "Your current consumption of daily quotas. Counters reset at 00:00 UTC.",
+      "title": "Usage",
       "error": "Failed to load usage.",
       "resetAt": "Resets {{time}}",
       "items": {
@@ -147,6 +137,25 @@
   "topbar": {
     "settings": "Settings"
   },
+  "editor": {
+    "toolbar": {
+      "label": "Editor tools",
+      "bold": "Bold",
+      "italic": "Italic",
+      "strikethrough": "Strikethrough",
+      "inlineCode": "Inline code",
+      "heading1": "Heading 1",
+      "heading2": "Heading 2",
+      "paragraph": "Paragraph",
+      "bulletList": "Bulleted list",
+      "orderedList": "Numbered list",
+      "blockquote": "Quote",
+      "codeBlock": "Code block",
+      "link": "Link",
+      "image": "Image",
+      "linkPrompt": "Enter a URL"
+    }
+  },
   "library": {
     "title": "Library",
     "subtitle": "Projects in progress and saved notes",
@@ -158,12 +167,34 @@
     "lastUpdated": "Updated {{time}}",
     "loadMore": "Load more"
   },
+  "workspace": {
+    "title": "Workspace",
+    "projects": {
+      "title": "Projects"
+    }
+  },
   "project": {
     "loading": "Loading...",
     "empty": "This project has no files yet.",
-    "allFiles": "All Files",
     "newFolder": "New Folder",
     "editProject": "Edit project",
+    "createActions": {
+      "add": "Add",
+      "folder": "Folder",
+      "file": "File"
+    },
+    "sections": {
+      "utility": {
+        "title": "Utility"
+      },
+      "podcasts": {
+        "title": "Podcasts"
+      },
+      "chat": {
+        "title": "AI Chat",
+        "error": "Failed to load chats."
+      }
+    },
     "breadcrumb": {
       "library": "Library"
     },
@@ -185,21 +216,18 @@
     }
   },
   "folder": {
-    "empty": "This folder has no files yet.",
     "editFolder": "Edit folder",
+    "up": "Up one level",
     "errors": {
       "load": "Failed to load folder."
     }
   },
   "file": {
-    "loading": "Loading...",
-    "createdAt": "Created",
-    "updatedAt": "Updated",
-    "size": "Size",
-    "description": {
-      "label": "Description",
-      "empty": "Add a description",
-      "edit": "Edit description"
+    "preview": {
+      "empty": "This file is empty.",
+      "image": "Image preview",
+      "expandImage": "Expand image",
+      "closeImage": "Close image"
     },
     "autosave": {
       "saving": "Saving...",
@@ -344,6 +372,11 @@
     "newChat": "New Chat",
     "creating": "Creating...",
     "newChatName": "Chat {{date}}",
+    "history": {
+      "open": "History",
+      "title": "Past chats",
+      "close": "Close history"
+    },
     "sessionList": {
       "empty": "No chats yet."
     },
@@ -356,8 +389,7 @@
     "input": {
       "placeholder": "Ask the AI... (Shift + Enter for new line)",
       "send": "Send",
-      "sending": "Sending...",
-      "disclaimer": "AI may generate incorrect information. Always verify important details with original sources."
+      "sending": "Sending..."
     },
     "errors": {
       "send": "Failed to send the message.",
@@ -368,7 +400,7 @@
     "loading": "Loading...",
     "loadMore": "Load more",
     "errors": {
-      "load": "Failed to load projects."
+      "load": "Failed to load podcasts."
     },
     "selectProject": {
       "title": "Select a project",
@@ -400,6 +432,21 @@
         "notImplemented": "Podcast generation flow is not implemented yet."
       }
     },
+    "panel": {
+      "newPodcast": "New podcast",
+      "createTitle": "New podcast",
+      "backToPlayer": "Player",
+      "history": {
+        "open": "List",
+        "title": "Podcast list",
+        "close": "Close list",
+        "empty": "No podcasts yet."
+      },
+      "empty": {
+        "title": "Podcast",
+        "body": "Choose source material and generate an AI podcast."
+      }
+    },
     "create": {
       "crumb": "New generation",
       "title": "Create AI Podcast",
@@ -419,7 +466,6 @@
       },
       "speakers": {
         "title": "Speakers",
-        "hint": "Choose a single narrator or a two-person dialogue.",
         "options": {
           "1": { "label": "1 person", "desc": "Narration" },
           "2": { "label": "2 people", "desc": "Dialogue" }
@@ -429,7 +475,6 @@
         "title": "Voice",
         "titleSpeaker1": "Voice for Speaker 1",
         "titleSpeaker2": "Voice for Speaker 2",
-        "hint": "Listen to a sample before choosing.",
         "play": "Play sample for {{name}}",
         "stop": "Stop sample for {{name}}",
         "female": "Female",
@@ -450,13 +495,10 @@
       },
       "fields": {
         "name": "Podcast name",
-        "nameHint": "If left empty, the selected filenames will be joined with \", \".",
-        "description": "Description",
-        "optional": "(optional)"
+        "nameHint": "If left empty, the selected filenames will be joined with \", \"."
       },
       "placeholders": {
-        "name": "e.g. Macroeconomics Lecture 4 — Recap",
-        "description": "Outline the angle or talking points for this podcast..."
+        "name": "e.g. Macroeconomics Lecture 4 — Recap"
       },
       "errors": {
         "load": "Failed to load folder contents.",
@@ -590,7 +632,7 @@
     "selectCompiler": "Select compiler",
     "selectCompilerHint": "Please select a compiler",
     "running": "Running…",
-    "run": "▶ Run",
+    "run": "Run",
     "stdin": "stdin",
     "stdinPlaceholder": "stdin…",
     "expand": "Expand",
@@ -606,11 +648,8 @@
     "picker": {
       "title": "Select compiler",
       "search": "Search by language or compiler…",
-      "currentLanguage": "Current language tag:",
       "loading": "Loading compilers…",
-      "empty": "No matching compilers",
-      "countLabel": "{{count}} items",
-      "hint": "↑↓ to move / Enter to select / Esc to close"
+      "empty": "No matching compilers"
     }
   },
   "tos": {

@@ -65,9 +65,7 @@
     },
     "account": {
       "title": "アカウント設定",
-      "subtitle": "プロフィールと設定を管理します。",
       "displayName": "表示名",
-      "displayNameHelp": "他のユーザーに表示される名前です。",
       "language": "言語",
       "theme": "テーマ"
     },
@@ -90,16 +88,9 @@
     },
     "security": {
       "title": "アクティブなセッション",
-      "subtitle": "現在アカウントにログインしているデバイスを管理できます。ログアウトすると、そのデバイスのセッションは即座に終了します。",
       "error": "セッションの取得に失敗しました。",
       "empty": "アクティブなセッションはありません。",
       "unknownAgent": "不明なデバイス",
-      "columns": {
-        "device": "デバイス / ブラウザ",
-        "ip": "IPアドレス",
-        "lastAccessed": "最終アクセス",
-        "action": "操作"
-      },
       "revoke": "ログアウト",
       "revoking": "解除中...",
       "revokeAll": "他のすべてのデバイスからログアウト",
@@ -114,8 +105,7 @@
       }
     },
     "usage": {
-      "title": "1日の利用状況",
-      "subtitle": "1日あたりのクォータの利用状況です。カウンターは毎日 UTC 00:00 にリセットされます。",
+      "title": "利用状況",
       "error": "利用状況の取得に失敗しました。",
       "resetAt": "リセット: {{time}}",
       "items": {
@@ -147,6 +137,25 @@
   "topbar": {
     "settings": "設定"
   },
+  "editor": {
+    "toolbar": {
+      "label": "編集ツール",
+      "bold": "太字",
+      "italic": "斜体",
+      "strikethrough": "取り消し線",
+      "inlineCode": "インラインコード",
+      "heading1": "見出し1",
+      "heading2": "見出し2",
+      "paragraph": "本文",
+      "bulletList": "箇条書き",
+      "orderedList": "番号付きリスト",
+      "blockquote": "引用",
+      "codeBlock": "コードブロック",
+      "link": "リンク",
+      "image": "画像",
+      "linkPrompt": "リンク先URLを入力"
+    }
+  },
   "library": {
     "title": "ライブラリ",
     "subtitle": "進行中のプロジェクトと保存されたノート",
@@ -158,12 +167,34 @@
     "lastUpdated": "最終更新: {{time}}",
     "loadMore": "もっと見る"
   },
+  "workspace": {
+    "title": "ワークスペース",
+    "projects": {
+      "title": "プロジェクト"
+    }
+  },
   "project": {
     "loading": "読み込み中...",
     "empty": "このプロジェクトにはまだファイルがありません。",
-    "allFiles": "すべてのファイル",
     "newFolder": "新規フォルダ",
     "editProject": "プロジェクトを編集",
+    "createActions": {
+      "add": "追加",
+      "folder": "フォルダ",
+      "file": "ファイル"
+    },
+    "sections": {
+      "utility": {
+        "title": "ユーティリティ"
+      },
+      "podcasts": {
+        "title": "ポッドキャスト"
+      },
+      "chat": {
+        "title": "AIチャット",
+        "error": "チャットの読み込みに失敗しました。"
+      }
+    },
     "breadcrumb": {
       "library": "ライブラリ"
     },
@@ -185,25 +216,22 @@
     }
   },
   "folder": {
-    "empty": "このフォルダにはまだファイルがありません。",
     "editFolder": "フォルダを編集",
+    "up": "上の階層",
     "errors": {
       "load": "フォルダ情報の取得に失敗しました。"
     }
   },
   "file": {
-    "loading": "読み込み中...",
-    "createdAt": "作成日時",
-    "updatedAt": "更新日時",
-    "size": "サイズ",
-    "description": {
-      "label": "説明",
-      "empty": "説明を追加",
-      "edit": "説明を編集"
+    "preview": {
+      "empty": "このファイルは空です。",
+      "image": "画像プレビュー",
+      "expandImage": "画像を拡大",
+      "closeImage": "画像を閉じる"
     },
     "autosave": {
       "saving": "保存中...",
-      "saved": "保存しました"
+      "saved": "保存済み"
     },
     "binary": {
       "notice": "このファイルはテキストとして表示できません。",
@@ -211,7 +239,7 @@
     },
     "errors": {
       "load": "ファイルの取得に失敗しました。",
-      "save": "保存に失敗しました。"
+      "save": "保存できませんでした。"
     }
   },
   "upload": {
@@ -344,6 +372,11 @@
     "newChat": "新しいチャット",
     "creating": "作成中...",
     "newChatName": "チャット {{date}}",
+    "history": {
+      "open": "履歴",
+      "title": "過去のチャット",
+      "close": "履歴を閉じる"
+    },
     "sessionList": {
       "empty": "まだチャットがありません。"
     },
@@ -356,8 +389,7 @@
     "input": {
       "placeholder": "AIに質問する... (Shift + Enter で改行)",
       "send": "送信",
-      "sending": "送信中...",
-      "disclaimer": "AIは誤った情報を生成することがあります。重要な情報は必ず元の資料で確認してください。"
+      "sending": "送信中..."
     },
     "errors": {
       "send": "メッセージの送信に失敗しました。",
@@ -368,7 +400,7 @@
     "loading": "読み込み中...",
     "loadMore": "もっと見る",
     "errors": {
-      "load": "プロジェクトの読み込みに失敗しました。"
+      "load": "ポッドキャストの読み込みに失敗しました。"
     },
     "selectProject": {
       "title": "プロジェクトを選択",
@@ -400,6 +432,21 @@
         "notImplemented": "ポッドキャスト生成フローは未実装です。"
       }
     },
+    "panel": {
+      "newPodcast": "新規作成",
+      "createTitle": "新規ポッドキャスト",
+      "backToPlayer": "再生",
+      "history": {
+        "open": "一覧",
+        "title": "ポッドキャスト一覧",
+        "close": "一覧を閉じる",
+        "empty": "まだポッドキャストがありません。"
+      },
+      "empty": {
+        "title": "ポッドキャスト",
+        "body": "素材を選んで、AIポッドキャストを生成できます。"
+      }
+    },
     "create": {
       "crumb": "新規生成",
       "title": "AIポッドキャストを生成",
@@ -419,7 +466,6 @@
       },
       "speakers": {
         "title": "話者数",
-        "hint": "1人のモノローグか、2人の対話形式かを選びます。",
         "options": {
           "1": { "label": "1人", "desc": "ナレーション" },
           "2": { "label": "2人", "desc": "対話" }
@@ -429,7 +475,6 @@
         "title": "音声",
         "titleSpeaker1": "話者1の音声",
         "titleSpeaker2": "話者2の音声",
-        "hint": "サンプルを試聴して選択してください。",
         "play": "{{name}}のサンプルを再生",
         "stop": "{{name}}のサンプルを停止",
         "female": "女性",
@@ -450,13 +495,10 @@
       },
       "fields": {
         "name": "ポッドキャスト名",
-        "nameHint": "未入力の場合、選択したファイル名を「, 」で連結したものが使われます。",
-        "description": "説明",
-        "optional": "(任意)"
+        "nameHint": "未入力の場合、選択したファイル名を「, 」で連結したものが使われます。"
       },
       "placeholders": {
-        "name": "例: マクロ経済学 第4回まとめ",
-        "description": "ポッドキャストの概要や視点を記入..."
+        "name": "例: マクロ経済学 第4回まとめ"
       },
       "errors": {
         "load": "フォルダーの読み込みに失敗しました。",
@@ -590,7 +632,7 @@
     "selectCompiler": "コンパイラを選択",
     "selectCompilerHint": "コンパイラを選択してください",
     "running": "実行中…",
-    "run": "▶ 実行",
+    "run": "実行",
     "stdin": "stdin",
     "stdinPlaceholder": "stdin…",
     "expand": "展開",
@@ -606,11 +648,8 @@
     "picker": {
       "title": "コンパイラを選択",
       "search": "言語名やコンパイラ名で検索…",
-      "currentLanguage": "現在の言語タグ:",
       "loading": "コンパイラ一覧を読み込み中…",
-      "empty": "一致するコンパイラがありません",
-      "countLabel": "{{count}} 件",
-      "hint": "↑↓ で移動 / Enter で選択 / Esc で閉じる"
+      "empty": "一致するコンパイラがありません"
     }
   },
   "tos": {

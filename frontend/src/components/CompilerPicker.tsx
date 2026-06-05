@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import { useTranslation } from "react-i18next";
 import type { Compiler } from "../hooks/useCompilers";
+import { normalizeLanguageKey } from "../utils/codeRunner";
 import { Dialog } from "./Dialog";
 
 interface Props {
@@ -18,48 +19,49 @@ interface Group {
 }
 
 function buildGroups(
-  list: Compiler[],
+  compilers: Compiler[],
   preferredLanguage: string,
   query: string,
 ): Group[] {
   const q = query.trim().toLowerCase();
   const filtered = q
-    ? list.filter((c) => {
-        const hay = [
-          c.language ?? "",
-          c.display_name ?? "",
-          c.name ?? "",
-          c.version ?? "",
+    ? compilers.filter((compiler) =>
+        [
+          compiler.language,
+          compiler.display_name,
+          compiler.name,
+          compiler.version,
         ]
           .join(" ")
-          .toLowerCase();
-        return hay.includes(q);
-      })
-    : list;
+          .toLowerCase()
+          .includes(q),
+      )
+    : compilers;
 
   const buckets = new Map<string, Compiler[]>();
-  for (const c of filtered) {
-    const key = (c.language ?? "other").toLowerCase();
-    let arr = buckets.get(key);
-    if (!arr) {
-      arr = [];
-      buckets.set(key, arr);
+  for (const compiler of filtered) {
+    const key = normalizeLanguageKey(compiler.language) || "other";
+    const bucket = buckets.get(key);
+    if (bucket) {
+      bucket.push(compiler);
+    } else {
+      buckets.set(key, [compiler]);
     }
-    arr.push(c);
   }
 
-  const pref = preferredLanguage.toLowerCase().replace("c++", "cpp");
+  const preferredKey = normalizeLanguageKey(preferredLanguage);
   const groups: Group[] = [];
-  if (pref && buckets.has(pref)) {
-    groups.push({ language: pref, items: buckets.get(pref)! });
-    buckets.delete(pref);
+  if (preferredKey && buckets.has(preferredKey)) {
+    groups.push({ language: preferredKey, items: buckets.get(preferredKey)! });
+    buckets.delete(preferredKey);
   }
-  const sorted = [...buckets.entries()].sort((a, b) =>
+
+  for (const [language, items] of [...buckets.entries()].sort((a, b) =>
     a[0].localeCompare(b[0]),
-  );
-  for (const [lang, items] of sorted) {
-    groups.push({ language: lang, items });
+  )) {
+    groups.push({ language, items });
   }
+
   return groups;
 }
 
@@ -72,46 +74,47 @@ export function CompilerPicker({
   onSelect,
 }: Props) {
   const { t } = useTranslation();
-  const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const [query, setQuery] = useState("");
+  const [activeIndex, setActiveIndex] = useState(0);
   const groups = useMemo(
     () => buildGroups(compilers, preferredLanguage, query),
     [compilers, preferredLanguage, query],
   );
-
-  const flat = useMemo(() => {
-    const out: Compiler[] = [];
-    for (const g of groups) for (const c of g.items) out.push(c);
-    return out;
-  }, [groups]);
-
-  const [activeIdx, setActiveIdx] = useState(0);
+  const flat = useMemo(() => groups.flatMap((group) => group.items), [groups]);
 
   useEffect(() => {
     if (!open) return;
     setQuery("");
-    setActiveIdx(0);
-    setTimeout(() => inputRef.current?.focus(), 30);
+    setActiveIndex(0);
+    const timer = window.setTimeout(() => inputRef.current?.focus(), 30);
+    return () => window.clearTimeout(timer);
   }, [open]);
 
   useEffect(() => {
-    setActiveIdx(0);
+    setActiveIndex(0);
   }, [query]);
 
-  const total = flat.length;
-
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setActiveIdx((i) => (total === 0 ? 0 : (i + 1) % total));
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setActiveIdx((i) => (total === 0 ? 0 : (i - 1 + total) % total));
-    } else if (e.key === "Enter") {
-      e.preventDefault();
-      const c = flat[activeIdx];
-      if (c) {
-        onSelect(c.name);
+  const handleKeyDown = (event: KeyboardEvent) => {
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setActiveIndex((index) =>
+        flat.length === 0 ? 0 : (index + 1) % flat.length,
+      );
+      return;
+    }
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setActiveIndex((index) =>
+        flat.length === 0 ? 0 : (index - 1 + flat.length) % flat.length,
+      );
+      return;
+    }
+    if (event.key === "Enter") {
+      event.preventDefault();
+      const compiler = flat[activeIndex];
+      if (compiler) {
+        onSelect(compiler.name);
         onClose();
       }
     }
@@ -122,69 +125,80 @@ export function CompilerPicker({
       open={open}
       onClose={onClose}
       ariaLabel={t("codeBlock.picker.title")}
-      maxWidth="max-w-[560px]"
+      maxWidth="max-w-[620px]"
     >
-      <div class="flex flex-col max-h-[70vh]">
-        <div class="p-4 border-b border-border-subtle shrink-0">
+      <div class="compiler-picker">
+        <div class="compiler-picker-header">
+          <div>
+            <div class="compiler-picker-title">
+              {t("codeBlock.picker.title")}
+            </div>
+          </div>
+          <button
+            type="button"
+            class="icon-button"
+            aria-label={t("codeBlock.picker.close")}
+            onClick={onClose}
+          >
+            <span class="material-symbols-outlined text-[20px]">close</span>
+          </button>
+        </div>
+        <div class="compiler-picker-search">
+          <span class="material-symbols-outlined text-[18px]">search</span>
           <input
             ref={inputRef}
             type="text"
             value={query}
-            onInput={(e) => setQuery((e.target as HTMLInputElement).value)}
+            onInput={(event) =>
+              setQuery((event.target as HTMLInputElement).value)
+            }
             onKeyDown={handleKeyDown}
             placeholder={t("codeBlock.picker.search")}
-            class="input-field"
           />
-          {preferredLanguage && (
-            <p class="text-[11px] text-text-disabled mt-2">
-              {t("codeBlock.picker.currentLanguage")}{" "}
-              <span class="font-mono">{preferredLanguage}</span>
-            </p>
-          )}
         </div>
-        <div class="flex-1 overflow-y-auto py-2">
-          {total === 0 ? (
-            <p class="text-sm text-text-disabled text-center py-8 px-4">
+        <div class="compiler-picker-list">
+          {flat.length === 0 ? (
+            <div class="compiler-picker-empty">
               {compilers.length === 0
                 ? t("codeBlock.picker.loading")
                 : t("codeBlock.picker.empty")}
-            </p>
+            </div>
           ) : (
             (() => {
-              let runningIdx = 0;
-              return groups.map((g) => (
-                <div key={g.language} class="mb-2">
-                  <div class="text-[10px] uppercase tracking-wider text-text-disabled px-4 py-1">
-                    {g.language}
+              let runningIndex = 0;
+              return groups.map((group) => (
+                <div class="compiler-picker-group" key={group.language}>
+                  <div class="compiler-picker-group-label">
+                    {group.language}
                   </div>
-                  {g.items.map((c) => {
-                    const idx = runningIdx++;
-                    const active = idx === activeIdx;
-                    const isSelected = c.name === selected;
+                  {group.items.map((compiler) => {
+                    const index = runningIndex++;
+                    const isActive = index === activeIndex;
+                    const isSelected = compiler.name === selected;
                     return (
                       <button
-                        key={c.name}
                         type="button"
+                        key={compiler.name}
+                        class={`compiler-picker-option ${
+                          isActive ? "is-active" : ""
+                        } ${isSelected ? "is-selected" : ""}`}
+                        onMouseEnter={() => setActiveIndex(index)}
                         onClick={() => {
-                          onSelect(c.name);
+                          onSelect(compiler.name);
                           onClose();
                         }}
-                        onMouseEnter={() => setActiveIdx(idx)}
-                        class={`w-full text-left px-4 py-2 cursor-pointer flex items-center gap-2 border-none bg-transparent ${
-                          active ? "bg-overlay-soft" : "hover:bg-overlay-faint"
-                        }`}
                       >
-                        <span class="flex-1 min-w-0">
-                          <span class="text-sm text-text-primary truncate block">
-                            {c.display_name || c.name}
-                            {c.version ? ` (${c.version})` : ""}
+                        <span class="compiler-picker-option-main">
+                          <span class="compiler-picker-option-name">
+                            {compiler.display_name || compiler.name}
                           </span>
-                          <span class="text-[11px] text-text-disabled font-mono truncate block">
-                            {c.name}
+                          <span class="compiler-picker-option-meta">
+                            {compiler.name}
+                            {compiler.version ? ` / ${compiler.version}` : ""}
                           </span>
                         </span>
                         {isSelected && (
-                          <span class="material-symbols-outlined text-[16px] text-accent-blue">
+                          <span class="material-symbols-outlined text-[18px]">
                             check
                           </span>
                         )}
@@ -195,10 +209,6 @@ export function CompilerPicker({
               ));
             })()
           )}
-        </div>
-        <div class="px-4 py-2 border-t border-border-subtle text-[11px] text-text-disabled shrink-0 flex items-center justify-between">
-          <span>{t("codeBlock.picker.countLabel", { count: total })}</span>
-          <span>{t("codeBlock.picker.hint")}</span>
         </div>
       </div>
     </Dialog>

@@ -52,56 +52,51 @@ export default function SecurityTab() {
     <>
       <div class="flex flex-col gap-2">
         <h1 class="heading-h2">{t("profile.security.title")}</h1>
-        <p class="text-body text-text-secondary max-w-2xl">
-          {t("profile.security.subtitle")}
-        </p>
       </div>
 
-      <div class="bg-surface-dark border border-border-subtle rounded-[12px] overflow-hidden">
-        <div class="grid grid-cols-12 gap-4 p-4 border-b border-border-dark bg-surface-container text-text-muted-dark text-sm">
-          <div class="col-span-5 md:col-span-4">
-            {t("profile.security.columns.device")}
-          </div>
-          <div class="col-span-4 md:col-span-3 hidden md:block">
-            {t("profile.security.columns.ip")}
-          </div>
-          <div class="col-span-4 md:col-span-3">
-            {t("profile.security.columns.lastAccessed")}
-          </div>
-          <div class="col-span-3 md:col-span-2 text-right">
-            {t("profile.security.columns.action")}
-          </div>
-        </div>
-
+      <div>
         {isLoading && (
-          <div class="p-4 text-sm text-text-muted-dark">
-            {t("profile.loading")}
+          <div class="divide-y divide-border-subtle">
+            {[0, 1, 2].map((i) => (
+              <div key={i} class="animate-pulse py-4">
+                <div class="flex items-start justify-between gap-4">
+                  <div class="min-w-0 flex-1 space-y-2">
+                    <div class="h-4 w-2/3 rounded bg-overlay-soft" />
+                    <div class="h-3 w-44 rounded bg-overlay-faint" />
+                  </div>
+                  <div class="h-9 w-20 rounded bg-overlay-faint" />
+                </div>
+              </div>
+            ))}
           </div>
         )}
         {error && (
-          <div class="p-4 text-sm text-danger">
+          <div class="py-4 text-sm text-danger">
             {t("profile.security.error")}
           </div>
         )}
         {data?.items.length === 0 && (
-          <div class="p-4 text-sm text-text-muted-dark">
+          <div class="py-4 text-sm text-text-muted-dark">
             {t("profile.security.empty")}
           </div>
         )}
 
-        {data?.items.map((session, i) => (
-          <SessionRow
-            key={session.id}
-            session={session}
-            locale={i18n.language}
-            isLast={i === data.items.length - 1}
-            onRevoke={() => setPendingRevoke(session)}
-            revoking={revoking === session.id}
-          />
-        ))}
+        {data && data.items.length > 0 && (
+          <div class="divide-y divide-border-subtle">
+            {data.items.map((session) => (
+              <SessionRow
+                key={session.id}
+                session={session}
+                locale={i18n.language}
+                onRevoke={() => setPendingRevoke(session)}
+                revoking={revoking === session.id}
+              />
+            ))}
+          </div>
+        )}
 
         {data && data.items.length > 0 && (
-          <div class="p-4 bg-surface-container border-t border-border-dark text-right">
+          <div class="mt-4 text-right">
             <button
               type="button"
               onClick={() => setConfirmAll(true)}
@@ -209,47 +204,34 @@ export default function SecurityTab() {
 interface SessionRowProps {
   session: ListSessions200ItemsItem;
   locale: string;
-  isLast: boolean;
   onRevoke: () => void;
   revoking: boolean;
 }
 
-function SessionRow({
-  session,
-  locale,
-  isLast,
-  onRevoke,
-  revoking,
-}: SessionRowProps) {
+function SessionRow({ session, locale, onRevoke, revoking }: SessionRowProps) {
   const { t } = useTranslation();
   const lastUsed = formatRelative(session.last_used_at, locale);
 
   return (
-    <div
-      class={`grid grid-cols-12 gap-4 p-4 items-center hover:bg-overlay-faint ${
-        isLast ? "" : "border-b border-border-dark"
-      }`}
-    >
-      <div class="col-span-5 md:col-span-4 min-w-0">
-        <div class="text-text-primary truncate" title={session.user_agent}>
-          {session.user_agent || t("profile.security.unknownAgent")}
+    <div class="py-4">
+      <div class="flex items-start justify-between gap-4">
+        <div class="min-w-0">
+          <div
+            class="truncate text-sm font-bold text-text-primary"
+            title={session.user_agent}
+          >
+            {session.user_agent || t("profile.security.unknownAgent")}
+          </div>
+          <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-muted-dark">
+            <span class="truncate">{session.ip_address}</span>
+            <span>{lastUsed}</span>
+          </div>
         </div>
-        <div class="text-xs text-text-muted-dark mt-1 md:hidden truncate">
-          {session.ip_address}
-        </div>
-      </div>
-      <div class="col-span-4 md:col-span-3 hidden md:block text-base text-text-muted-dark truncate">
-        {session.ip_address}
-      </div>
-      <div class="col-span-4 md:col-span-3 text-base text-text-muted-dark">
-        {lastUsed}
-      </div>
-      <div class="col-span-3 md:col-span-2 text-right">
         <button
           type="button"
           onClick={onRevoke}
           disabled={revoking}
-          class="btn-secondary"
+          class="btn-secondary shrink-0"
         >
           {revoking
             ? t("profile.security.revoking")
