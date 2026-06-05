@@ -51,9 +51,10 @@ jobs:
 
       - name: Check generated code is up to date
         run: |
-          if [ -n "$(git status --porcelain)" ]; then
+          if [ -n "$(git status --porcelain -- src/api/generated)" ]; then
             echo "::error::Generated code is out of date. Please run 'npm run generate' locally and commit the changes."
-            git diff --stat
+            git status --short -- src/api/generated
+            git diff --stat -- src/api/generated
             exit 1
           fi
 
