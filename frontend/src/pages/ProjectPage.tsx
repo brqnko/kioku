@@ -21,8 +21,10 @@ import { StateMessage } from "../components/StateMessage";
 import { UploadDialog } from "../components/UploadDialog";
 import { useProject, useProjectChildren } from "../hooks/useProject";
 import { useDocumentHead } from "../hooks/useDocumentHead";
+import { useMediaQuery } from "../hooks/useMediaQuery";
 
 type UtilityPanel = "chat" | "podcast";
+type MobileView = "home" | "preview" | "chat" | "podcast";
 
 interface CreateParentTarget {
   id: string;
@@ -76,6 +78,25 @@ function ProjectUtilityTabs({ active, onChange }: ProjectUtilityTabsProps) {
   );
 }
 
+function MobileBackBar({
+  label,
+  onBack,
+}: {
+  label: string;
+  onBack: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onBack}
+      class="mb-3 flex w-fit items-center gap-1 rounded-md px-2 py-1 text-sm font-medium text-text-secondary transition-colors hover:bg-overlay-faint hover:text-text-primary"
+    >
+      <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+      {label}
+    </button>
+  );
+}
+
 export default function ProjectPage() {
   const { t } = useTranslation();
   useDocumentHead({ title: "Project — kioku", robots: "noindex,nofollow" });
@@ -94,6 +115,8 @@ export default function ProjectPage() {
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [editProjectOpen, setEditProjectOpen] = useState(false);
   const [utilityPanel, setUtilityPanel] = useState<UtilityPanel>("chat");
+  const isMobile = useMediaQuery("(max-width: 1279px)");
+  const [mobileView, setMobileView] = useState<MobileView>("home");
   const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
   const [autoExpandFolderIds, setAutoExpandFolderIds] = useState<Set<string>>(
     () => new Set(),
@@ -126,6 +149,7 @@ export default function ProjectPage() {
 
   const handleSelectFile = (file: ProjectExplorerFileItem) => {
     setSelectedFileId(file.id);
+    if (isMobile) setMobileView("preview");
   };
 
   const openRenameDialog = (
@@ -186,9 +210,46 @@ export default function ProjectPage() {
       (deleteTarget?.kind === "file" && deleteTarget.id === selectedFileId)
     ) {
       setSelectedFileId(null);
+      if (isMobile && mobileView === "preview") setMobileView("home");
     }
     await (mutationRefresh ?? projectChildren.refresh)();
   };
+
+  const explorerErrors = (
+    <>
+      {projectError && (
+        <StateMessage tone="danger" className="mb-4">
+          {t("project.errors.load")}
+        </StateMessage>
+      )}
+      {projectChildren.error && (
+        <StateMessage tone="danger" className="mb-4">
+          {t("project.errors.children")}
+        </StateMessage>
+      )}
+    </>
+  );
+
+  const explorerNode = (
+    <ProjectExplorer
+      parentId={projectId}
+      parentKind="project"
+      items={projectChildren.items as ProjectExplorerItem[]}
+      loading={projectChildren.isLoading}
+      emptyLabel={t("project.empty")}
+      hasMore={projectChildren.hasMore}
+      loadingMore={projectChildren.loadingMore}
+      loadMore={projectChildren.loadMore}
+      selectedFileId={selectedFileId}
+      autoExpandFolderIds={autoExpandFolderIds}
+      onSelectFile={handleSelectFile}
+      onEdit={openRenameDialog}
+      onDelete={openDeleteDialog}
+      onCreateFolder={openCreateFolderDialog}
+      onCreateFile={openUploadDialog}
+      refresh={projectChildren.refresh}
+    />
+  );
 
   return (
     <AppLayout className="flex min-h-0 flex-col">
@@ -213,53 +274,94 @@ export default function ProjectPage() {
         description={project?.description}
       />
 
-      <div class="grid min-h-0 flex-1 grid-cols-1 items-stretch gap-6 xl:grid-cols-[minmax(0,1fr)_38rem]">
-        <section class="content-section flex min-h-0 flex-col">
-          {projectError && (
-            <StateMessage tone="danger" className="mb-4">
-              {t("project.errors.load")}
-            </StateMessage>
+      {isMobile ? (
+        <div class="flex min-h-0 flex-1 flex-col">
+          {mobileView === "home" && (
+            <section class="content-section flex min-h-0 flex-1 flex-col">
+              {explorerErrors}
+              {explorerNode}
+
+              <div class="mt-4 grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setMobileView("chat")}
+                  class={`${utilityTabClass(false)} border border-border-subtle bg-surface-container-low`}
+                >
+                  <span class="material-symbols-outlined text-[18px]">
+                    smart_toy
+                  </span>
+                  {t("project.sections.chat.title")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMobileView("podcast")}
+                  class={`${utilityTabClass(false)} border border-border-subtle bg-surface-container-low`}
+                >
+                  <span class="material-symbols-outlined text-[18px]">
+                    podcasts
+                  </span>
+                  {t("project.sections.podcasts.title")}
+                </button>
+              </div>
+            </section>
           )}
-          {projectChildren.error && (
-            <StateMessage tone="danger" className="mb-4">
-              {t("project.errors.children")}
-            </StateMessage>
+
+          {mobileView === "preview" && (
+            <section class="content-section flex min-h-0 flex-1 flex-col">
+              <MobileBackBar
+                label={t("project.back")}
+                onBack={() => setMobileView("home")}
+              />
+              <InlineFilePreview fileId={selectedFileId} />
+            </section>
           )}
 
-          <ProjectExplorer
-            parentId={projectId}
-            parentKind="project"
-            items={projectChildren.items as ProjectExplorerItem[]}
-            loading={projectChildren.isLoading}
-            emptyLabel={t("project.empty")}
-            hasMore={projectChildren.hasMore}
-            loadingMore={projectChildren.loadingMore}
-            loadMore={projectChildren.loadMore}
-            selectedFileId={selectedFileId}
-            autoExpandFolderIds={autoExpandFolderIds}
-            onSelectFile={handleSelectFile}
-            onEdit={openRenameDialog}
-            onDelete={openDeleteDialog}
-            onCreateFolder={openCreateFolderDialog}
-            onCreateFile={openUploadDialog}
-            refresh={projectChildren.refresh}
-          />
+          {mobileView === "chat" && (
+            <section class="flex min-h-0 flex-1 flex-col">
+              <MobileBackBar
+                label={t("project.back")}
+                onBack={() => setMobileView("home")}
+              />
+              <div class="min-h-0 flex-1">
+                <ProjectChatPanel projectId={projectId} compact />
+              </div>
+            </section>
+          )}
 
-          <InlineFilePreview fileId={selectedFileId} />
-        </section>
+          {mobileView === "podcast" && (
+            <section class="flex min-h-0 flex-1 flex-col">
+              <MobileBackBar
+                label={t("project.back")}
+                onBack={() => setMobileView("home")}
+              />
+              <div class="min-h-0 flex-1">
+                <ProjectPodcastPanel projectId={projectId} compact />
+              </div>
+            </section>
+          )}
+        </div>
+      ) : (
+        <div class="grid min-h-0 flex-1 grid-cols-1 items-stretch gap-6 xl:grid-cols-[minmax(0,1fr)_38rem]">
+          <section class="content-section flex min-h-0 flex-col">
+            {explorerErrors}
+            {explorerNode}
 
-        <aside class="flex min-h-0 min-w-0 flex-col gap-4 xl:h-full xl:overflow-hidden">
-          <ProjectUtilityTabs active={utilityPanel} onChange={setUtilityPanel} />
+            <InlineFilePreview fileId={selectedFileId} />
+          </section>
 
-          <div class="min-h-0 xl:flex-1">
-            {utilityPanel === "chat" ? (
-              <ProjectChatPanel projectId={projectId} compact />
-            ) : (
-              <ProjectPodcastPanel projectId={projectId} compact />
-            )}
-          </div>
-        </aside>
-      </div>
+          <aside class="flex min-h-0 min-w-0 flex-col gap-4 xl:h-full xl:overflow-hidden">
+            <ProjectUtilityTabs active={utilityPanel} onChange={setUtilityPanel} />
+
+            <div class="min-h-0 xl:flex-1">
+              {utilityPanel === "chat" ? (
+                <ProjectChatPanel projectId={projectId} compact />
+              ) : (
+                <ProjectPodcastPanel projectId={projectId} compact />
+              )}
+            </div>
+          </aside>
+        </div>
+      )}
 
       {projectId && (
         <>

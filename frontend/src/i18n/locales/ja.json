@@ -178,6 +178,7 @@
     "empty": "このプロジェクトにはまだファイルがありません。",
     "newFolder": "新規フォルダ",
     "editProject": "プロジェクトを編集",
+    "back": "戻る",
     "createActions": {
       "add": "追加",
       "folder": "フォルダ",

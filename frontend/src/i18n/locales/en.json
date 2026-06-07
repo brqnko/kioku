@@ -178,6 +178,7 @@
     "empty": "This project has no files yet.",
     "newFolder": "New Folder",
     "editProject": "Edit project",
+    "back": "Back",
     "createActions": {
       "add": "Add",
       "folder": "Folder",
