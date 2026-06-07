@@ -5,6 +5,12 @@ pub trait ProjectRepository<C>: Send + Sync {
         c: &mut C,
         id: uuid::Uuid,
     ) -> Result<Option<super::domain::Project>, anyhow::Error>;
+    async fn update_last_seen_at(
+        &self,
+        c: &mut C,
+        id: uuid::Uuid,
+        last_seen_at: chrono::DateTime<chrono::Utc>,
+    ) -> Result<(), anyhow::Error>;
     async fn save(
         &self,
         c: &mut C,
@@ -64,6 +70,27 @@ impl ProjectRepository<sqlx::MySqlConnection> for ProjectRepositoryImpl {
             })),
             None => Ok(None),
         }
+    }
+
+    async fn update_last_seen_at(
+        &self,
+        c: &mut sqlx::MySqlConnection,
+        id: uuid::Uuid,
+        last_seen_at: chrono::DateTime<chrono::Utc>,
+    ) -> Result<(), anyhow::Error> {
+        sqlx::query!(
+            r#"
+            UPDATE project
+            SET last_seen_at = ?
+            WHERE project_id = ?
+            "#,
+            last_seen_at,
+            id.as_bytes().as_slice(),
+        )
+        .execute(c)
+        .await?;
+
+        Ok(())
     }
 
     async fn save(

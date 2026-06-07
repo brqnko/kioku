@@ -1,0 +1,12 @@
+{
+  "db_name": "MySQL",
+  "query": "\n            UPDATE project\n            SET last_seen_at = ?\n            WHERE project_id = ?\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "5b56afefaf3cd4844db844d7132ba4aa191acd919b88a558aefa9c75f0df2457"
+}

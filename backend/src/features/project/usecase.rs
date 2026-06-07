@@ -125,11 +125,9 @@ pub async fn get_project(
     app: &crate::app::App,
     input: GetProjectInput,
 ) -> Result<Result<GetProjectOutput, crate::domain::DomainError>, anyhow::Error> {
-    let mut tx = app.pool.begin().await?;
-
-    let mut project = match app
-        .project_repository
-        .find_for_update(&mut tx, input.project_id)
+    let view = match app
+        .project_query_service
+        .find_by_id(input.project_id)
         .await?
     {
         Some(ok) => ok,
@@ -142,7 +140,7 @@ pub async fn get_project(
         }
     };
 
-    if project.created_by != input.user_id {
+    if view.created_by != input.user_id {
         return Ok(Err(crate::domain::DomainError::new(
             "forbidden",
             "project does not belong to the user".to_string(),
@@ -150,16 +148,38 @@ pub async fn get_project(
         )));
     }
 
-    project.update_last_seen_at();
+    let last_seen_at = chrono::Utc::now();
 
-    match app.project_repository.save(&mut tx, &project).await? {
-        Ok(ok) => ok,
-        Err(err) => return Ok(Err(err)),
-    }
+    let pool = app.pool.clone();
+    let repository = app.project_repository.clone();
+    let project_id = input.project_id;
+    tokio::spawn(async move {
+        let mut conn = match pool.acquire().await {
+            Ok(conn) => conn,
+            Err(err) => {
+                tracing::error!(%project_id, ?err, "failed to acquire connection");
+                return;
+            }
+        };
+        if let Err(err) = repository
+            .update_last_seen_at(&mut conn, project_id, last_seen_at)
+            .await
+        {
+            tracing::error!(%project_id, ?err, "update_last_seen_at failed");
+        }
+    });
 
-    tx.commit().await?;
-
-    Ok(Ok(GetProjectOutput { project }))
+    Ok(Ok(GetProjectOutput {
+        project: super::domain::Project {
+            id: view.id,
+            created_by: view.created_by,
+            name: super::domain::ProjectName(view.name),
+            description: super::domain::ProjectDescription(view.description),
+            indexed_at: view.indexed_at,
+            last_seen_at,
+            last_seen_file_id: view.last_seen_file_id,
+        },
+    }))
 }
 
 // update project

@@ -1,3 +1,13 @@
+pub struct ProjectView {
+    pub id: uuid::Uuid,
+    pub created_by: uuid::Uuid,
+    pub name: String,
+    pub description: String,
+    pub indexed_at: chrono::DateTime<chrono::Utc>,
+    pub last_seen_at: chrono::DateTime<chrono::Utc>,
+    pub last_seen_file_id: uuid::Uuid,
+}
+
 pub struct ListProjectsByUserIdView {
     pub id: uuid::Uuid,
     pub created_by: uuid::Uuid,
@@ -27,6 +37,10 @@ pub trait QueryService: Send + Sync {
         cursor: Option<ListProjectsByUserIdCursor>,
         limit: u32,
     ) -> Result<Vec<ListProjectsByUserIdView>, anyhow::Error>;
+    async fn find_by_id(
+        &self,
+        project_id: uuid::Uuid,
+    ) -> Result<Option<ProjectView>, anyhow::Error>;
     async fn exists_owned_by_user(
         &self,
         project_id: uuid::Uuid,
@@ -174,6 +188,37 @@ impl QueryService for QueryServiceImpl {
         };
 
         Ok(rows)
+    }
+
+    async fn find_by_id(
+        &self,
+        project_id: uuid::Uuid,
+    ) -> Result<Option<ProjectView>, anyhow::Error> {
+        let row = sqlx::query!(
+            r#"
+            SELECT project_id, created_by, name, description,
+                   indexed_at, last_seen_at, last_seen_file_id
+            FROM project
+            WHERE project_id = ?
+            LIMIT 1
+            "#,
+            project_id.as_bytes().as_slice(),
+        )
+        .fetch_optional(&self.pool)
+        .await?;
+
+        match row {
+            Some(r) => Ok(Some(ProjectView {
+                id: uuid::Uuid::from_slice(&r.project_id)?,
+                created_by: uuid::Uuid::from_slice(&r.created_by)?,
+                name: r.name,
+                description: r.description,
+                indexed_at: r.indexed_at.and_utc(),
+                last_seen_at: r.last_seen_at.and_utc(),
+                last_seen_file_id: uuid::Uuid::from_slice(&r.last_seen_file_id)?,
+            })),
+            None => Ok(None),
+        }
     }
 
     async fn exists_owned_by_user(
