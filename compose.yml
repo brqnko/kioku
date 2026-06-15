@@ -1,7 +1,10 @@
 services:
-  backend:
+  # NOTE: サービス名は共有ネットワーク(anti-yt-network)上のDNSエイリアスになるため、
+  # anti-yt側の`backend`サービスと衝突しない一意な名前にすること
+  kioku-backend:
     build:
       context: ./backend
+    image: kioku-backend
     container_name: kioku-backend
     expose:
       - "3000"

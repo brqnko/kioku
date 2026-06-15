@@ -7,15 +7,16 @@ default-run = "backend"
 [dependencies]
 anyhow = "1.0.102"
 async-trait = "0.1.89"
-aws-config = { version = "1.8.16", features = ["behavior-version-latest"] }
-aws-sdk-s3 = "1.131.0"
 axum = "0.8.9"
 axum-extra = { version = "0.12.6", features = ["cookie"] }
 base64 = "0.22.1"
 chrono = "0.4.44"
 deadpool-redis = "0.23.0"
+hex = "0.4.3"
+hmac = "0.12.1"
 hound = "3.5.1"
 jsonwebtoken = { version = "10.3.0", features = ["rust_crypto"] }
+md-5 = "0.10.6"
 openidconnect = "4.0.1"
 opentelemetry = { version = "0.31", features = ["trace", "metrics"] }
 opentelemetry_sdk = { version = "0.31", features = ["trace", "metrics"] }
@@ -28,6 +29,7 @@ reqwest = { version = "0.12.28", features = ["json"] }
 rustls = { version = "0.23.40", features = ["ring"] }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.150"
+sha2 = "0.10.9"
 sha256 = "1.6.0"
 sqlx = { version = "0.8.6", features = ["macros", "mysql", "runtime-tokio-rustls", "json", "uuid", "chrono"] }
 thiserror = "2.0.18"
@@ -36,6 +38,7 @@ tower-http = { version = "0.6.11", features = ["trace", "request-id"] }
 tracing = "0.1.44"
 tracing-opentelemetry = "0.32"
 tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
+url = "2.5.8"
 utoipa = { version = "5.4.0", features = ["yaml", "chrono", "uuid"] }
 utoipa-axum = "0.2.0"
 utoipa-redoc = { version = "6.0.0", features = ["axum"] }
