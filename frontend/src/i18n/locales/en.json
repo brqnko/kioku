@@ -655,148 +655,277 @@
   },
   "tos": {
     "title": "Terms of Service",
-    "sections": {
-      "intro": {
-        "title": "1. Introduction",
-        "paragraphs": [
-          "Welcome to kioku (the \"Service\"). These Terms of Service (the \"Terms\") set out the conditions under which you may use the Service. By accessing or using the Service, you agree to be bound by all provisions of these Terms.",
-          "If you do not agree to these Terms, please discontinue use of the Service immediately. We reserve the right to modify these Terms at any time without prior notice."
+    "intro": "These Terms of Service (the \"Terms\") set out the conditions for using the service \"kioku\" (the \"Service\") provided by brqnko (the \"Operator\") on this website. Registered users (\"Users\") shall use the Service in accordance with these Terms.",
+    "updated": "Established: June 20, 2026",
+    "articles": [
+      {
+        "title": "Article 1 (Applicability)",
+        "items": [
+          "These Terms apply to all relationships between Users and the Operator concerning the use of the Service.",
+          "In addition to these Terms, the Operator may establish various rules and provisions regarding the Service (the \"Individual Provisions\"). Regardless of their name, these Individual Provisions constitute a part of these Terms.",
+          "If any provision of these Terms conflicts with an Individual Provision referred to in the preceding paragraph, the Individual Provision shall prevail unless otherwise specified therein."
         ]
       },
-      "definitions": {
-        "title": "2. Definitions",
-        "lead": "The following terms shall have the meanings set forth below when used in these Terms.",
+      {
+        "title": "Article 2 (Registration)",
         "items": [
+          "Registration is completed when an applicant agrees to these Terms, applies for registration in the manner prescribed by the Operator, and the Operator approves the application.",
           {
-            "term": "\"We\" / \"Us\"",
-            "desc": " refers to the entity that operates kioku."
-          },
-          {
-            "term": "\"User\"",
-            "desc": " refers to any individual or legal entity that registers for or uses the Service."
-          },
-          {
-            "term": "\"Content\"",
-            "desc": " refers to all information made available through the Service, including text, audio, images, and data."
-          },
-          {
-            "term": "\"AI Models\"",
-            "desc": " refers to the artificial intelligence technologies and algorithms that we provide within the Service."
+            "text": "The Operator may decline an application for registration if it determines that any of the following applies to the applicant, and is under no obligation to disclose the reasons.",
+            "sub": [
+              "False information was provided in the registration application;",
+              "The application is from a person who has previously violated these Terms;",
+              "The Operator otherwise determines that registration is not appropriate."
+            ]
           }
         ]
       },
-      "service": {
-        "title": "3. Use of the Service",
-        "intro": "Subject to your compliance with these Terms and applicable laws, you are granted a non-exclusive, non-transferable, revocable license to use the Service.",
-        "prohibitedHeading": "Prohibited Activities",
-        "prohibitedLead": "You may not engage in any of the following activities.",
-        "prohibitedItems": [
-          "Acts that violate laws, court judgments, decisions or orders, or legally binding administrative measures.",
-          "Acts that may harm public order or morals.",
-          "Acts that infringe the intellectual property rights, including copyrights, trademarks, and patents, the rights of honor, privacy, or any other legal or contractual rights of us or any third party.",
-          "Acts that interfere with the servers or network systems of the Service, or that abuse the Service through bots, cheat tools, or other technical means.",
-          "Acts of using AI Models to generate harmful, discriminatory, or illegal content."
+      {
+        "title": "Article 3 (Management of User ID and Password)",
+        "items": [
+          "Users shall appropriately manage their own User ID and password for the Service at their own responsibility.",
+          "Users may not, under any circumstances, transfer, lend, or share their User ID and password with any third party. Where a combination of User ID and password matches the registered information at login, the Operator shall deem such use to be by the User who registered that User ID.",
+          "The Operator shall bear no liability for any damage arising from the use of a User ID and password by a third party, except where there is willful intent or gross negligence on the part of the Operator."
         ]
       },
-      "account": {
-        "title": "4. User Accounts",
-        "body": "Some features of the Service require account registration. Users are responsible for providing accurate and truthful information and keeping it up to date at all times.",
-        "callout": "Users are solely responsible for any damages arising from inadequate management of account credentials, errors in use, or use by third parties; we accept no liability. If you discover unauthorized use of your account, please contact us immediately."
-      },
-      "privacy": {
-        "title": "5. Privacy and Data",
-        "paragraphs": [
-          "We respect your privacy and handle personal information appropriately. For details on how we collect, use, and share personal information, please refer to our Privacy Policy.",
-          "Data you input into the Service (such as prompts and uploaded files) may be used to provide the Service and to improve the quality of our AI Models. We recommend that you do not input confidential information or sensitive personally identifiable information."
+      {
+        "title": "Article 4 (Fees)",
+        "items": [
+          "The Service is provided free of charge.",
+          "If the Operator introduces any paid features or services in the future, the fees and payment methods shall be separately determined by the Operator and displayed on the Service, and Users shall use them only after agreeing to such terms."
         ]
       },
-      "ip": {
-        "title": "6. Intellectual Property",
-        "paragraphs": [
-          "Intellectual property rights in the Service and all programs, software, trademarks, and logos related to the Service belong to us or to third parties holding legitimate rights.",
-          "The treatment of copyrights and other rights in content generated by users through the Service shall be governed by the rights in the underlying source data and the applicable laws of the relevant country. We do not claim ownership of user-generated content but are granted a right to use it to the extent necessary to operate the Service."
+      {
+        "title": "Article 5 (Prohibited Acts)",
+        "items": [
+          {
+            "text": "In using the Service, Users shall not engage in any of the following acts.",
+            "sub": [
+              "Acts that violate laws or public order and morals;",
+              "Acts related to criminal activity;",
+              "Acts that infringe the intellectual property rights, portrait rights, privacy, honor, or other rights or interests of the Operator, other Users, or third parties;",
+              "Acts that destroy or interfere with the functioning of the servers or networks of the Operator, other Users, or third parties;",
+              "Acts of commercially exploiting information obtained through the Service;",
+              "Acts that may interfere with the operation of the Operator's Service;",
+              "Acts of unauthorized access or attempts thereof;",
+              "Acts of collecting or accumulating personal information about other Users;",
+              "Acts of using the Service for improper purposes;",
+              "Acts that cause disadvantage, damage, or discomfort to other Users or third parties of the Service;",
+              "Acts of impersonating other Users;",
+              "Acts of advertising, promotion, solicitation, or business on the Service that are not permitted by the Operator;",
+              "Acts aimed at meeting unacquainted persons of the opposite sex;",
+              "Acts of directly or indirectly providing benefits to antisocial forces in connection with the Operator's Service;",
+              "Other acts that the Operator deems inappropriate."
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Article 6 (Suspension of the Service)",
+        "items": [
+          {
+            "text": "The Operator may suspend or interrupt all or part of the Service without prior notice to Users if it determines that any of the following applies.",
+            "sub": [
+              "When performing maintenance, inspection, or updates of the computer systems related to the Service;",
+              "When provision of the Service becomes difficult due to force majeure such as earthquake, lightning, fire, power outage, or natural disaster;",
+              "When computers or communication lines stop due to an accident;",
+              "When the Operator otherwise determines that provision of the Service is difficult."
+            ]
+          },
+          "The Operator shall bear no liability for any disadvantage or damage incurred by Users or third parties as a result of the suspension or interruption of the Service."
+        ]
+      },
+      {
+        "title": "Article 7 (Usage Restrictions and Deregistration)",
+        "items": [
+          {
+            "text": "The Operator may, without prior notice, restrict a User's use of all or part of the Service, or cancel the User's registration, if the User falls under any of the following.",
+            "sub": [
+              "Violation of any provision of these Terms;",
+              "Discovery that the registered information contains false facts;",
+              "Failure to respond to communications from the Operator for a certain period;",
+              "No use of the Service for a certain period since the last use;",
+              "The Operator otherwise determines that use of the Service is not appropriate."
+            ]
+          },
+          "The Operator shall bear no liability for any damage incurred by Users as a result of actions taken by the Operator under this Article."
+        ]
+      },
+      {
+        "title": "Article 8 (Withdrawal)",
+        "items": [
+          "Users may withdraw from the Service through the withdrawal procedure prescribed by the Operator."
+        ]
+      },
+      {
+        "title": "Article 9 (Disclaimer of Warranties and Limitation of Liability)",
+        "items": [
+          "The Operator does not warrant, expressly or impliedly, that the Service is free from de facto or legal defects (including defects in safety, reliability, accuracy, completeness, validity, fitness for a particular purpose, and security, as well as errors, bugs, and rights infringements).",
+          "The Operator shall bear no liability for any damage incurred by Users arising from the Service, except in cases of willful intent or gross negligence on the part of the Operator. However, this disclaimer does not apply where the contract between the Operator and a User concerning the Service (including these Terms) constitutes a consumer contract under the Consumer Contract Act.",
+          "Even in the cases set out in the proviso to the preceding paragraph, the Operator shall bear no liability for damage arising from special circumstances (including where the Operator or the User foresaw or could have foreseen the occurrence of damage) due to the Operator's breach of contract or tort caused by negligence (excluding gross negligence).",
+          "The Operator shall bear no liability for any transactions, communications, or disputes arising between Users and other Users or third parties in connection with the Service."
+        ]
+      },
+      {
+        "title": "Article 10 (Changes to the Service)",
+        "items": [
+          "The Operator may change, add to, or discontinue the content of the Service upon prior notice to Users, and Users shall consent to this."
+        ]
+      },
+      {
+        "title": "Article 11 (Amendment of the Terms)",
+        "items": [
+          {
+            "text": "The Operator may amend these Terms without the individual consent of Users in the following cases.",
+            "sub": [
+              "When the amendment conforms to the general interests of Users;",
+              "When the amendment does not contradict the purpose of the service use agreement and is reasonable in light of the necessity of the amendment, the appropriateness of the amended content, and other relevant circumstances."
+            ]
+          },
+          "When amending these Terms under the preceding paragraph, the Operator shall notify Users in advance of the amendment, the content of the amended Terms, and the time at which they take effect."
+        ]
+      },
+      {
+        "title": "Article 12 (Handling of Personal Information)",
+        "items": [
+          "The Operator shall appropriately handle personal information obtained through use of the Service in accordance with the Operator's Privacy Policy."
+        ]
+      },
+      {
+        "title": "Article 13 (Notices and Communications)",
+        "items": [
+          "Notices or communications between Users and the Operator shall be made in the manner prescribed by the Operator. Unless a User submits a change in accordance with a method separately prescribed by the Operator, the Operator shall deem the currently registered contact details to be valid and shall send notices or communications to such contact details, which shall be deemed to have reached the User at the time of transmission."
+        ]
+      },
+      {
+        "title": "Article 14 (Prohibition of Assignment of Rights and Obligations)",
+        "items": [
+          "Users may not assign to a third party, or use as security, their contractual position under the service use agreement or their rights or obligations under these Terms, without the prior written consent of the Operator."
+        ]
+      },
+      {
+        "title": "Article 15 (Governing Law and Jurisdiction)",
+        "items": [
+          "These Terms shall be governed by and construed in accordance with the laws of Japan.",
+          "In the event of a dispute concerning the Service, the court having jurisdiction over the location of the Operator's head office shall have exclusive agreed jurisdiction."
         ]
       }
-    }
+    ]
   },
   "privacy": {
     "title": "Privacy Policy",
-    "sections": {
-      "intro": {
-        "paragraphs": [
-          "kioku (\"we\" or \"us\") takes your privacy extremely seriously. This Privacy Policy describes what information we collect, and how we use and protect it, in connection with our AI-powered learning platform (the \"Service\")."
+    "intro": "brqnko (the \"Operator\") establishes the following Privacy Policy (this \"Policy\") regarding the handling of users' personal information in the service \"kioku\" (the \"Service\") provided on this website.",
+    "updated": "Established: June 20, 2026",
+    "articles": [
+      {
+        "title": "Article 1 (Personal Information)",
+        "items": [
+          "\"Personal information\" means \"personal information\" as defined in the Act on the Protection of Personal Information: information about a living individual that can identify the specific individual by name, date of birth, address, telephone number, contact details, or other descriptions contained in the information, as well as data on appearance, fingerprints, or voiceprints, and information that can identify a specific individual on its own, such as the insurer number on a health insurance card (personal identification information)."
         ]
       },
-      "collected": {
-        "title": "1. Information We Collect",
-        "lead": "To deliver the Service effectively, we collect the following information.",
+      {
+        "title": "Article 2 (Method of Collecting Personal Information)",
+        "items": [
+          "The Operator may ask for personal information such as name and email address when a user registers. The Operator may also collect transaction records and payment-related information containing users' personal information that are made between users and business partners, from the Operator's business partners (including information providers, advertisers, and ad distribution partners; the \"Partners\")."
+        ]
+      },
+      {
+        "title": "Article 3 (Purposes of Collecting and Using Personal Information)",
         "items": [
           {
-            "term": "Account information:",
-            "desc": " Name, email address, affiliated institution, and other information provided when you create an account."
-          },
-          {
-            "term": "Uploaded materials:",
-            "desc": " Learning materials such as PDFs, documents, and images that you intentionally upload for AI-based analysis or summarization."
-          },
-          {
-            "term": "Conversation history:",
-            "desc": " Logs of questions, prompts, and generated responses involving the AI assistant (used to maintain learning context)."
-          },
-          {
-            "term": "Usage data:",
-            "desc": " Technical information such as access logs, device information, and IP addresses, used to monitor system performance and maintain security."
+            "text": "The purposes for which the Operator collects and uses personal information are as follows.",
+            "sub": [
+              "To provide and operate the Service;",
+              "To respond to inquiries from users (including identity verification);",
+              "To send emails informing users of new features, updates, campaigns, and other services provided by the Operator regarding the service in use;",
+              "To contact users as necessary, such as for maintenance and important notices;",
+              "To identify users who violate the terms of service or who attempt to use the Service for improper or unjust purposes, and to refuse their use;",
+              "To allow users to view, change, or delete their own registration information and to view their usage status;",
+              "To bill users for usage fees in paid services;",
+              "Purposes incidental to the above."
+            ]
           }
         ]
       },
-      "aiCommitment": {
-        "title": "2. Our Commitments on AI Models and Data Use",
-        "lead": "We recognize that, given the educational nature of the Service, materials you upload may contain highly sensitive information. We strictly adhere to the following principles.",
-        "cards": [
-          {
-            "title": "Not used to train foundation models",
-            "body": "Personal learning materials, notes, and PDFs uploaded by users are not used as training data for kioku's overall AI foundation models."
-          },
-          {
-            "title": "Tenant isolation",
-            "body": "Your data is logically isolated, and another customer's AI will never generate responses based on the contents of your documents."
-          }
-        ]
-      },
-      "sharing": {
-        "title": "3. Information Sharing and Third Parties",
-        "lead": "We do not share, sell, or rent your personal information or uploaded data to third parties, except in the following cases.",
+      {
+        "title": "Article 4 (Change of Purpose of Use)",
         "items": [
-          "When you have given explicit consent.",
-          "When it is necessary to use external infrastructure providers (such as cloud hosting or specific AI API providers) that are essential to delivering the Service. We enter into strict data processing agreements with these providers and prohibit any use of data outside the agreed purposes.",
-          "When disclosure is required by law."
+          "The Operator shall change the purpose of use of personal information only where it is reasonably recognized that the purpose of use is related to the purpose prior to the change.",
+          "If the purpose of use is changed, the Operator shall notify users of the changed purpose by the method prescribed by the Operator, or announce it on this website."
         ]
       },
-      "retention": {
-        "title": "4. Data Retention and Deletion",
-        "paragraphs": [
-          "We retain your data only while your account remains active or as long as necessary to provide the Service. You may request complete deletion of your data and your account at any time from the account settings screen. Once we receive a deletion request, your data — including backups — will be securely erased from our systems."
-        ]
-      },
-      "rights": {
-        "title": "5. Your Rights",
-        "lead": "You have the following rights with respect to your data.",
-        "cards": [
+      {
+        "title": "Article 5 (Provision of Personal Information to Third Parties)",
+        "items": [
           {
-            "title": "Data export",
-            "body": "You can download your saved notes and conversation history in a standard format."
+            "text": "Except in the following cases, the Operator shall not provide personal information to third parties without obtaining the prior consent of the user, except where permitted by the Act on the Protection of Personal Information and other laws and regulations.",
+            "sub": [
+              "When it is necessary to protect the life, body, or property of a person and it is difficult to obtain the consent of the individual;",
+              "When it is especially necessary to improve public health or promote the sound development of children and it is difficult to obtain the consent of the individual;",
+              "When it is necessary to cooperate with a state organ, local government, or a party entrusted by them in performing affairs prescribed by law, and obtaining the consent of the individual is likely to impede the performance of such affairs;",
+              "When the Operator has, in advance, given notice of or announced the inclusion of provision to third parties in the purpose of use, the items of data provided, the means or method of provision, the cessation of provision upon the individual's request, and the method of accepting such requests, and has filed a report with the Personal Information Protection Commission."
+            ]
           },
           {
-            "title": "Complete deletion",
-            "body": "The right to immediately delete specific uploaded files or your entire account."
+            "text": "Notwithstanding the preceding paragraph, the recipient shall not be deemed a third party in the following cases.",
+            "sub": [
+              "When the Operator entrusts all or part of the handling of personal information within the scope necessary to achieve the purpose of use;",
+              "When personal information is provided in connection with a business succession due to merger or other reasons;",
+              "When personal information is jointly used with a specific party, and the individual has been notified in advance, or such information has been placed in a state where the individual can readily know, of the fact of joint use, the items of personal information jointly used, the scope of joint users, the purpose of use by such users, and the name of the party responsible for managing such personal information."
+            ]
           }
         ]
       },
-      "contact": {
-        "title": "6. Contact Us",
-        "lead": "For any questions or concerns about this Privacy Policy or our data handling practices, or to exercise your rights, please contact us at the address below.",
-        "email": "privacy@kioku.example.com"
+      {
+        "title": "Article 6 (Disclosure of Personal Information)",
+        "items": [
+          {
+            "text": "When requested by an individual to disclose personal information, the Operator shall disclose it to the individual without delay. However, if disclosure falls under any of the following, the Operator may decline to disclose all or part of it, and shall notify the individual without delay if it decides not to disclose.",
+            "sub": [
+              "When there is a risk of harming the life, body, property, or other rights and interests of the individual or a third party;",
+              "When there is a risk of significant impediment to the proper conduct of the Operator's business;",
+              "When it would otherwise violate laws and regulations."
+            ]
+          },
+          "Notwithstanding the preceding paragraph, in principle the Operator shall not disclose information other than personal information, such as history information and characteristic information."
+        ]
+      },
+      {
+        "title": "Article 7 (Correction and Deletion of Personal Information)",
+        "items": [
+          "Where the personal information held by the Operator about a user is incorrect, the user may request the Operator to correct, add to, or delete such personal information (\"Correction, etc.\") in accordance with the procedure prescribed by the Operator.",
+          "If the Operator receives a request under the preceding paragraph and determines that it is necessary to comply, it shall make the Correction, etc. of the relevant personal information without delay.",
+          "If the Operator makes a Correction, etc. under the preceding paragraph, or decides not to make a Correction, etc., it shall notify the user without delay."
+        ]
+      },
+      {
+        "title": "Article 8 (Suspension of Use of Personal Information)",
+        "items": [
+          "If the Operator is requested by an individual to suspend the use of or erase personal information (\"Suspension of Use, etc.\") on the grounds that the personal information is being handled beyond the scope of the purpose of use, or was obtained by improper means, the Operator shall conduct the necessary investigation without delay.",
+          "Based on the results of the investigation in the preceding paragraph, if the Operator determines that it is necessary to comply with the request, it shall carry out Suspension of Use, etc. of the relevant personal information without delay.",
+          "If the Operator carries out Suspension of Use, etc. under the preceding paragraph, or decides not to do so, it shall notify the user without delay.",
+          "Notwithstanding the preceding two paragraphs, where Suspension of Use, etc. requires a large expense or is otherwise difficult, and alternative measures necessary to protect the rights and interests of the user can be taken, the Operator shall take such alternative measures."
+        ]
+      },
+      {
+        "title": "Article 9 (Changes to the Privacy Policy)",
+        "items": [
+          "The content of this Policy may be changed without notice to users, except for matters otherwise provided by laws and regulations or in this Policy.",
+          "Except as otherwise specified by the Operator, the changed Privacy Policy shall take effect from the time it is posted on this website."
+        ]
+      },
+      {
+        "title": "Article 10 (Contact)",
+        "items": [
+          {
+            "text": "For inquiries regarding this Policy, please contact us at the following.",
+            "sub": [
+              "Operator: brqnko",
+              "Email address: contact@brqnko.rs"
+            ]
+          }
+        ]
       }
-    }
+    ]
   }
 }
