@@ -6,7 +6,7 @@ export default function TopAppBar() {
   const { path } = useLocation();
 
   return (
-    <header class="bg-background-dark/90 backdrop-blur text-text-primary text-sm w-full h-14 border-b border-border-subtle sticky top-0 z-50 px-3 tablet:px-4">
+    <header class="bg-background-dark/95 text-text-primary text-sm w-full h-14 border-b border-border-subtle sticky top-0 z-50 px-3 tablet:px-4">
       <div class="flex h-full items-center justify-between gap-3 min-w-0">
         <a
           href="/dashboard"

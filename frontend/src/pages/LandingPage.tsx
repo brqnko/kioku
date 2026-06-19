@@ -263,7 +263,7 @@ export default function LandingPage() {
 
   return (
     <div class="min-h-dvh bg-background-light dark:bg-background-dark text-charcoal dark:text-white/95">
-      <header class="sticky top-0 z-50 border-b border-border-light dark:border-border-dark bg-background-light/90 dark:bg-background-dark/90 backdrop-blur">
+      <header class="sticky top-0 z-50 border-b border-border-light dark:border-border-dark bg-background-light/95 dark:bg-background-dark/95">
         <div class="max-w-7xl mx-auto px-6 md:px-8 py-4 flex items-center justify-between">
           <a href="/" class="no-underline text-inherit">
             <span class="text-xl font-bold tracking-tight">kioku</span>

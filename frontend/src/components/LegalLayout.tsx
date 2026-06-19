@@ -14,7 +14,7 @@ export function LegalLayout({ children }: { children: ComponentChildren }) {
 
   return (
     <div class="min-h-dvh bg-background-light dark:bg-background-dark text-charcoal dark:text-white/95">
-      <header class="border-b border-border-light dark:border-border-dark bg-background-light/90 dark:bg-background-dark/90 backdrop-blur sticky top-0 z-50">
+      <header class="border-b border-border-light dark:border-border-dark bg-background-light/95 dark:bg-background-dark/95 sticky top-0 z-50">
         <div class="max-w-[1000px] mx-auto px-6 py-4 flex items-center justify-between">
           <a href="/" class="no-underline text-inherit">
             <span class="text-xl font-bold tracking-tight">kioku</span>

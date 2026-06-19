@@ -438,10 +438,9 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(4, 4, 5, 0.94);
+    background: rgba(4, 4, 5, 0.96);
     color: white;
     cursor: zoom-out;
-    backdrop-filter: blur(10px);
     padding: 20px;
     animation: image-lightbox-fade 140ms ease-out;
   }
