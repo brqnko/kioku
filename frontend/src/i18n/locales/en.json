@@ -655,277 +655,153 @@
   },
   "tos": {
     "title": "Terms of Service",
-    "intro": "These Terms of Service (the \"Terms\") set out the conditions for using the service \"kioku\" (the \"Service\") provided by brqnko (the \"Operator\") on this website. Registered users (\"Users\") shall use the Service in accordance with these Terms.",
-    "updated": "Established: June 20, 2026",
-    "articles": [
-      {
-        "title": "Article 1 (Applicability)",
+    "metaDescription": "Terms of Service for kioku — the rights, obligations, prohibited conduct, and disclaimers that apply when you use the Service.",
+    "intro": "These Terms of Service (hereinafter, the \"Terms\") set out the conditions for using the various services provided by kioku (hereinafter, the \"Service\"). Registered users (hereinafter, \"Users\") shall use the Service in accordance with these Terms.",
+    "effectiveDate": "Last updated: June 20, 2026",
+    "sections": {
+      "application": {
+        "title": "Scope of Application",
+        "body": "These Terms apply to all relationships between Users and the Service concerning the use of the Service.\nIn addition to these Terms, the Service may establish various rules and provisions regarding use of the Service (hereinafter, \"Individual Provisions\"). Regardless of their name, these Individual Provisions shall constitute a part of these Terms.\nWhere the provisions of these Terms conflict with those of the Individual Provisions, the Individual Provisions shall prevail unless otherwise stated therein."
+      },
+      "registration": {
+        "title": "Registration",
+        "body": "Registration is completed when a prospective User agrees to these Terms, applies for registration in the manner prescribed by the Service, and the Service approves the application. Registration for the Service is performed through authentication with a Google account.\nThe Service may decline to approve an application for registration if it determines that the applicant falls under any of the following, and is under no obligation to disclose the reasons:\n(1) Where false information was provided in the application;\n(2) Where the application is from a person who has previously violated these Terms;\n(3) Where the Service otherwise determines the registration to be inappropriate."
+      },
+      "account": {
+        "title": "Account Management",
+        "body": "Users shall appropriately manage, at their own responsibility, their Service account and the Google account used for authentication.\nUnder no circumstances may a User transfer, lend, or share their account with any third party.\nThe User shall bear responsibility for any damage arising from inadequate management of the account, errors in use, or use by a third party, and the Service shall bear no responsibility whatsoever."
+      },
+      "prohibited": {
+        "title": "Prohibited Matters",
+        "body": "In using the Service, Users shall not engage in any of the following acts:",
         "items": [
-          "These Terms apply to all relationships between Users and the Operator concerning the use of the Service.",
-          "In addition to these Terms, the Operator may establish various rules and provisions regarding the Service (the \"Individual Provisions\"). Regardless of their name, these Individual Provisions constitute a part of these Terms.",
-          "If any provision of these Terms conflicts with an Individual Provision referred to in the preceding paragraph, the Individual Provision shall prevail unless otherwise specified therein."
+          "Acts that violate laws and regulations or public order and morals",
+          "Acts related to criminal conduct",
+          "Acts that infringe the copyrights, trademarks, or other intellectual property rights contained in the Service",
+          "Acts that destroy or interfere with the functions of the servers or networks of the Service, other Users, or third parties",
+          "Commercially exploiting information obtained through the Service",
+          "Acts that may interfere with the operation of the Service",
+          "Unauthorized access or attempts thereof",
+          "Collecting or accumulating the personal information of other Users",
+          "Using the Service for improper purposes",
+          "Acts that cause disadvantage, damage, or discomfort to other Users of the Service or to third parties",
+          "Impersonating another User",
+          "Directly or indirectly providing benefits to antisocial forces",
+          "Uploading to the Service any files that infringe the rights of third parties, or any content that violates laws and regulations",
+          "Any other acts that the Service deems inappropriate"
         ]
       },
-      {
-        "title": "Article 2 (Registration)",
-        "items": [
-          "Registration is completed when an applicant agrees to these Terms, applies for registration in the manner prescribed by the Operator, and the Operator approves the application.",
-          {
-            "text": "The Operator may decline an application for registration if it determines that any of the following applies to the applicant, and is under no obligation to disclose the reasons.",
-            "sub": [
-              "False information was provided in the registration application;",
-              "The application is from a person who has previously violated these Terms;",
-              "The Operator otherwise determines that registration is not appropriate."
-            ]
-          }
-        ]
+      "suspension": {
+        "title": "Suspension of the Service",
+        "body": "The Service may suspend or interrupt all or part of the Service without prior notice to Users if it determines that any of the following applies:\n(1) When performing maintenance, inspection, or updates of the computer systems related to the Service;\n(2) When provision of the Service becomes difficult due to force majeure such as earthquake, lightning, fire, power outage, or natural disaster;\n(3) When computers or communication lines are stopped due to an accident;\n(4) When the Service otherwise determines that provision of the Service is difficult.\nThe Service shall bear no responsibility whatsoever for any disadvantage or damage suffered by Users or third parties resulting from the suspension or interruption of the Service."
       },
-      {
-        "title": "Article 3 (Management of User ID and Password)",
-        "items": [
-          "Users shall appropriately manage their own User ID and password for the Service at their own responsibility.",
-          "Users may not, under any circumstances, transfer, lend, or share their User ID and password with any third party. Where a combination of User ID and password matches the registered information at login, the Operator shall deem such use to be by the User who registered that User ID.",
-          "The Operator shall bear no liability for any damage arising from the use of a User ID and password by a third party, except where there is willful intent or gross negligence on the part of the Operator."
-        ]
+      "restriction": {
+        "title": "Usage Restrictions and Deregistration",
+        "body": "The Service may, without prior notice, restrict all or part of a User's use of the Service or cancel their registration if the User falls under any of the following:\n(1) Where the User violates any provision of these Terms;\n(2) Where it is found that there are false facts in the registered information;\n(3) Where there is no response to contact from the Service for a certain period;\n(4) Where there has been no use of the Service for a certain period since the last use;\n(5) Where the Service otherwise determines the use of the Service to be inappropriate.\nThe Service shall bear no responsibility for any damage caused to Users by actions taken by the Service under this Article."
       },
-      {
-        "title": "Article 4 (Fees)",
-        "items": [
-          "The Service is provided free of charge.",
-          "If the Operator introduces any paid features or services in the future, the fees and payment methods shall be separately determined by the Operator and displayed on the Service, and Users shall use them only after agreeing to such terms."
-        ]
+      "withdrawal": {
+        "title": "Withdrawal",
+        "body": "Users may withdraw from the Service through the withdrawal procedure prescribed by the Service. The handling of a User's information after withdrawal shall be governed by the separately established Privacy Policy."
       },
-      {
-        "title": "Article 5 (Prohibited Acts)",
-        "items": [
-          {
-            "text": "In using the Service, Users shall not engage in any of the following acts.",
-            "sub": [
-              "Acts that violate laws or public order and morals;",
-              "Acts related to criminal activity;",
-              "Acts that infringe the intellectual property rights, portrait rights, privacy, honor, or other rights or interests of the Operator, other Users, or third parties;",
-              "Acts that destroy or interfere with the functioning of the servers or networks of the Operator, other Users, or third parties;",
-              "Acts of commercially exploiting information obtained through the Service;",
-              "Acts that may interfere with the operation of the Operator's Service;",
-              "Acts of unauthorized access or attempts thereof;",
-              "Acts of collecting or accumulating personal information about other Users;",
-              "Acts of using the Service for improper purposes;",
-              "Acts that cause disadvantage, damage, or discomfort to other Users or third parties of the Service;",
-              "Acts of impersonating other Users;",
-              "Acts of advertising, promotion, solicitation, or business on the Service that are not permitted by the Operator;",
-              "Acts aimed at meeting unacquainted persons of the opposite sex;",
-              "Acts of directly or indirectly providing benefits to antisocial forces in connection with the Operator's Service;",
-              "Other acts that the Operator deems inappropriate."
-            ]
-          }
-        ]
+      "disclaimer": {
+        "title": "Disclaimer of Warranties and Limitation of Liability",
+        "body": "The Service does not expressly or impliedly warrant that the Service is free from de facto or legal defects (including defects relating to safety, reliability, accuracy, completeness, effectiveness, fitness for a particular purpose, and security, as well as errors, bugs, and infringements of rights).\nThe Service uses AI technology to generate content such as chat responses and audio, but the Service does not guarantee the accuracy or completeness of such content, and Users shall review and use it at their own responsibility.\nThe Service shall bear no responsibility whatsoever for any damage caused to Users arising from the Service, except in cases of the Service's willful misconduct or gross negligence."
       },
-      {
-        "title": "Article 6 (Suspension of the Service)",
-        "items": [
-          {
-            "text": "The Operator may suspend or interrupt all or part of the Service without prior notice to Users if it determines that any of the following applies.",
-            "sub": [
-              "When performing maintenance, inspection, or updates of the computer systems related to the Service;",
-              "When provision of the Service becomes difficult due to force majeure such as earthquake, lightning, fire, power outage, or natural disaster;",
-              "When computers or communication lines stop due to an accident;",
-              "When the Operator otherwise determines that provision of the Service is difficult."
-            ]
-          },
-          "The Operator shall bear no liability for any disadvantage or damage incurred by Users or third parties as a result of the suspension or interruption of the Service."
-        ]
+      "serviceChange": {
+        "title": "Changes to the Service",
+        "body": "The Service may change, add to, or discontinue the content of the Service upon prior notice to Users, and Users shall consent thereto."
       },
-      {
-        "title": "Article 7 (Usage Restrictions and Deregistration)",
-        "items": [
-          {
-            "text": "The Operator may, without prior notice, restrict a User's use of all or part of the Service, or cancel the User's registration, if the User falls under any of the following.",
-            "sub": [
-              "Violation of any provision of these Terms;",
-              "Discovery that the registered information contains false facts;",
-              "Failure to respond to communications from the Operator for a certain period;",
-              "No use of the Service for a certain period since the last use;",
-              "The Operator otherwise determines that use of the Service is not appropriate."
-            ]
-          },
-          "The Operator shall bear no liability for any damage incurred by Users as a result of actions taken by the Operator under this Article."
-        ]
+      "termsChange": {
+        "title": "Changes to These Terms",
+        "body": "The Service may change these Terms at any time without notice to Users when it deems necessary. If a User begins using the Service after the revision of these Terms, that User shall be deemed to have agreed to the revised Terms."
       },
-      {
-        "title": "Article 8 (Withdrawal)",
-        "items": [
-          "Users may withdraw from the Service through the withdrawal procedure prescribed by the Operator."
-        ]
+      "personalInfo": {
+        "title": "Handling of Personal Information",
+        "body": "The Service shall appropriately handle personal information obtained through use of the Service in accordance with the Service's \"Privacy Policy.\""
       },
-      {
-        "title": "Article 9 (Disclaimer of Warranties and Limitation of Liability)",
-        "items": [
-          "The Operator does not warrant, expressly or impliedly, that the Service is free from de facto or legal defects (including defects in safety, reliability, accuracy, completeness, validity, fitness for a particular purpose, and security, as well as errors, bugs, and rights infringements).",
-          "The Operator shall bear no liability for any damage incurred by Users arising from the Service, except in cases of willful intent or gross negligence on the part of the Operator. However, this disclaimer does not apply where the contract between the Operator and a User concerning the Service (including these Terms) constitutes a consumer contract under the Consumer Contract Act.",
-          "Even in the cases set out in the proviso to the preceding paragraph, the Operator shall bear no liability for damage arising from special circumstances (including where the Operator or the User foresaw or could have foreseen the occurrence of damage) due to the Operator's breach of contract or tort caused by negligence (excluding gross negligence).",
-          "The Operator shall bear no liability for any transactions, communications, or disputes arising between Users and other Users or third parties in connection with the Service."
-        ]
+      "notification": {
+        "title": "Notice and Contact",
+        "body": "Notices or communications between Users and the Service shall be made in the manner prescribed by the Service. Unless the User submits a change in accordance with a method separately prescribed by the Service, the Service shall regard the currently registered contact information as valid and contact the User accordingly, and such notice or communication shall be deemed to have reached the User at the time of dispatch."
       },
-      {
-        "title": "Article 10 (Changes to the Service)",
-        "items": [
-          "The Operator may change, add to, or discontinue the content of the Service upon prior notice to Users, and Users shall consent to this."
-        ]
+      "assignment": {
+        "title": "Prohibition of Assignment of Rights and Obligations",
+        "body": "Users may not assign or pledge as collateral their contractual status or any rights or obligations under these Terms to a third party without the prior written consent of the Service."
       },
-      {
-        "title": "Article 11 (Amendment of the Terms)",
-        "items": [
-          {
-            "text": "The Operator may amend these Terms without the individual consent of Users in the following cases.",
-            "sub": [
-              "When the amendment conforms to the general interests of Users;",
-              "When the amendment does not contradict the purpose of the service use agreement and is reasonable in light of the necessity of the amendment, the appropriateness of the amended content, and other relevant circumstances."
-            ]
-          },
-          "When amending these Terms under the preceding paragraph, the Operator shall notify Users in advance of the amendment, the content of the amended Terms, and the time at which they take effect."
-        ]
-      },
-      {
-        "title": "Article 12 (Handling of Personal Information)",
-        "items": [
-          "The Operator shall appropriately handle personal information obtained through use of the Service in accordance with the Operator's Privacy Policy."
-        ]
-      },
-      {
-        "title": "Article 13 (Notices and Communications)",
-        "items": [
-          "Notices or communications between Users and the Operator shall be made in the manner prescribed by the Operator. Unless a User submits a change in accordance with a method separately prescribed by the Operator, the Operator shall deem the currently registered contact details to be valid and shall send notices or communications to such contact details, which shall be deemed to have reached the User at the time of transmission."
-        ]
-      },
-      {
-        "title": "Article 14 (Prohibition of Assignment of Rights and Obligations)",
-        "items": [
-          "Users may not assign to a third party, or use as security, their contractual position under the service use agreement or their rights or obligations under these Terms, without the prior written consent of the Operator."
-        ]
-      },
-      {
-        "title": "Article 15 (Governing Law and Jurisdiction)",
-        "items": [
-          "These Terms shall be governed by and construed in accordance with the laws of Japan.",
-          "In the event of a dispute concerning the Service, the court having jurisdiction over the location of the Operator's head office shall have exclusive agreed jurisdiction."
-        ]
+      "governingLaw": {
+        "title": "Governing Law and Jurisdiction",
+        "body": "These Terms shall be interpreted in accordance with the laws of Japan.\nIn the event of a dispute concerning the Service, the court having jurisdiction over the location of the Service's operator shall have exclusive agreed jurisdiction."
       }
-    ]
+    }
   },
   "privacy": {
     "title": "Privacy Policy",
-    "intro": "brqnko (the \"Operator\") establishes the following Privacy Policy (this \"Policy\") regarding the handling of users' personal information in the service \"kioku\" (the \"Service\") provided on this website.",
-    "updated": "Established: June 20, 2026",
-    "articles": [
-      {
-        "title": "Article 1 (Personal Information)",
+    "metaDescription": "Privacy Policy for kioku — the information we collect, how we use it, third-party provision, and procedures for disclosure, correction, and deletion.",
+    "intro": "kioku (hereinafter, the \"Service\") establishes the following Privacy Policy (hereinafter, this \"Policy\") regarding the handling of user information, including personal information, in the Service.",
+    "effectiveDate": "Last updated: June 20, 2026",
+    "sections": {
+      "definition": {
+        "title": "Personal Information",
+        "body": "\"Personal information\" means \"personal information\" as defined in the Act on the Protection of Personal Information: information about a living individual that can identify the specific individual by name, date of birth, or other description contained in the information, as well as information that can identify a specific individual on its own, such as personal identification data."
+      },
+      "collection": {
+        "title": "Information We Collect",
+        "body": "When providing the Service, the Service collects the following information. The Service does not collect your postal address, phone number, or payment information such as credit card details.",
         "items": [
-          "\"Personal information\" means \"personal information\" as defined in the Act on the Protection of Personal Information: information about a living individual that can identify the specific individual by name, date of birth, address, telephone number, contact details, or other descriptions contained in the information, as well as data on appearance, fingerprints, or voiceprints, and information that can identify a specific individual on its own, such as the insurer number on a health insurance card (personal identification information)."
+          "An identifier (ID) for identifying the account, and profile information such as a display name, obtained through authentication with a Google account",
+          "Settings you configure, such as language and theme",
+          "Content you create or upload within the Service (such as folders, files and documents, notes, AI chat history, and generated audio or podcasts)",
+          "Session information related to access (such as device type, approximate region, and user agent)",
+          "Technical logs regarding the operating status of the Service"
         ]
       },
-      {
-        "title": "Article 2 (Method of Collecting Personal Information)",
+      "purpose": {
+        "title": "Purposes of Collecting and Using Personal Information",
+        "body": "The purposes for which the Service collects and uses personal information are as follows:",
         "items": [
-          "The Operator may ask for personal information such as name and email address when a user registers. The Operator may also collect transaction records and payment-related information containing users' personal information that are made between users and business partners, from the Operator's business partners (including information providers, advertisers, and ad distribution partners; the \"Partners\")."
+          "To provide and operate the Service",
+          "To respond to inquiries from Users (including verifying identity)",
+          "To send necessary notices regarding new features, updates, maintenance, and important announcements of the service being used",
+          "To identify Users who have violated the Terms of Service or who attempt to use the Service for improper or unjust purposes, and to refuse their use",
+          "To allow Users to view, change, or delete their own registered information and to view their usage status",
+          "For purposes incidental to the above purposes of use"
         ]
       },
-      {
-        "title": "Article 3 (Purposes of Collecting and Using Personal Information)",
+      "purposeChange": {
+        "title": "Changes to Purposes of Use",
+        "body": "The Service shall change the purposes of use of personal information only where it is reasonably recognized that the new purpose of use is related to the purpose before the change.\nWhere the purpose of use has been changed, the Service shall notify Users of the changed purpose by the method prescribed by the Service, or announce it on this website."
+      },
+      "thirdParty": {
+        "title": "Provision of Personal Information to Third Parties",
+        "body": "Except in the following cases, the Service will not provide personal information to third parties without obtaining the User's prior consent, except where permitted under the Act on the Protection of Personal Information and other laws. The Service does not sell, lend, or trade Users' personal information.",
         "items": [
-          {
-            "text": "The purposes for which the Operator collects and uses personal information are as follows.",
-            "sub": [
-              "To provide and operate the Service;",
-              "To respond to inquiries from users (including identity verification);",
-              "To send emails informing users of new features, updates, campaigns, and other services provided by the Operator regarding the service in use;",
-              "To contact users as necessary, such as for maintenance and important notices;",
-              "To identify users who violate the terms of service or who attempt to use the Service for improper or unjust purposes, and to refuse their use;",
-              "To allow users to view, change, or delete their own registration information and to view their usage status;",
-              "To bill users for usage fees in paid services;",
-              "Purposes incidental to the above."
-            ]
-          }
+          "Where required by laws and regulations",
+          "Where necessary to protect a person's life, body, or property, and it is difficult to obtain the consent of the individual",
+          "Where particularly necessary to improve public health or promote the sound development of children, and it is difficult to obtain the consent of the individual",
+          "Where it is necessary to cooperate with a national agency, a local government, or a party entrusted thereby in performing duties prescribed by law, and obtaining the consent of the individual is likely to impede the performance of such duties",
+          "Where handling of personal information is entrusted to subcontractors, such as hosting providers, cloud storage providers, and AI processing services, to the extent necessary for the operation of the Service"
         ]
       },
-      {
-        "title": "Article 4 (Change of Purpose of Use)",
-        "items": [
-          "The Operator shall change the purpose of use of personal information only where it is reasonably recognized that the purpose of use is related to the purpose prior to the change.",
-          "If the purpose of use is changed, the Operator shall notify users of the changed purpose by the method prescribed by the Operator, or announce it on this website."
-        ]
+      "disclosure": {
+        "title": "Disclosure of Personal Information",
+        "body": "When requested by an individual to disclose personal information, the Service will disclose it to the individual without delay. However, if disclosure would fall under any of the following, the Service may decide not to disclose all or part of it, and will notify the individual to that effect without delay:\n(1) Where there is a risk of harming the life, body, property, or other rights or interests of the individual or a third party;\n(2) Where there is a risk of significantly impeding the proper conduct of the Service's business;\n(3) Where it would otherwise violate laws and regulations."
       },
-      {
-        "title": "Article 5 (Provision of Personal Information to Third Parties)",
-        "items": [
-          {
-            "text": "Except in the following cases, the Operator shall not provide personal information to third parties without obtaining the prior consent of the user, except where permitted by the Act on the Protection of Personal Information and other laws and regulations.",
-            "sub": [
-              "When it is necessary to protect the life, body, or property of a person and it is difficult to obtain the consent of the individual;",
-              "When it is especially necessary to improve public health or promote the sound development of children and it is difficult to obtain the consent of the individual;",
-              "When it is necessary to cooperate with a state organ, local government, or a party entrusted by them in performing affairs prescribed by law, and obtaining the consent of the individual is likely to impede the performance of such affairs;",
-              "When the Operator has, in advance, given notice of or announced the inclusion of provision to third parties in the purpose of use, the items of data provided, the means or method of provision, the cessation of provision upon the individual's request, and the method of accepting such requests, and has filed a report with the Personal Information Protection Commission."
-            ]
-          },
-          {
-            "text": "Notwithstanding the preceding paragraph, the recipient shall not be deemed a third party in the following cases.",
-            "sub": [
-              "When the Operator entrusts all or part of the handling of personal information within the scope necessary to achieve the purpose of use;",
-              "When personal information is provided in connection with a business succession due to merger or other reasons;",
-              "When personal information is jointly used with a specific party, and the individual has been notified in advance, or such information has been placed in a state where the individual can readily know, of the fact of joint use, the items of personal information jointly used, the scope of joint users, the purpose of use by such users, and the name of the party responsible for managing such personal information."
-            ]
-          }
-        ]
+      "correction": {
+        "title": "Correction and Deletion of Personal Information",
+        "body": "Where the personal information held by the Service is incorrect, Users may request the Service to correct, add to, or delete (hereinafter, \"Correction, etc.\") the personal information in accordance with the procedure prescribed by the Service.\nUsers may export their own data and delete their account from the profile settings of the Service. Saved notes and conversation history can be downloaded in a standard format. Upon deletion of an account, all associated data will be completely erased within 30 days.\nWhere the Service receives a request from a User as described in the preceding paragraph and determines that it is necessary to respond to the request, it shall make the Correction, etc. of the personal information without delay."
       },
-      {
-        "title": "Article 6 (Disclosure of Personal Information)",
-        "items": [
-          {
-            "text": "When requested by an individual to disclose personal information, the Operator shall disclose it to the individual without delay. However, if disclosure falls under any of the following, the Operator may decline to disclose all or part of it, and shall notify the individual without delay if it decides not to disclose.",
-            "sub": [
-              "When there is a risk of harming the life, body, property, or other rights and interests of the individual or a third party;",
-              "When there is a risk of significant impediment to the proper conduct of the Operator's business;",
-              "When it would otherwise violate laws and regulations."
-            ]
-          },
-          "Notwithstanding the preceding paragraph, in principle the Operator shall not disclose information other than personal information, such as history information and characteristic information."
-        ]
+      "suspensionOfUse": {
+        "title": "Suspension of Use of Personal Information",
+        "body": "Where the Service is requested by an individual to suspend or erase (hereinafter, \"Suspension of Use, etc.\") personal information on the grounds that it is being handled beyond the scope of the purposes of use or that it was obtained by improper means, the Service will conduct the necessary investigation without delay and, based on the results, carry out the Suspension of Use, etc. of the personal information and notify the individual to that effect. However, where Suspension of Use, etc. would require substantial cost or is otherwise difficult, and where alternative measures necessary to protect the rights and interests of the User can be taken, the Service will take such alternative measures."
       },
-      {
-        "title": "Article 7 (Correction and Deletion of Personal Information)",
-        "items": [
-          "Where the personal information held by the Operator about a user is incorrect, the user may request the Operator to correct, add to, or delete such personal information (\"Correction, etc.\") in accordance with the procedure prescribed by the Operator.",
-          "If the Operator receives a request under the preceding paragraph and determines that it is necessary to comply, it shall make the Correction, etc. of the relevant personal information without delay.",
-          "If the Operator makes a Correction, etc. under the preceding paragraph, or decides not to make a Correction, etc., it shall notify the user without delay."
-        ]
+      "policyChange": {
+        "title": "Changes to This Privacy Policy",
+        "body": "The contents of this Policy may be changed without notice to Users, except for matters otherwise provided by law or in this Policy.\nUnless otherwise specified by the Service, the revised Privacy Policy shall take effect from the time it is posted on this website."
       },
-      {
-        "title": "Article 8 (Suspension of Use of Personal Information)",
-        "items": [
-          "If the Operator is requested by an individual to suspend the use of or erase personal information (\"Suspension of Use, etc.\") on the grounds that the personal information is being handled beyond the scope of the purpose of use, or was obtained by improper means, the Operator shall conduct the necessary investigation without delay.",
-          "Based on the results of the investigation in the preceding paragraph, if the Operator determines that it is necessary to comply with the request, it shall carry out Suspension of Use, etc. of the relevant personal information without delay.",
-          "If the Operator carries out Suspension of Use, etc. under the preceding paragraph, or decides not to do so, it shall notify the user without delay.",
-          "Notwithstanding the preceding two paragraphs, where Suspension of Use, etc. requires a large expense or is otherwise difficult, and alternative measures necessary to protect the rights and interests of the user can be taken, the Operator shall take such alternative measures."
-        ]
-      },
-      {
-        "title": "Article 9 (Changes to the Privacy Policy)",
-        "items": [
-          "The content of this Policy may be changed without notice to users, except for matters otherwise provided by laws and regulations or in this Policy.",
-          "Except as otherwise specified by the Operator, the changed Privacy Policy shall take effect from the time it is posted on this website."
-        ]
-      },
-      {
-        "title": "Article 10 (Contact)",
-        "items": [
-          {
-            "text": "For inquiries regarding this Policy, please contact us at the following.",
-            "sub": [
-              "Operator: brqnko",
-              "Email address: contact@brqnko.rs"
-            ]
-          }
-        ]
+      "contact": {
+        "title": "Contact",
+        "body": "For inquiries regarding this Policy, please use the contact address below.\n\nService name: kioku\nOperator: brqnko",
+        "linkLabel": "contact@brqnko.rs"
       }
-    ]
+    }
   }
 }

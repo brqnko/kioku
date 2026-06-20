@@ -1,5 +1,7 @@
 # kioku
 
+[English](README.en.md)
+
 ## アーキテクチャ
 
 ```mermaid

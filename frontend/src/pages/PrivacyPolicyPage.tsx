@@ -1,21 +1,45 @@
+import { useTranslation } from "react-i18next";
 import { LegalLayout } from "../components/LegalLayout";
-import { LegalArticles } from "../components/LegalArticles";
+import { LegalSections, type LegalSection } from "../components/LegalSections";
 import { useDocumentHead } from "../hooks/useDocumentHead";
 
+const sections: LegalSection[] = [
+  { num: "01", key: "definition" },
+  { num: "02", key: "collection", items: true },
+  { num: "03", key: "purpose", items: true },
+  { num: "04", key: "purposeChange" },
+  { num: "05", key: "thirdParty", items: true },
+  { num: "06", key: "disclosure" },
+  { num: "07", key: "correction" },
+  { num: "08", key: "suspensionOfUse" },
+  { num: "09", key: "policyChange" },
+  {
+    num: "10",
+    key: "contact",
+    link: {
+      url: "mailto:contact@brqnko.rs",
+      labelKey: "privacy.sections.contact.linkLabel",
+    },
+  },
+];
+
 export default function PrivacyPolicyPage() {
+  const { t } = useTranslation();
+  const title = `${t("privacy.title")} — kioku`;
+  const description = t("privacy.metaDescription");
   useDocumentHead({
-    title: "Privacy Policy — kioku",
-    description: "How kioku handles your personal information.",
+    title,
+    description,
     canonical: "/privacy",
     robots: "index,follow",
-    ogTitle: "Privacy Policy — kioku",
-    ogDescription: "How kioku handles your personal information.",
+    ogTitle: title,
+    ogDescription: description,
     ogUrl: "/privacy",
   });
 
   return (
     <LegalLayout>
-      <LegalArticles baseKey="privacy" />
+      <LegalSections ns="privacy" sections={sections} />
     </LegalLayout>
   );
 }
