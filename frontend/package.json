@@ -54,7 +54,7 @@
   "devDependencies": {
     "@iconify-json/material-symbols": "^1.2.82",
     "@preact/preset-vite": "^2.10.5",
-    "eslint": "^9.39.4",
+    "eslint": "^10.6.0",
     "eslint-config-preact": "^2.0.0",
     "orval": "^8.9.1",
     "prettier": "^3.9.4",
