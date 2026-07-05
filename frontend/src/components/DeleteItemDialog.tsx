@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useSWRConfig } from "swr";
 import { kyInstance } from "../api/mutator";
 import { invalidateAfterMutation } from "../utils/swrCache";
+import { pushNotification } from "../notifications/store";
 import { Dialog } from "./Dialog";
 
 interface DeleteItemDialogProps {
@@ -27,18 +28,15 @@ export function DeleteItemDialog({
   const { t } = useTranslation();
   const { mutate } = useSWRConfig();
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (open) {
       setSubmitting(false);
-      setError(null);
     }
   }, [open]);
 
   const handleDelete = async () => {
     setSubmitting(true);
-    setError(null);
     try {
       const path =
         customPath ?? (kind === "file" ? `files/${id}` : `folders/${id}`);
@@ -51,9 +49,16 @@ export function DeleteItemDialog({
           dashboard: true,
         }),
       ]);
+      pushNotification({
+        kind: "success",
+        message: t("notification.actions.itemDeleted"),
+      });
       onClose();
     } catch {
-      setError(t("deleteItem.errors.failed"));
+      pushNotification({
+        kind: "error",
+        message: t("deleteItem.errors.failed"),
+      });
       setSubmitting(false);
     }
   };
@@ -74,12 +79,6 @@ export function DeleteItemDialog({
         <p class="text-body text-text-secondary">
           {t("deleteItem.body", { name })}
         </p>
-
-        {error && (
-          <div class="px-3 py-2 rounded-lg bg-danger/10 border border-danger/30 text-danger text-sm">
-            {error}
-          </div>
-        )}
 
         <div class="flex items-center justify-end gap-3 mt-2">
           <button

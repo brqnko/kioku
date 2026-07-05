@@ -5,6 +5,7 @@ import { MarkdownEditor } from "./MarkdownEditor";
 import { StateMessage } from "./StateMessage";
 import { kyInstance } from "../api/mutator";
 import { uploadFile } from "../api/upload";
+import { pushNotification } from "../notifications/store";
 import type {
   GetFileContent200,
   UpdateFileTextBody,
@@ -178,12 +179,20 @@ export function InlineFilePreview({ fileId }: InlineFilePreviewProps) {
     const named = new File([pasted], `image-${id}.${ext}`, {
       type: pasted.type,
     });
-    const result = await uploadFile({
-      file: named,
-      parentId: file.parent_id,
-      parentKind: file.parent_kind,
-    });
-    return `/api/files/${result.id}/raw`;
+    try {
+      const result = await uploadFile({
+        file: named,
+        parentId: file.parent_id,
+        parentKind: file.parent_kind,
+      });
+      return `/api/files/${result.id}/raw`;
+    } catch {
+      pushNotification({
+        kind: "error",
+        message: t("file.errors.imageUpload"),
+      });
+      throw new Error("image_upload_failed");
+    }
   };
 
   return (

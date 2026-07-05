@@ -8,6 +8,7 @@ import { MarkdownView } from "../components/MarkdownView";
 import { useChats } from "../hooks/useChat";
 import { useDocumentHead } from "../hooks/useDocumentHead";
 import { kyInstance } from "../api/mutator";
+import { pushNotification } from "../notifications/store";
 import type {
   GetChat200,
   CreateChat200,
@@ -210,7 +211,6 @@ export function ProjectChatPanel({
   const [chatLoading, setChatLoading] = useState(false);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
-  const [sendError, setSendError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
 
@@ -252,7 +252,6 @@ export function ProjectChatPanel({
     let cancelled = false;
     stickToBottom();
     setChatLoading(true);
-    setSendError(null);
     kyInstance
       .get(`projects/${projectId}/chats/${activeChatId}`)
       .json<GetChat200>()
@@ -319,11 +318,17 @@ export function ProjectChatPanel({
   const handleCreateChat = async () => {
     if (creating || !projectId) return;
     setCreating(true);
-    setSendError(null);
     try {
       await createChat();
+      pushNotification({
+        kind: "success",
+        message: t("notification.actions.chatCreated"),
+      });
     } catch {
-      setSendError(t("projectChat.errors.create"));
+      pushNotification({
+        kind: "error",
+        message: t("projectChat.errors.create"),
+      });
     } finally {
       setCreating(false);
     }
@@ -342,9 +347,16 @@ export function ProjectChatPanel({
         json: { name: renameInput.trim() },
       });
       await refreshChats();
+      pushNotification({
+        kind: "success",
+        message: t("notification.actions.chatRenamed"),
+      });
       setRenamingChat(null);
     } catch {
-      // keep dialog open; user can retry
+      pushNotification({
+        kind: "error",
+        message: t("projectChat.errors.rename"),
+      });
     } finally {
       setRenameSubmitting(false);
     }
@@ -365,9 +377,16 @@ export function ProjectChatPanel({
         if (remaining.length === 0) setMessages([]);
       }
       await refreshChats();
+      pushNotification({
+        kind: "success",
+        message: t("notification.actions.chatDeleted"),
+      });
       setDeletingChat(null);
     } catch {
-      // keep dialog open; user can retry
+      pushNotification({
+        kind: "error",
+        message: t("projectChat.errors.delete"),
+      });
     } finally {
       setDeleteSubmitting(false);
     }
@@ -378,11 +397,13 @@ export function ProjectChatPanel({
     let targetChatId = activeChatId;
     if (!targetChatId) {
       setCreating(true);
-      setSendError(null);
       try {
         targetChatId = await createChat(false, false);
       } catch {
-        setSendError(t("projectChat.errors.create"));
+        pushNotification({
+          kind: "error",
+          message: t("projectChat.errors.create"),
+        });
         return;
       } finally {
         setCreating(false);
@@ -396,7 +417,6 @@ export function ProjectChatPanel({
       textareaRef.current.style.height = "auto";
     }
     setSending(true);
-    setSendError(null);
     stickToBottom("smooth");
 
     setMessages((prev) => [
@@ -427,7 +447,10 @@ export function ProjectChatPanel({
       refreshChats();
     } catch {
       setMessages((prev) => prev.filter((m) => !m.thinking));
-      setSendError(t("projectChat.errors.send"));
+      pushNotification({
+        kind: "error",
+        message: t("projectChat.errors.send"),
+      });
     } finally {
       setSending(false);
     }
@@ -626,9 +649,6 @@ export function ProjectChatPanel({
 
         <div class="shrink-0 px-3 tablet:px-6 pb-4 pt-2">
           <div class="max-w-3xl mx-auto">
-            {sendError && (
-              <p class="text-xs text-danger mb-2 text-center">{sendError}</p>
-            )}
             <div class="bg-surface-dark border border-border-subtle focus-within:border-accent-blue rounded-xl p-3 shadow-sm">
               <textarea
                 ref={textareaRef}

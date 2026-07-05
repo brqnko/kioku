@@ -38,7 +38,7 @@ interface ProjectUtilityTabsProps {
 }
 
 function utilityTabClass(active: boolean) {
-  return `min-h-9 rounded-md px-3 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
+  return `min-h-9 rounded-md px-3 text-sm font-medium flex items-center justify-center gap-2 ${
     active
       ? "bg-surface-dark text-text-primary shadow-sm"
       : "text-text-secondary hover:text-text-primary hover:bg-overlay-faint"
@@ -89,7 +89,7 @@ function MobileBackBar({
     <button
       type="button"
       onClick={onBack}
-      class="mb-3 flex w-fit items-center gap-1 rounded-md px-2 py-1 text-sm font-medium text-text-secondary transition-colors hover:bg-overlay-faint hover:text-text-primary"
+      class="mb-3 flex w-fit items-center gap-1 rounded-md px-2 py-1 text-sm font-medium text-text-secondary hover:bg-overlay-faint hover:text-text-primary"
     >
       <span class="material-symbols-outlined text-[20px]">arrow_back</span>
       {label}

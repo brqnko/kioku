@@ -22,9 +22,16 @@ interface ItemProps {
 function NotificationItem({ notification, dismissLabel }: ItemProps) {
   const { icon, accent } = KIND_STYLES[notification.kind];
   return (
-    <div class="flex items-start gap-3 bg-surface-dark border border-border-subtle rounded-[12px] px-4 py-3 shadow-[0_4px_12px_rgba(0,0,0,0.15)] animate-fade-in-up">
+    <div
+      class="flex items-start gap-3 bg-surface-dark border border-border-subtle rounded-[12px] px-4 py-3 shadow-[0_4px_12px_rgba(0,0,0,0.15)]"
+      style={{
+        animation: notification.isExiting
+          ? "notification-out 0.2s ease-in forwards"
+          : "notification-in 0.25s ease-out both",
+      }}
+    >
       <Icon name={icon} class={`shrink-0 mt-0.5 ${accent}`} />
-      <p class="flex-1 text-sm leading-6 text-text-primary">
+      <p class="flex-1 text-sm font-medium leading-5 text-text-primary">
         {notification.message}
       </p>
       <button
@@ -46,17 +53,30 @@ export function NotificationBanner() {
 
   return (
     <div
-      role="region"
+      role="status"
       aria-live="polite"
       aria-label={t("notification.region", { defaultValue: "Notifications" })}
-      class="fixed top-4 left-1/2 -translate-x-1/2 z-[200] flex flex-col gap-2 w-[calc(100%-32px)] max-w-[480px] pointer-events-none"
+      class="fixed top-4 left-4 right-4 tablet:left-auto tablet:w-auto tablet:min-w-[18rem] tablet:max-w-sm z-[250] flex flex-col pointer-events-none"
     >
       {notifications.map((n) => (
-        <div key={n.id} class="pointer-events-auto">
-          <NotificationItem
-            notification={n}
-            dismissLabel={t("notification.dismiss")}
-          />
+        <div
+          key={n.id}
+          style={{
+            display: "grid",
+            gridTemplateRows: n.isExiting ? "0fr" : "1fr",
+            paddingBottom: n.isExiting ? "0" : "0.5rem",
+            transition: n.isExiting
+              ? "grid-template-rows 0.2s ease-in 0.2s, padding-bottom 0.2s ease-in 0.2s"
+              : "none",
+            overflow: "hidden",
+          }}
+        >
+          <div class="overflow-hidden pointer-events-auto">
+            <NotificationItem
+              notification={n}
+              dismissLabel={t("notification.dismiss")}
+            />
+          </div>
         </div>
       ))}
     </div>

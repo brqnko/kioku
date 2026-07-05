@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useSWRConfig } from "swr";
 import { kyInstance } from "../api/mutator";
 import { invalidateAfterMutation } from "../utils/swrCache";
+import { pushNotification } from "../notifications/store";
 import { Dialog } from "./Dialog";
 import type {
   CreateProject200,
@@ -54,9 +55,16 @@ export function CreateProjectDialog({
         .post("projects", { json: body })
         .json<CreateProject200>();
       await invalidateAfterMutation(mutate, { library: true, dashboard: true });
+      pushNotification({
+        kind: "success",
+        message: t("notification.actions.projectCreated"),
+      });
       onClose();
     } catch {
-      setError(t("createProject.errors.failed"));
+      pushNotification({
+        kind: "error",
+        message: t("createProject.errors.failed"),
+      });
     } finally {
       setSubmitting(false);
     }

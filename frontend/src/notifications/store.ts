@@ -8,6 +8,7 @@ export interface Notification {
   message: string;
   dedupeKey?: string;
   durationMs?: number;
+  isExiting?: boolean;
 }
 
 export interface PushInput {
@@ -18,9 +19,11 @@ export interface PushInput {
 }
 
 const DEFAULT_DURATION_MS = 5000;
+const EXIT_DURATION_MS = 420;
 
 const items = new Map<string, Notification>();
-const timers = new Map<string, ReturnType<typeof setTimeout>>();
+const autoDismissTimers = new Map<string, ReturnType<typeof setTimeout>>();
+const removeTimers = new Map<string, ReturnType<typeof setTimeout>>();
 const subscribers = new Set<() => void>();
 let snapshot: Notification[] = [];
 
@@ -33,11 +36,19 @@ function notify() {
   for (const sub of subscribers) sub();
 }
 
-function clearTimer(id: string) {
-  const t = timers.get(id);
+function clearAutoDismissTimer(id: string) {
+  const t = autoDismissTimers.get(id);
   if (t !== undefined) {
     clearTimeout(t);
-    timers.delete(id);
+    autoDismissTimers.delete(id);
+  }
+}
+
+function clearRemoveTimer(id: string) {
+  const t = removeTimers.get(id);
+  if (t !== undefined) {
+    clearTimeout(t);
+    removeTimers.delete(id);
   }
 }
 
@@ -45,10 +56,16 @@ function scheduleAutoDismiss(id: string, durationMs: number) {
   if (typeof window === "undefined") return;
   if (durationMs <= 0) return;
   const t = setTimeout(() => {
-    timers.delete(id);
-    if (items.delete(id)) notify();
+    autoDismissTimers.delete(id);
+    dismissNotification(id);
   }, durationMs);
-  timers.set(id, t);
+  autoDismissTimers.set(id, t);
+}
+
+function removeNotification(id: string) {
+  clearAutoDismissTimer(id);
+  clearRemoveTimer(id);
+  if (items.delete(id)) notify();
 }
 
 function makeId(): string {
@@ -71,7 +88,8 @@ export function pushNotification(input: PushInput): string {
     }
   }
   if (!id) id = makeId();
-  clearTimer(id);
+  clearAutoDismissTimer(id);
+  clearRemoveTimer(id);
 
   items.set(id, {
     id,
@@ -79,6 +97,7 @@ export function pushNotification(input: PushInput): string {
     message: input.message,
     dedupeKey: input.dedupeKey,
     durationMs: duration,
+    isExiting: false,
   });
   scheduleAutoDismiss(id, duration);
   notify();
@@ -86,8 +105,24 @@ export function pushNotification(input: PushInput): string {
 }
 
 export function dismissNotification(id: string): void {
-  clearTimer(id);
-  if (items.delete(id)) notify();
+  clearAutoDismissTimer(id);
+  const item = items.get(id);
+  if (!item) return;
+  if (item.isExiting) return;
+
+  items.set(id, { ...item, isExiting: true });
+  notify();
+
+  if (typeof window === "undefined") {
+    removeNotification(id);
+    return;
+  }
+
+  const t = setTimeout(() => {
+    removeTimers.delete(id);
+    removeNotification(id);
+  }, EXIT_DURATION_MS);
+  removeTimers.set(id, t);
 }
 
 export function useNotifications(): Notification[] {

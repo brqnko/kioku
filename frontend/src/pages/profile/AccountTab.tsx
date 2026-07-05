@@ -6,6 +6,7 @@ import { PROFILE_KEY } from "../../api/keys";
 import { useColorMode, type ColorMode } from "../../hooks/useColorMode";
 import { languages, modeIcons, modeOrder } from "../../constants";
 import { Dialog } from "../../components/Dialog";
+import { pushNotification } from "../../notifications/store";
 import type {
   GetUserProfile200,
   UpdateUserProfileBody,
@@ -25,8 +26,6 @@ export default function AccountTab() {
   const [displayName, setDisplayName] = useState("");
   const [languageCode, setLanguageCode] = useState(i18n.language);
   const [saving, setSaving] = useState(false);
-  const [saveError, setSaveError] = useState<string | null>(null);
-  const [saved, setSaved] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -84,8 +83,6 @@ export default function AccountTab() {
   const handleSave = async () => {
     if (!nameValid || saving) return;
     setSaving(true);
-    setSaveError(null);
-    setSaved(false);
     try {
       const body: UpdateUserProfileBody = {
         display_name: trimmed,
@@ -97,10 +94,15 @@ export default function AccountTab() {
       await mutate(updated, { revalidate: false });
       void i18n.changeLanguage(languageCode);
       localStorage.setItem("lang", languageCode);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2500);
+      pushNotification({
+        kind: "success",
+        message: t("notification.actions.changesSaved"),
+      });
     } catch {
-      setSaveError(t("profile.errors.save"));
+      pushNotification({
+        kind: "error",
+        message: t("profile.errors.save"),
+      });
     } finally {
       setSaving(false);
     }
@@ -122,6 +124,10 @@ export default function AccountTab() {
       await kyInstance.delete(PROFILE_KEY);
       window.location.href = "/";
     } catch {
+      pushNotification({
+        kind: "error",
+        message: t("profile.errors.delete"),
+      });
       setDeleting(false);
     }
   };
@@ -275,10 +281,6 @@ export default function AccountTab() {
         </Field>
 
         <div class="flex items-center justify-end gap-3 pt-2">
-          {saved && (
-            <span class="text-sm text-success">{t("profile.saved")}</span>
-          )}
-          {saveError && <span class="text-sm text-danger">{saveError}</span>}
           <button
             type="button"
             onClick={handleSave}

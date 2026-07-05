@@ -4,6 +4,7 @@ import useSWR from "swr";
 import { kyInstance } from "../../api/mutator";
 import { SESSIONS_KEY } from "../../api/keys";
 import { Dialog } from "../../components/Dialog";
+import { pushNotification } from "../../notifications/store";
 import { formatRelative } from "../../utils/datetime";
 import type {
   ListSessions200,
@@ -32,6 +33,15 @@ export default function SecurityTab() {
       await kyInstance.delete(`users/me/sessions/${id}`);
       await mutate();
       setPendingRevoke(null);
+      pushNotification({
+        kind: "success",
+        message: t("notification.actions.sessionRevoked"),
+      });
+    } catch {
+      pushNotification({
+        kind: "error",
+        message: t("profile.security.errors.revoke"),
+      });
     } finally {
       setRevoking(null);
     }
@@ -43,6 +53,10 @@ export default function SecurityTab() {
       await kyInstance.delete("users/me/sessions");
       window.location.href = "/";
     } catch {
+      pushNotification({
+        kind: "error",
+        message: t("profile.security.errors.revokeAll"),
+      });
       setRevokingAll(false);
       setConfirmAll(false);
     }

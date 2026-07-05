@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import { useTranslation } from "react-i18next";
 import { kyInstance } from "../api/mutator";
+import { pushNotification } from "../notifications/store";
 import type { UpdatePodcastBody } from "../api/generated/backend.schemas";
 import { Dialog } from "./Dialog";
 
@@ -72,9 +73,16 @@ export function EditPodcastDialog({
         json: body,
       });
       await onSuccess();
+      pushNotification({
+        kind: "success",
+        message: t("notification.actions.changesSaved"),
+      });
       onClose();
     } catch {
-      setError(t("renameItem.errors.failed"));
+      pushNotification({
+        kind: "error",
+        message: t("renameItem.errors.failed"),
+      });
       setSubmitting(false);
     }
   };
@@ -130,11 +138,7 @@ export function EditPodcastDialog({
           />
         </div>
 
-        {error && (
-          <div class="px-3 py-2 rounded-lg bg-danger/10 border border-danger/30 text-danger text-sm">
-            {error}
-          </div>
-        )}
+        {error && <p class="text-sm text-danger">{error}</p>}
 
         <div class="flex items-center justify-end gap-3 mt-2">
           <button

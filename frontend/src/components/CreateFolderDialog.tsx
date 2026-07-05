@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useSWRConfig } from "swr";
 import { kyInstance } from "../api/mutator";
 import { invalidateAfterMutation } from "../utils/swrCache";
+import { pushNotification } from "../notifications/store";
 import { Dialog } from "./Dialog";
 import {
   CreateFolderBodyParentKind,
@@ -67,9 +68,16 @@ export function CreateFolderDialog({
         onSuccess(),
         invalidateAfterMutation(mutate, { library: true, dashboard: true }),
       ]);
+      pushNotification({
+        kind: "success",
+        message: t("notification.actions.folderCreated"),
+      });
       onClose();
     } catch {
-      setError(t("createFolder.errors.failed"));
+      pushNotification({
+        kind: "error",
+        message: t("createFolder.errors.failed"),
+      });
     } finally {
       setSubmitting(false);
     }

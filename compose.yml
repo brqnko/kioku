@@ -1,5 +1,5 @@
 services:
-  # NOTE: サービス名は共有ネットワーク(anti-yt-network)上のDNSエイリアスになるため、
+  # NOTE: サービス名は共有ネットワーク(app-network)上のDNSエイリアスになるため、
   # anti-yt側の`backend`サービスと衝突しない一意な名前にすること
   kioku-backend:
     build:
@@ -39,4 +39,3 @@ secrets:
 networks:
   app-network:
     external: true
-    name: anti-yt-network

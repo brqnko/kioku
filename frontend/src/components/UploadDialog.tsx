@@ -241,9 +241,16 @@ export function UploadDialog({
           onSuccess(),
           invalidateAfterMutation(mutate, { library: true, dashboard: true }),
         ]);
+        pushNotification({
+          kind: "success",
+          message: t("notification.actions.fileSaved"),
+        });
         onClose();
       } catch (err) {
-        setError(translateTopError(err));
+        pushNotification({
+          kind: "error",
+          message: translateTopError(err),
+        });
       } finally {
         setSubmitting(false);
       }
@@ -262,9 +269,16 @@ export function UploadDialog({
         onSuccess(),
         invalidateAfterMutation(mutate, { library: true, dashboard: true }),
       ]);
+      pushNotification({
+        kind: "success",
+        message: t("notification.actions.fileSaved"),
+      });
       onClose();
     } catch (err) {
-      setError(translateTopError(err));
+      pushNotification({
+        kind: "error",
+        message: translateTopError(err),
+      });
     } finally {
       setSubmitting(false);
     }

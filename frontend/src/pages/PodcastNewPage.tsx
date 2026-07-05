@@ -3,6 +3,7 @@ import { useLocation, useRoute } from "preact-iso";
 import { useTranslation } from "react-i18next";
 import { AppLayout } from "../components/AppLayout";
 import { kyInstance } from "../api/mutator";
+import { pushNotification } from "../notifications/store";
 import { useProject, useProjectChildren } from "../hooks/useProject";
 import { useFolderChildren } from "../hooks/useFolder";
 import { useDocumentHead } from "../hooks/useDocumentHead";
@@ -533,9 +534,16 @@ export function PodcastCreator({
       setSelected(new Map());
       setName("");
       setSubmitting(false);
+      pushNotification({
+        kind: "success",
+        message: t("notification.actions.podcastQueued"),
+      });
       onCreated?.(created.podcast_id);
     } catch {
-      setSubmitError(t("podcast.create.errors.failed"));
+      pushNotification({
+        kind: "error",
+        message: t("podcast.create.errors.failed"),
+      });
       setSubmitting(false);
     }
   };

@@ -4,6 +4,7 @@ import { useSWRConfig } from "swr";
 import { RowActionMenu } from "./RowActionMenu";
 import { Dialog } from "./Dialog";
 import { kyInstance } from "../api/mutator";
+import { pushNotification } from "../notifications/store";
 import { formatRelative } from "../utils/datetime";
 import { invalidateAfterMutation } from "../utils/swrCache";
 import type { ListProjects200ItemsItem } from "../api/generated/backend.schemas";
@@ -58,9 +59,16 @@ export function ProjectCard({
           dashboard: true,
         }),
       ]);
+      pushNotification({
+        kind: "success",
+        message: t("notification.actions.changesSaved"),
+      });
       setRenameOpen(false);
     } catch {
-      // keep dialog open
+      pushNotification({
+        kind: "error",
+        message: t("renameItem.errors.failed"),
+      });
     } finally {
       setRenameSubmitting(false);
     }
@@ -79,9 +87,16 @@ export function ProjectCard({
           dashboard: true,
         }),
       ]);
+      pushNotification({
+        kind: "success",
+        message: t("notification.actions.itemDeleted"),
+      });
       setDeleteOpen(false);
     } catch {
-      // keep dialog open
+      pushNotification({
+        kind: "error",
+        message: t("deleteItem.errors.failed"),
+      });
     } finally {
       setDeleteSubmitting(false);
     }

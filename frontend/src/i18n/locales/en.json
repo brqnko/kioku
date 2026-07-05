@@ -30,6 +30,18 @@
     "rateLimit": {
       "generic": "Too many requests. Please try again later.",
       "specific": "Rate limit reached. Please wait a moment and try again."
+    },
+    "actions": {
+      "projectCreated": "Project created.",
+      "folderCreated": "Folder created.",
+      "changesSaved": "Changes saved.",
+      "itemDeleted": "Deleted.",
+      "fileSaved": "File saved.",
+      "podcastQueued": "Podcast generation started.",
+      "chatCreated": "Chat created.",
+      "chatRenamed": "Chat renamed.",
+      "chatDeleted": "Chat deleted.",
+      "sessionRevoked": "Session ended."
     }
   },
   "nav": {
@@ -57,11 +69,11 @@
     "loading": "Loading...",
     "save": "Save changes",
     "saving": "Saving...",
-    "saved": "Saved",
     "cancel": "Cancel",
     "errors": {
       "load": "Failed to load profile.",
-      "save": "Failed to save."
+      "save": "Failed to save.",
+      "delete": "Failed to delete your account."
     },
     "account": {
       "title": "Account settings",
@@ -89,6 +101,10 @@
     "security": {
       "title": "Active sessions",
       "error": "Failed to load sessions.",
+      "errors": {
+        "revoke": "Failed to end the session.",
+        "revokeAll": "Failed to end sessions."
+      },
       "empty": "No active sessions.",
       "unknownAgent": "Unknown device",
       "revoke": "Log out",
@@ -240,7 +256,8 @@
     },
     "errors": {
       "load": "Failed to load file.",
-      "save": "Failed to save."
+      "save": "Failed to save.",
+      "imageUpload": "Failed to upload the image."
     }
   },
   "upload": {
@@ -394,7 +411,9 @@
     },
     "errors": {
       "send": "Failed to send the message.",
-      "create": "Failed to create the chat."
+      "create": "Failed to create the chat.",
+      "rename": "Failed to rename the chat.",
+      "delete": "Failed to delete the chat."
     }
   },
   "podcast": {

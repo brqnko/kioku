@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useSWRConfig } from "swr";
 import { kyInstance } from "../api/mutator";
 import { invalidateAfterMutation } from "../utils/swrCache";
+import { pushNotification } from "../notifications/store";
 import { Dialog } from "./Dialog";
 
 interface RenameItemDialogProps {
@@ -86,9 +87,16 @@ export function RenameItemDialog({
           dashboard: true,
         }),
       ]);
+      pushNotification({
+        kind: "success",
+        message: t("notification.actions.changesSaved"),
+      });
       onClose();
     } catch {
-      setError(t("renameItem.errors.failed"));
+      pushNotification({
+        kind: "error",
+        message: t("renameItem.errors.failed"),
+      });
       setSubmitting(false);
     }
   };
@@ -144,11 +152,7 @@ export function RenameItemDialog({
           />
         </div>
 
-        {error && (
-          <div class="px-3 py-2 rounded-lg bg-danger/10 border border-danger/30 text-danger text-sm">
-            {error}
-          </div>
-        )}
+        {error && <p class="text-sm text-danger">{error}</p>}
 
         <div class="flex items-center justify-end gap-3 mt-2">
           <button
