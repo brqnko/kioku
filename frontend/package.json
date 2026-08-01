@@ -34,7 +34,7 @@
     "@codemirror/view": "^6.43.0",
     "@milkdown/core": "^7.21.2",
     "@milkdown/plugin-listener": "^7.21.2",
-    "@milkdown/preset-commonmark": "^7.21.2",
+    "@milkdown/preset-commonmark": "^7.21.3",
     "@milkdown/preset-gfm": "^7.21.2",
     "@milkdown/prose": "^7.21.2",
     "@milkdown/utils": "^7.21.2",
