@@ -21,7 +21,7 @@ jobs:
           path: ~/.cargo/bin/sqlx
           key: ${{ runner.os }}-sqlx-cli-0.8.6
 
-      - uses: taiki-e/install-action@v2
+      - uses: taiki-e/install-action@v2.85.4
         if: steps.cache-sqlx-cli.outputs.cache-hit != 'true'
         with:
           tool: sqlx-cli@0.8.6
