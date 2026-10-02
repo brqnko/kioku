@@ -56,7 +56,7 @@
     "@preact/preset-vite": "^2.10.5",
     "eslint": "^9.39.4",
     "eslint-config-preact": "^2.0.0",
-    "orval": "^8.9.1",
+    "orval": "^8.38.0",
     "prettier": "^3.9.4",
     "sharp": "^0.35.3",
     "svgo": "^4.0.2",
